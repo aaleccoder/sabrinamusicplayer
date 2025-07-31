@@ -19,36 +19,22 @@ class _MetadataScreenState extends State<MetadataScreen> {
   Uint8List? _albumArt;
 
   Future<void> _pickFile() async {
-    var status = await Permission.audio.status;
-    if (!status.isGranted) {
-      status = await Permission.audio.request();
-    }
-
-    if (status.isGranted) {
-      final result = await FilePicker.platform.pickFiles(type: FileType.audio);
-      if (result != null) {
+    final result = await FilePicker.platform.pickFiles(type: FileType.audio);
+    if (result != null) {
+      setState(() {
+        _filePath = result.files.single.path;
+        _metadata = null;
+        _albumArt = null;
+      });
+      if (_filePath != null) {
+        final metadata = await _metadataService.getMetadata(_filePath!);
         setState(() {
-          _filePath = result.files.single.path;
-          _metadata = null;
-          _albumArt = null;
+          _metadata = metadata;
+          if (metadata.containsKey('album_art')) {
+            _albumArt = base64Decode(metadata['album_art']!);
+          }
         });
-        if (_filePath != null) {
-          final metadata = await _metadataService.getMetadata(_filePath!);
-          setState(() {
-            _metadata = metadata;
-            if (metadata.containsKey('album_art')) {
-              _albumArt = base64Decode(metadata['album_art']!);
-            }
-          });
-        }
       }
-    } else {
-      // Handle the case where the user denies the permission
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text('Storage permission is required to pick audio files.'),
-        ),
-      );
     }
   }
 

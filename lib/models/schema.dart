@@ -1,5 +1,3 @@
-import 'dart:ffi';
-
 import 'package:drift/drift.dart';
 import 'package:drift_flutter/drift_flutter.dart';
 import 'package:path_provider/path_provider.dart';
@@ -19,7 +17,48 @@ class MusicDirectories extends Table {
   TextColumn get excluded_subdirectories => text().nullable()();
 }
 
-@DriftDatabase(tables: [MusicDirectories])
+// table for genres
+class Genres extends Table {
+  IntColumn get id => integer().autoIncrement()();
+  TextColumn get name => text().unique()();
+}
+
+// table for artists
+class Artists extends Table {
+  IntColumn get id => integer().autoIncrement()();
+  TextColumn get name => text().unique()();
+  TextColumn get cover => text().nullable()();
+  IntColumn get genreId => integer().nullable().references(Genres, #id)();
+}
+
+// table for albums
+class Albums extends Table {
+  IntColumn get id => integer().autoIncrement()();
+  TextColumn get name => text()();
+  TextColumn get cover => text().nullable()();
+  IntColumn get artistId => integer().nullable().references(Artists, #id)();
+  IntColumn get genreId => integer().nullable().references(Genres, #id)();
+}
+
+// table for tracks
+class Tracks extends Table {
+  IntColumn get id => integer().autoIncrement()();
+  TextColumn get title => text()();
+  TextColumn get fileuri => text()(); // As requested
+  TextColumn get cover => text().nullable()();
+  TextColumn get lyrics => text().nullable()();
+  IntColumn get duration => integer().nullable()();
+  IntColumn get trackNumber => integer().nullable()();
+  IntColumn get year => integer().nullable()();
+  DateTimeColumn get createdAt => dateTime().withDefault(currentDateAndTime)();
+  DateTimeColumn get updatedAt => dateTime().nullable()();
+
+  IntColumn get albumId => integer().nullable().references(Albums, #id)();
+  IntColumn get artistId => integer().nullable().references(Artists, #id)();
+  IntColumn get genreId => integer().nullable().references(Genres, #id)();
+}
+
+@DriftDatabase(tables: [MusicDirectories, Genres, Artists, Albums, Tracks])
 class AppDatabase extends _$AppDatabase {
   AppDatabase([QueryExecutor? executor]) : super(executor ?? _openConnection());
 
@@ -30,11 +69,8 @@ class AppDatabase extends _$AppDatabase {
     return driftDatabase(
       name: 'my_database',
       native: const DriftNativeOptions(
-        // By default, `driftDatabase` from `package:drift_flutter` stores the
-        // database files in `getApplicationDocumentsDirectory()`.
         databaseDirectory: getApplicationSupportDirectory,
       ),
-      // If you need web support, see https://drift.simonbinder.eu/platforms/web/
     );
   }
 }

@@ -6,6 +6,7 @@ import 'package:flutter_application_1/services/library_service.dart';
 import 'package:flutter_application_1/widgets/navbar.dart';
 import 'package:flutter_application_1/theme.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:permission_handler/permission_handler.dart';
 
 final appDatabaseProvider = Provider<AppDatabase>((ref) {
   return AppDatabase();
@@ -13,6 +14,10 @@ final appDatabaseProvider = Provider<AppDatabase>((ref) {
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
+
+  await Permission.audio.request();
+  await Permission.storage.request();
+
   final container = ProviderContainer();
   LibraryService().getFileUrl(container);
 
