@@ -1,15 +1,20 @@
 import 'package:flutter/material.dart';
-import 'package:file_picker/file_picker.dart';
 import 'package:flutter_application_1/models/schema.dart';
 import 'package:flutter_application_1/routes.dart';
 import 'package:flutter_application_1/services/library_service.dart';
 import 'package:flutter_application_1/widgets/navbar.dart';
 import 'package:flutter_application_1/theme.dart';
+import 'package:flutter_application_1/widgets/song_list_view.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:permission_handler/permission_handler.dart';
 
 final appDatabaseProvider = Provider<AppDatabase>((ref) {
   return AppDatabase();
+});
+
+final tracksProvider = FutureProvider<List<TrackItem>>((ref) {
+  final db = ref.watch(appDatabaseProvider);
+  return db.getAllTracks();
 });
 
 void main() async {
@@ -19,7 +24,7 @@ void main() async {
   await Permission.storage.request();
 
   final container = ProviderContainer();
-  LibraryService().scanLibrary(container);
+  LibraryService().scanIfChange(container);
 
   runApp(const ProviderScope(child: MainApp()));
 }

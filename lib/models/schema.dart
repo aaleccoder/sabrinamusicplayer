@@ -1,5 +1,6 @@
 import 'package:drift/drift.dart';
 import 'package:drift_flutter/drift_flutter.dart';
+import 'package:flutter_application_1/widgets/song_list_view.dart';
 import 'package:path_provider/path_provider.dart';
 
 part 'schema.g.dart';
@@ -53,8 +54,8 @@ class Tracks extends Table {
   IntColumn get coverId => integer().nullable().references(Cover, #id)();
   TextColumn get lyrics => text().nullable()();
   IntColumn get duration => integer().nullable()();
-  IntColumn get trackNumber => integer().nullable()();
-  IntColumn get year => integer().nullable()();
+  TextColumn get trackNumber => text().nullable()();
+  TextColumn get year => text().nullable()();
   DateTimeColumn get createdAt => dateTime().withDefault(currentDateAndTime)();
   DateTimeColumn get updatedAt => dateTime().nullable()();
 
@@ -71,6 +72,28 @@ class AppDatabase extends _$AppDatabase {
 
   @override
   int get schemaVersion => 1;
+
+  Future<List<TrackItem>> getAllTracks() async {
+    final query = select(tracks).join([
+      leftOuterJoin(artists, artists.id.equalsExp(tracks.artistId)),
+      leftOuterJoin(cover, cover.id.equalsExp(tracks.coverId)),
+    ]);
+
+    final rows = await query.get();
+
+    return rows.map((row) {
+      final track = row.readTable(tracks);
+      final artist = row.readTableOrNull(artists);
+      final coverItem = row.readTableOrNull(cover);
+
+      return TrackItem(
+        title: track.title,
+        artist: artist?.name ?? '',
+        cover: coverItem?.cover ?? '',
+        fileuri: track.fileuri,
+      );
+    }).toList();
+  }
 
   static QueryExecutor _openConnection() {
     return driftDatabase(

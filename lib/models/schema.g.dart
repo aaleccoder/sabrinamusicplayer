@@ -1704,20 +1704,20 @@ class $TracksTable extends Tracks with TableInfo<$TracksTable, Track> {
     'trackNumber',
   );
   @override
-  late final GeneratedColumn<int> trackNumber = GeneratedColumn<int>(
+  late final GeneratedColumn<String> trackNumber = GeneratedColumn<String>(
     'track_number',
     aliasedName,
     true,
-    type: DriftSqlType.int,
+    type: DriftSqlType.string,
     requiredDuringInsert: false,
   );
   static const VerificationMeta _yearMeta = const VerificationMeta('year');
   @override
-  late final GeneratedColumn<int> year = GeneratedColumn<int>(
+  late final GeneratedColumn<String> year = GeneratedColumn<String>(
     'year',
     aliasedName,
     true,
-    type: DriftSqlType.int,
+    type: DriftSqlType.string,
     requiredDuringInsert: false,
   );
   static const VerificationMeta _createdAtMeta = const VerificationMeta(
@@ -1929,11 +1929,11 @@ class $TracksTable extends Tracks with TableInfo<$TracksTable, Track> {
         data['${effectivePrefix}duration'],
       ),
       trackNumber: attachedDatabase.typeMapping.read(
-        DriftSqlType.int,
+        DriftSqlType.string,
         data['${effectivePrefix}track_number'],
       ),
       year: attachedDatabase.typeMapping.read(
-        DriftSqlType.int,
+        DriftSqlType.string,
         data['${effectivePrefix}year'],
       ),
       createdAt: attachedDatabase.typeMapping.read(
@@ -1972,8 +1972,8 @@ class Track extends DataClass implements Insertable<Track> {
   final int? coverId;
   final String? lyrics;
   final int? duration;
-  final int? trackNumber;
-  final int? year;
+  final String? trackNumber;
+  final String? year;
   final DateTime createdAt;
   final DateTime? updatedAt;
   final int? albumId;
@@ -2010,10 +2010,10 @@ class Track extends DataClass implements Insertable<Track> {
       map['duration'] = Variable<int>(duration);
     }
     if (!nullToAbsent || trackNumber != null) {
-      map['track_number'] = Variable<int>(trackNumber);
+      map['track_number'] = Variable<String>(trackNumber);
     }
     if (!nullToAbsent || year != null) {
-      map['year'] = Variable<int>(year);
+      map['year'] = Variable<String>(year);
     }
     map['created_at'] = Variable<DateTime>(createdAt);
     if (!nullToAbsent || updatedAt != null) {
@@ -2077,8 +2077,8 @@ class Track extends DataClass implements Insertable<Track> {
       coverId: serializer.fromJson<int?>(json['coverId']),
       lyrics: serializer.fromJson<String?>(json['lyrics']),
       duration: serializer.fromJson<int?>(json['duration']),
-      trackNumber: serializer.fromJson<int?>(json['trackNumber']),
-      year: serializer.fromJson<int?>(json['year']),
+      trackNumber: serializer.fromJson<String?>(json['trackNumber']),
+      year: serializer.fromJson<String?>(json['year']),
       createdAt: serializer.fromJson<DateTime>(json['createdAt']),
       updatedAt: serializer.fromJson<DateTime?>(json['updatedAt']),
       albumId: serializer.fromJson<int?>(json['albumId']),
@@ -2096,8 +2096,8 @@ class Track extends DataClass implements Insertable<Track> {
       'coverId': serializer.toJson<int?>(coverId),
       'lyrics': serializer.toJson<String?>(lyrics),
       'duration': serializer.toJson<int?>(duration),
-      'trackNumber': serializer.toJson<int?>(trackNumber),
-      'year': serializer.toJson<int?>(year),
+      'trackNumber': serializer.toJson<String?>(trackNumber),
+      'year': serializer.toJson<String?>(year),
       'createdAt': serializer.toJson<DateTime>(createdAt),
       'updatedAt': serializer.toJson<DateTime?>(updatedAt),
       'albumId': serializer.toJson<int?>(albumId),
@@ -2113,8 +2113,8 @@ class Track extends DataClass implements Insertable<Track> {
     Value<int?> coverId = const Value.absent(),
     Value<String?> lyrics = const Value.absent(),
     Value<int?> duration = const Value.absent(),
-    Value<int?> trackNumber = const Value.absent(),
-    Value<int?> year = const Value.absent(),
+    Value<String?> trackNumber = const Value.absent(),
+    Value<String?> year = const Value.absent(),
     DateTime? createdAt,
     Value<DateTime?> updatedAt = const Value.absent(),
     Value<int?> albumId = const Value.absent(),
@@ -2217,8 +2217,8 @@ class TracksCompanion extends UpdateCompanion<Track> {
   final Value<int?> coverId;
   final Value<String?> lyrics;
   final Value<int?> duration;
-  final Value<int?> trackNumber;
-  final Value<int?> year;
+  final Value<String?> trackNumber;
+  final Value<String?> year;
   final Value<DateTime> createdAt;
   final Value<DateTime?> updatedAt;
   final Value<int?> albumId;
@@ -2262,8 +2262,8 @@ class TracksCompanion extends UpdateCompanion<Track> {
     Expression<int>? coverId,
     Expression<String>? lyrics,
     Expression<int>? duration,
-    Expression<int>? trackNumber,
-    Expression<int>? year,
+    Expression<String>? trackNumber,
+    Expression<String>? year,
     Expression<DateTime>? createdAt,
     Expression<DateTime>? updatedAt,
     Expression<int>? albumId,
@@ -2294,8 +2294,8 @@ class TracksCompanion extends UpdateCompanion<Track> {
     Value<int?>? coverId,
     Value<String?>? lyrics,
     Value<int?>? duration,
-    Value<int?>? trackNumber,
-    Value<int?>? year,
+    Value<String?>? trackNumber,
+    Value<String?>? year,
     Value<DateTime>? createdAt,
     Value<DateTime?>? updatedAt,
     Value<int?>? albumId,
@@ -2341,10 +2341,10 @@ class TracksCompanion extends UpdateCompanion<Track> {
       map['duration'] = Variable<int>(duration.value);
     }
     if (trackNumber.present) {
-      map['track_number'] = Variable<int>(trackNumber.value);
+      map['track_number'] = Variable<String>(trackNumber.value);
     }
     if (year.present) {
-      map['year'] = Variable<int>(year.value);
+      map['year'] = Variable<String>(year.value);
     }
     if (createdAt.present) {
       map['created_at'] = Variable<DateTime>(createdAt.value);
@@ -4468,8 +4468,8 @@ typedef $$TracksTableCreateCompanionBuilder =
       Value<int?> coverId,
       Value<String?> lyrics,
       Value<int?> duration,
-      Value<int?> trackNumber,
-      Value<int?> year,
+      Value<String?> trackNumber,
+      Value<String?> year,
       Value<DateTime> createdAt,
       Value<DateTime?> updatedAt,
       Value<int?> albumId,
@@ -4484,8 +4484,8 @@ typedef $$TracksTableUpdateCompanionBuilder =
       Value<int?> coverId,
       Value<String?> lyrics,
       Value<int?> duration,
-      Value<int?> trackNumber,
-      Value<int?> year,
+      Value<String?> trackNumber,
+      Value<String?> year,
       Value<DateTime> createdAt,
       Value<DateTime?> updatedAt,
       Value<int?> albumId,
@@ -4603,12 +4603,12 @@ class $$TracksTableFilterComposer
     builder: (column) => ColumnFilters(column),
   );
 
-  ColumnFilters<int> get trackNumber => $composableBuilder(
+  ColumnFilters<String> get trackNumber => $composableBuilder(
     column: $table.trackNumber,
     builder: (column) => ColumnFilters(column),
   );
 
-  ColumnFilters<int> get year => $composableBuilder(
+  ColumnFilters<String> get year => $composableBuilder(
     column: $table.year,
     builder: (column) => ColumnFilters(column),
   );
@@ -4750,12 +4750,12 @@ class $$TracksTableOrderingComposer
     builder: (column) => ColumnOrderings(column),
   );
 
-  ColumnOrderings<int> get trackNumber => $composableBuilder(
+  ColumnOrderings<String> get trackNumber => $composableBuilder(
     column: $table.trackNumber,
     builder: (column) => ColumnOrderings(column),
   );
 
-  ColumnOrderings<int> get year => $composableBuilder(
+  ColumnOrderings<String> get year => $composableBuilder(
     column: $table.year,
     builder: (column) => ColumnOrderings(column),
   );
@@ -4887,12 +4887,12 @@ class $$TracksTableAnnotationComposer
   GeneratedColumn<int> get duration =>
       $composableBuilder(column: $table.duration, builder: (column) => column);
 
-  GeneratedColumn<int> get trackNumber => $composableBuilder(
+  GeneratedColumn<String> get trackNumber => $composableBuilder(
     column: $table.trackNumber,
     builder: (column) => column,
   );
 
-  GeneratedColumn<int> get year =>
+  GeneratedColumn<String> get year =>
       $composableBuilder(column: $table.year, builder: (column) => column);
 
   GeneratedColumn<DateTime> get createdAt =>
@@ -5033,8 +5033,8 @@ class $$TracksTableTableManager
                 Value<int?> coverId = const Value.absent(),
                 Value<String?> lyrics = const Value.absent(),
                 Value<int?> duration = const Value.absent(),
-                Value<int?> trackNumber = const Value.absent(),
-                Value<int?> year = const Value.absent(),
+                Value<String?> trackNumber = const Value.absent(),
+                Value<String?> year = const Value.absent(),
                 Value<DateTime> createdAt = const Value.absent(),
                 Value<DateTime?> updatedAt = const Value.absent(),
                 Value<int?> albumId = const Value.absent(),
@@ -5063,8 +5063,8 @@ class $$TracksTableTableManager
                 Value<int?> coverId = const Value.absent(),
                 Value<String?> lyrics = const Value.absent(),
                 Value<int?> duration = const Value.absent(),
-                Value<int?> trackNumber = const Value.absent(),
-                Value<int?> year = const Value.absent(),
+                Value<String?> trackNumber = const Value.absent(),
+                Value<String?> year = const Value.absent(),
                 Value<DateTime> createdAt = const Value.absent(),
                 Value<DateTime?> updatedAt = const Value.absent(),
                 Value<int?> albumId = const Value.absent(),

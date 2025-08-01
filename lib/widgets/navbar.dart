@@ -12,8 +12,6 @@ class NavbarScaffold extends StatefulWidget {
 class _NavbarScaffoldState extends State<NavbarScaffold> {
   int _selectedIndex = 0;
 
-  static const List<String> _titles = <String>['Folders', 'Settings'];
-
   void _onItemTapped(int index) {
     setState(() {
       _selectedIndex = index;
