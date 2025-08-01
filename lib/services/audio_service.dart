@@ -74,6 +74,39 @@ class AudioPlayerNotifier extends StateNotifier<AudioPlayerState> {
     state = state.copyWith(currentTrack: track, isPlaying: true);
   }
 
+  Future<void> next() async {
+    if (state.queue != null && state.queue!.isNotEmpty) {
+      final nextIndex = (state.currentIndex + 1) % state.queue!.length;
+      final nextTrack = state.queue![nextIndex];
+      await _audioPlayer.setFilePath(nextTrack.fileuri);
+      await _audioPlayer.play();
+      state = state.copyWith(
+        currentTrack: nextTrack,
+        currentIndex: nextIndex,
+        isPlaying: true,
+      );
+    }
+  }
+
+  Future<void> previous() async {
+    if (state.queue != null && state.queue!.isNotEmpty) {
+      final previousIndex =
+          (state.currentIndex - 1 + state.queue!.length) % state.queue!.length;
+      final previousTrack = state.queue![previousIndex];
+      await _audioPlayer.setFilePath(previousTrack.fileuri);
+      await _audioPlayer.play();
+      state = state.copyWith(
+        currentTrack: previousTrack,
+        currentIndex: previousIndex,
+        isPlaying: true,
+      );
+    }
+  }
+
+  Future<void> unpause() async {
+    await _audioPlayer.play();
+  }
+
   Future<void> pause() async {
     await _audioPlayer.pause();
     state = state.copyWith(isPlaying: false);

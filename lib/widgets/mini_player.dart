@@ -20,15 +20,45 @@ class _MiniPlayerState extends ConsumerState<MiniPlayer> {
     final audioService = ref.watch(audioPlayerNotifierProvider.notifier);
     final audioState = ref.watch(audioPlayerNotifierProvider);
     final currentTrack = audioState.currentTrack;
+
+    if (currentTrack == null) {
+      return const SizedBox.shrink();
+    }
+
     final colorScheme = Theme.of(context).colorScheme;
 
-    void onPressed() {}
+    void onPressed() {
+      if (audioState.isPlaying) {
+        audioService.pause();
+      } else {
+        audioService.unpause();
+      }
+    }
 
     return GestureDetector(
       onTap: () {
         Navigator.push(
           context,
-          MaterialPageRoute(builder: (context) => PlayerScreen()),
+          PageRouteBuilder(
+            transitionDuration: const Duration(milliseconds: 700),
+            pageBuilder: (context, animation, secondaryAnimation) =>
+                PlayerScreen(),
+            transitionsBuilder:
+                (context, animation, secondaryAnimation, child) {
+                  final curvedAnimation = CurvedAnimation(
+                    parent: animation,
+                    curve: Curves.easeOutCubic,
+                  );
+                  return Align(
+                    alignment: Alignment.bottomCenter,
+                    child: SizeTransition(
+                      sizeFactor: curvedAnimation,
+                      axisAlignment: -1.0,
+                      child: child,
+                    ),
+                  );
+                },
+          ),
         );
       },
       child: Container(
@@ -37,21 +67,27 @@ class _MiniPlayerState extends ConsumerState<MiniPlayer> {
         color: AppTheme.surface,
         child: Row(
           children: [
-            ClipRRect(
-              borderRadius: BorderRadius.circular(8),
-              child: File(currentTrack!.cover).existsSync()
-                  ? Image.file(
-                      File(currentTrack.cover),
-                      width: 50,
-                      height: 50,
-                      fit: BoxFit.cover,
-                    )
-                  : Container(
-                      width: 50,
-                      height: 50,
-                      color: colorScheme.primary.withOpacity(0.1),
-                      child: Icon(Icons.music_note, color: colorScheme.primary),
-                    ),
+            Hero(
+              tag: 'player-artwork',
+              child: ClipRRect(
+                borderRadius: BorderRadius.circular(8),
+                child: File(currentTrack.cover).existsSync()
+                    ? Image.file(
+                        File(currentTrack.cover),
+                        width: 50,
+                        height: 50,
+                        fit: BoxFit.cover,
+                      )
+                    : Container(
+                        width: 50,
+                        height: 50,
+                        color: colorScheme.primary.withOpacity(0.1),
+                        child: Icon(
+                          Icons.music_note,
+                          color: colorScheme.primary,
+                        ),
+                      ),
+              ),
             ),
             const SizedBox(width: 16),
             Expanded(

@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter_application_1/models/schema.dart';
 import 'package:flutter_application_1/routes.dart';
 import 'package:flutter_application_1/screens/metadata_screen.dart';
-import 'package:flutter_application_1/screens/player_screen.dart';
 import 'package:flutter_application_1/screens/settings.dart';
 import 'package:flutter_application_1/services/audio_service.dart';
 import 'package:flutter_application_1/services/library_service.dart';
