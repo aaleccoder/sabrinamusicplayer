@@ -20,9 +20,9 @@ class AppTheme {
   // ──────────────────────────────────────────────────────────
   // SPACING & RADIUS
   // ──────────────────────────────────────────────────────────
-  static BorderRadiusGeometry radiusSm = BorderRadiusGeometry.circular(4);
-  static BorderRadiusGeometry radiusMd = BorderRadiusGeometry.circular(8);
-  static BorderRadiusGeometry radiusLg = BorderRadiusGeometry.circular(16);
+  static BorderRadius radiusSm = BorderRadius.circular(4);
+  static BorderRadius radiusMd = BorderRadius.circular(8);
+  static BorderRadius radiusLg = BorderRadius.circular(16);
 
   static const EdgeInsets paddingSm = EdgeInsets.all(8);
   static const EdgeInsets paddingMd = EdgeInsets.all(16);
