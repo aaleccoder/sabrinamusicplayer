@@ -11,14 +11,17 @@ dependencies:
     sdk: flutter
   file_picker: ^10.2.0
   drift: ^2.28.1
+  shared_preferences: ^2.2.3
   drift_flutter: ^0.2.5
   path_provider: ^2.1.5
+  path: ^1.8.2
   just_audio: ^0.10.4            # Full-featured audio playback with gapless, streaming, file, playlist support — latest was released Jun 5 2025 :contentReference[oaicite:1]{index=1}
   audio_service: ^0.18.0         # Background playback & notification handling (usually paired with just_audio)
 
   metadata_god: ^1.0.0           # Read/write audio tags (ID3/mp4/FLAC), published ~9 months ago :contentReference[oaicite:3]{index=3}
 
-  
+  crypto: ^3.0.3
+  uuid: ^4.2.1
 
   dio: ^5.8.0+1                    # HTTP client for fetching from APIs like Last.fm and Genius (widely used)
   json_serializable: ^6.6.0      # Automatic JSON model generation (facilitates parsing API responses)

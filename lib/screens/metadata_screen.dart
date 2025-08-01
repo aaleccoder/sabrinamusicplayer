@@ -3,7 +3,6 @@ import 'dart:typed_data';
 import 'package:flutter/material.dart';
 import 'package:file_picker/file_picker.dart';
 import 'package:flutter_application_1/services/metadata_service.dart';
-import 'package:permission_handler/permission_handler.dart';
 
 class MetadataScreen extends StatefulWidget {
   const MetadataScreen({super.key});

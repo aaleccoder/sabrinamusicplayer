@@ -19,7 +19,7 @@ void main() async {
   await Permission.storage.request();
 
   final container = ProviderContainer();
-  LibraryService().getFileUrl(container);
+  LibraryService().scanLibrary(container);
 
   runApp(const ProviderScope(child: MainApp()));
 }
@@ -39,8 +39,6 @@ class MainApp extends StatelessWidget {
           onPrimary: AppTheme.onPrimary,
           secondary: AppTheme.secondary,
           onSecondary: AppTheme.onSecondary,
-          background: AppTheme.background,
-          onBackground: AppTheme.onBackground,
           surface: AppTheme.surface,
           onSurface: AppTheme.onSurface,
           error: AppTheme.error,

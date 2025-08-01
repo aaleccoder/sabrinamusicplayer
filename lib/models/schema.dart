@@ -23,19 +23,24 @@ class Genres extends Table {
   TextColumn get name => text().unique()();
 }
 
+class Cover extends Table {
+  IntColumn get id => integer().autoIncrement()();
+  TextColumn get cover => text().nullable()();
+  TextColumn get hash => text().unique()();
+}
+
 // table for artists
 class Artists extends Table {
   IntColumn get id => integer().autoIncrement()();
   TextColumn get name => text().unique()();
-  TextColumn get cover => text().nullable()();
-  IntColumn get genreId => integer().nullable().references(Genres, #id)();
+  IntColumn get coverId => integer().nullable().references(Cover, #id)();
 }
 
 // table for albums
 class Albums extends Table {
   IntColumn get id => integer().autoIncrement()();
   TextColumn get name => text()();
-  TextColumn get cover => text().nullable()();
+  IntColumn get coverId => integer().nullable().references(Cover, #id)();
   IntColumn get artistId => integer().nullable().references(Artists, #id)();
   IntColumn get genreId => integer().nullable().references(Genres, #id)();
 }
@@ -45,7 +50,7 @@ class Tracks extends Table {
   IntColumn get id => integer().autoIncrement()();
   TextColumn get title => text()();
   TextColumn get fileuri => text()(); // As requested
-  TextColumn get cover => text().nullable()();
+  IntColumn get coverId => integer().nullable().references(Cover, #id)();
   TextColumn get lyrics => text().nullable()();
   IntColumn get duration => integer().nullable()();
   IntColumn get trackNumber => integer().nullable()();
@@ -58,7 +63,9 @@ class Tracks extends Table {
   IntColumn get genreId => integer().nullable().references(Genres, #id)();
 }
 
-@DriftDatabase(tables: [MusicDirectories, Genres, Artists, Albums, Tracks])
+@DriftDatabase(
+  tables: [MusicDirectories, Genres, Artists, Albums, Tracks, Cover],
+)
 class AppDatabase extends _$AppDatabase {
   AppDatabase([QueryExecutor? executor]) : super(executor ?? _openConnection());
 

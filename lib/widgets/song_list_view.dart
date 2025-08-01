@@ -3,7 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_application_1/theme.dart';
 
 class SongListView extends StatefulWidget {
-  const SongListView({Key? key}) : super(key: key);
+  const SongListView({super.key});
 
   @override
   _SongListViewState createState() => _SongListViewState();
@@ -20,7 +20,7 @@ class _SongListViewState extends State<SongListView> {
 }
 
 class SongListViewItem extends StatefulWidget {
-  const SongListViewItem({Key? key}) : super(key: key);
+  const SongListViewItem({super.key});
 
   @override
   _SongListViewItemState createState() => _SongListViewItemState();
