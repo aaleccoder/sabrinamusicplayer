@@ -134,8 +134,9 @@ class _TrackSearchPageState extends ConsumerState<TrackSearchPage> {
                 if (_searchQuery.isNotEmpty) {
                   tracksAsync = ref.watch(searchTracksProvider(_searchQuery));
                 } else {
-                  tracksAsync =
-                      ref.watch(tracksProvider(SortOption.alphabetical));
+                  tracksAsync = ref.watch(
+                    tracksProvider(SortOption.alphabeticalAZ),
+                  );
                 }
 
                 return tracksAsync.when(

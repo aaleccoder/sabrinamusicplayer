@@ -75,7 +75,7 @@ class AudioPlayerNotifier extends StateNotifier<AudioPlayerState> {
     _initializeAudioService();
 
     // Listen to track updates and refresh the current track if it's playing
-    _ref.listen(tracksProvider(SortOption.alphabetical), (previous, next) {
+    _ref.listen(tracksProvider(SortOption.alphabeticalAZ), (previous, next) {
       final tracks = next.asData?.value;
       if (tracks != null && state.currentTrack != null) {
         try {

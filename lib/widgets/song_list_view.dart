@@ -8,10 +8,17 @@ import 'package:flutter_application_1/widgets/home_scan_banner.dart';
 import 'package:flutter_application_1/widgets/search_bar.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-enum SortOption { alphabetical, album, artist, year, dateAdded }
+enum SortOption {
+  alphabeticalAZ,
+  alphabeticalZA,
+  album,
+  artist,
+  year,
+  dateAdded,
+}
 
 final sortOptionProvider = StateProvider<SortOption>(
-  (ref) => SortOption.alphabetical,
+  (ref) => SortOption.alphabeticalAZ,
 );
 
 class TrackItem {
@@ -62,9 +69,7 @@ class SongListView extends ConsumerWidget {
             ),
 
             _buildSongCountHeader(context, tracksAsync),
-            _buildShuffleRow(context, ref, tracksAsync),
-
-            _buildSortDropdown(context, ref),
+            _buildHeaderWithOptions(context, ref, tracksAsync),
 
             // Songs list
             Expanded(child: _buildSongsList(context, tracksAsync)),
@@ -74,14 +79,48 @@ class SongListView extends ConsumerWidget {
     );
   }
 
-  Widget _buildSortDropdown(BuildContext context, WidgetRef ref) {
+  Widget _buildHeaderWithOptions(
+    BuildContext context,
+    WidgetRef ref,
+    AsyncValue<List<TrackItem>> tracksAsync,
+  ) {
     final sortOption = ref.watch(sortOptionProvider);
 
     return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 16.0),
+      padding: const EdgeInsets.fromLTRB(16, 0, 16, 8),
       child: Row(
-        mainAxisAlignment: MainAxisAlignment.end,
+        mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
+          tracksAsync.when(
+            data: (tracks) {
+              if (tracks.isEmpty) {
+                return const SizedBox.shrink();
+              }
+              return TextButton.icon(
+                onPressed: () {
+                  ref
+                      .read(audioPlayerNotifierProvider.notifier)
+                      .playAllShuffled(tracks);
+                },
+                icon: Icon(Icons.shuffle, color: AppTheme.primary, size: 16),
+                label: Text(
+                  'Shuffle Play',
+                  style: TextStyle(color: AppTheme.primary),
+                ),
+                style: TextButton.styleFrom(
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 12,
+                    vertical: 8,
+                  ),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(8),
+                  ),
+                ),
+              );
+            },
+            loading: () => const SizedBox.shrink(),
+            error: (e, _) => const SizedBox.shrink(),
+          ),
           DropdownButton<SortOption>(
             value: sortOption,
             onChanged: (SortOption? newValue) {
@@ -106,8 +145,10 @@ class SongListView extends ConsumerWidget {
 
   String _getSortOptionName(SortOption option) {
     switch (option) {
-      case SortOption.alphabetical:
-        return 'Alphabetical';
+      case SortOption.alphabeticalAZ:
+        return 'Alphabetical (A-Z)';
+      case SortOption.alphabeticalZA:
+        return 'Alphabetical (Z-A)';
       case SortOption.album:
         return 'Album';
       case SortOption.artist:
@@ -221,51 +262,6 @@ class SongListView extends ConsumerWidget {
           ],
         ),
       ),
-    );
-  }
-
-  Widget _buildShuffleRow(
-    BuildContext context,
-    WidgetRef ref,
-    AsyncValue<List<TrackItem>> tracksAsync,
-  ) {
-    return tracksAsync.when(
-      data: (tracks) {
-        if (tracks.isEmpty) {
-          return const SizedBox.shrink();
-        }
-        return Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 16.0),
-          child: Row(
-            mainAxisAlignment: MainAxisAlignment.end,
-            children: [
-              TextButton.icon(
-                onPressed: () {
-                  ref
-                      .read(audioPlayerNotifierProvider.notifier)
-                      .playAllShuffled(tracks);
-                },
-                icon: Icon(Icons.shuffle, color: AppTheme.primary, size: 16),
-                label: Text(
-                  'Shuffle Play',
-                  style: TextStyle(color: AppTheme.primary),
-                ),
-                style: TextButton.styleFrom(
-                  padding: const EdgeInsets.symmetric(
-                    horizontal: 12,
-                    vertical: 8,
-                  ),
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(8),
-                  ),
-                ),
-              ),
-            ],
-          ),
-        );
-      },
-      loading: () => const SizedBox.shrink(),
-      error: (e, _) => const SizedBox.shrink(),
     );
   }
 
@@ -593,7 +589,8 @@ class _SongListViewItemState extends ConsumerState<SongListViewItem> {
                           _showAddToPlaylistDialog(context, widget.track);
                           break;
                       }
-                      ref.refresh(tracksProvider(SortOption.alphabetical));
+                      final currentSortOption = ref.read(sortOptionProvider);
+                      ref.refresh(tracksProvider(currentSortOption));
                       ref.refresh(likedTracksProvider);
                       ref.refresh(unlikedTracksProvider);
                     },

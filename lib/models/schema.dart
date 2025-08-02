@@ -140,7 +140,7 @@ class AppDatabase extends _$AppDatabase {
   Stream<List<TrackItem>> watchAllTracks({
     bool? isFavorite,
     bool? isUnliked,
-    SortOption sortOption = SortOption.alphabetical,
+    SortOption sortOption = SortOption.alphabeticalAZ,
   }) {
     final query = select(tracks).join([
       leftOuterJoin(artists, artists.id.equalsExp(tracks.artistId)),
@@ -156,8 +156,11 @@ class AppDatabase extends _$AppDatabase {
 
     // Sorting logic
     switch (sortOption) {
-      case SortOption.alphabetical:
+      case SortOption.alphabeticalAZ:
         query.orderBy([OrderingTerm.asc(tracks.title)]);
+        break;
+      case SortOption.alphabeticalZA:
+        query.orderBy([OrderingTerm.desc(tracks.title)]);
         break;
       case SortOption.album:
         query.orderBy([OrderingTerm.asc(albums.name)]);
