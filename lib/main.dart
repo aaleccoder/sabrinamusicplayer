@@ -1,6 +1,8 @@
 import 'dart:ui';
+import 'package:flutter/foundation.dart'; // Moved to top
 
 import 'package:flutter/material.dart';
+import 'package:flutter/scheduler.dart';
 import 'package:flutter_application_1/models/schema.dart';
 import 'package:flutter_application_1/providers/library_scanning_provider.dart';
 import 'package:flutter_application_1/routes.dart';
@@ -194,6 +196,11 @@ final updateTrackProvider = FutureProvider.family<void, TrackItem>((
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
 
+  // Enable performance debugging in debug mode
+  if (kDebugMode) {
+    debugProfileBuildsEnabled = true;
+  }
+
   await Permission.audio.request();
   await Permission.storage.request();
   await Permission.notification.request();
@@ -212,6 +219,7 @@ class MainApp extends StatelessWidget {
     return MaterialApp(
       onGenerateRoute: AppRoutes.generateRoute,
       debugShowCheckedModeBanner: false,
+      showPerformanceOverlay: kDebugMode,
 
       theme: ThemeData(
         fontFamily: "Sora",
@@ -280,6 +288,7 @@ class Home extends ConsumerStatefulWidget {
 
 class _HomeState extends ConsumerState<Home> with TickerProviderStateMixin {
   int _selectedIndex = 0;
+  final PageStorageBucket _pageStorageBucket = PageStorageBucket();
   final List<Widget> _pages = [
     SongListView(),
     const AlbumsPage(),
@@ -316,7 +325,10 @@ class _HomeState extends ConsumerState<Home> with TickerProviderStateMixin {
         );
 
     _animationController.forward();
-    _checkAndScan();
+    // Defer heavy scan to after first frame
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      _checkAndScan();
+    });
   }
 
   @override
@@ -337,13 +349,11 @@ class _HomeState extends ConsumerState<Home> with TickerProviderStateMixin {
   void _onItemTapped(int index) {
     if (index == _selectedIndex) return;
 
-    setState(() {
-      _selectedIndex = index;
+    // Reverse animation before switching pages
+    _animationController.reverse().then((_) {
+      setState(() => _selectedIndex = index);
+      _animationController.forward();
     });
-
-    // Restart animation for page transition
-    _animationController.reset();
-    _animationController.forward();
   }
 
   @override
@@ -366,17 +376,21 @@ class _HomeState extends ConsumerState<Home> with TickerProviderStateMixin {
         ),
         child: Stack(
           children: [
-            AnimatedBuilder(
-              animation: _animationController,
-              builder: (context, child) {
-                return FadeTransition(
-                  opacity: _fadeAnimation,
-                  child: SlideTransition(
-                    position: _slideAnimation,
-                    child: _pages[_selectedIndex],
-                  ),
-                );
-              },
+            // Use PageStorage to preserve tab state
+            PageStorage(
+              bucket: _pageStorageBucket,
+              child: AnimatedBuilder(
+                animation: _animationController,
+                builder: (context, child) {
+                  return FadeTransition(
+                    opacity: _fadeAnimation,
+                    child: SlideTransition(
+                      position: _slideAnimation,
+                      child: _pages[_selectedIndex],
+                    ),
+                  );
+                },
+              ),
             ),
             Positioned(
               left: 0,

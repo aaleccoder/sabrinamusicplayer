@@ -33,14 +33,21 @@ class MainActivity : AudioServiceFragmentActivity() {
         }
     }
 
-    // In-memory LRU cache for hot albums (256MB cache)
-    private val memoryCache = LruCache<String, Bitmap>(256 * 2048 * 2048) // 256MB
+    // Memory cache optimized for device capabilities
+    private val memoryCache by lazy {
+        val maxMemory = Runtime.getRuntime().maxMemory() / 1024
+        val cacheSize = (maxMemory / 8).toInt() // Use 1/8th of available memory
+        LruCache<String, Bitmap>(cacheSize)
+    }
 
     // Cache for album art URIs by album ID to avoid duplicate processing
     private val albumArtCache = mutableMapOf<Long, String?>()
     
     // Single retriever instance per thread for better resource management
     private val retrieverThreadLocal = ThreadLocal.withInitial { MediaMetadataRetriever() }
+
+    // Limited dispatcher for heavy operations
+    private val heavyWorkDispatcher = Dispatchers.IO.limitedParallelism(4)
 
     override fun configureFlutterEngine(flutterEngine: FlutterEngine) {
         super.configureFlutterEngine(flutterEngine)
@@ -281,7 +288,7 @@ class MainActivity : AudioServiceFragmentActivity() {
                     MediaStore.Audio.Albums.EXTERNAL_CONTENT_URI,
                     albumId
                 )
-                val thumbnail = contentResolver.loadThumbnail(albumUri, Size(2048, 2048), null)
+                val thumbnail = contentResolver.loadThumbnail(albumUri, Size(512, 512), null)
                 
                 if (saveBitmapToCache(thumbnail, cacheFile)) {
                     // Cache in memory for hot access
@@ -321,7 +328,7 @@ class MainActivity : AudioServiceFragmentActivity() {
                 
                 if (originalBitmap != null) {
                     // Compress to 2048x2048 thumbnail
-                    val thumbnail = compressBitmapToThumbnail(originalBitmap, 2048, 2048)
+                    val thumbnail = compressBitmapToThumbnail(originalBitmap, 512, 512)
                     
                     // Save to cache
                     if (saveBitmapToCache(thumbnail, cacheFile)) {
@@ -443,50 +450,54 @@ class MainActivity : AudioServiceFragmentActivity() {
      * @param trackId The track ID to get album information
      * @return Full-size album art URI or null if not available
      */
-    private suspend fun extractFullSizeAlbumArt(trackId: Long): String? {
-        // First get the album ID for this track
-        val albumId = getAlbumIdFromTrack(trackId) ?: return getDefaultAlbumArt()
-        
-        // Create cache filename for full-size image based on album ID
-        val cacheFileName = "album_full_${albumId}.jpg"
-        val cacheFile = File(albumArtCacheDir, cacheFileName)
-        
-        // Return cached version if it exists
-        if (cacheFile.exists()) {
-            return Uri.fromFile(cacheFile).toString()
-        }
-        
-        val retriever = retrieverThreadLocal.get()
-        
-        try {
-            val trackUri = ContentUris.withAppendedId(
-                MediaStore.Audio.Media.EXTERNAL_CONTENT_URI,
-                trackId
-            )
-            
-            retriever.setDataSource(this, trackUri)
-            val albumArt = retriever.embeddedPicture
-            
-            if (albumArt != null) {
-                // Decode the byte array to bitmap (keep original size)
-                val originalBitmap = BitmapFactory.decodeByteArray(albumArt, 0, albumArt.size)
+    private suspend fun extractFullSizeAlbumArt(trackId: Long): String? =
+        withContext(heavyWorkDispatcher) {
+            val startTime = System.currentTimeMillis()
+            try {
+                // First get the album ID for this track
+                val albumId = getAlbumIdFromTrack(trackId) ?: return@withContext getDefaultAlbumArt()
                 
-                if (originalBitmap != null) {
-                    // Save full-size image to cache
-                    if (saveBitmapToCache(originalBitmap, cacheFile)) {
-                        originalBitmap.recycle()
-                        return Uri.fromFile(cacheFile).toString()
-                    }
-                    
-                    originalBitmap.recycle()
+                // Create cache filename for full-size image based on album ID
+                val cacheFileName = "album_full_${albumId}.jpg"
+                val cacheFile = File(albumArtCacheDir, cacheFileName)
+                
+                // Return cached version if it exists
+                if (cacheFile.exists()) {
+                    return@withContext Uri.fromFile(cacheFile).toString()
                 }
+                
+                val retriever = retrieverThreadLocal.get()
+                
+                val trackUri = ContentUris.withAppendedId(
+                    MediaStore.Audio.Media.EXTERNAL_CONTENT_URI,
+                    trackId
+                )
+                
+                retriever.setDataSource(this@MainActivity, trackUri)
+                val albumArt = retriever.embeddedPicture
+                
+                if (albumArt != null) {
+                    // Decode the byte array to bitmap (keep original size)
+                    val originalBitmap = BitmapFactory.decodeByteArray(albumArt, 0, albumArt.size)
+                    
+                    if (originalBitmap != null) {
+                        // Save full-size image to cache
+                        if (saveBitmapToCache(originalBitmap, cacheFile)) {
+                            originalBitmap.recycle()
+                            return@withContext Uri.fromFile(cacheFile).toString()
+                        }
+                        
+                        originalBitmap.recycle()
+                    }
+                }
+                return@withContext getDefaultAlbumArt()
+            } catch (e: Exception) {
+                Log.e("MainActivity", "Error extracting full-size album art for track $trackId", e)
+                return@withContext getDefaultAlbumArt()
+            } finally {
+                Log.d("Perf", "Full-size album art extraction took ${System.currentTimeMillis() - startTime}ms")
             }
-        } catch (e: Exception) {
-            Log.e("MainActivity", "Error extracting full-size album art for track $trackId", e)
         }
-        
-        return getDefaultAlbumArt()
-    }
     
     /**
      * Gets the album ID for a given track ID
