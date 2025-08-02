@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_application_1/models/schema.dart';
+import 'package:flutter_application_1/providers/library_scanning_provider.dart';
 import 'package:flutter_application_1/routes.dart';
 import 'package:flutter_application_1/screens/settings.dart';
 import 'package:flutter_application_1/services/audio_service.dart';
@@ -9,6 +10,7 @@ import 'package:flutter_application_1/widgets/albums.dart';
 import 'package:flutter_application_1/widgets/artists.dart';
 import 'package:flutter_application_1/widgets/genres.dart';
 import 'package:flutter_application_1/widgets/library.dart';
+import 'package:flutter_application_1/widgets/library_scanning_overlay.dart';
 import 'package:flutter_application_1/widgets/mini_player.dart';
 import 'package:flutter_application_1/widgets/playlists.dart';
 import 'package:flutter_application_1/widgets/song_list_view.dart';
@@ -195,10 +197,15 @@ class _HomeState extends ConsumerState<Home> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      body: Column(
+      body: Stack(
         children: [
-          Expanded(child: _pages[_selectedIndex]),
-          MiniPlayer(),
+          Column(
+            children: [
+              Expanded(child: _pages[_selectedIndex]),
+              MiniPlayer(),
+            ],
+          ),
+          LibraryScanningOverlay(),
         ],
       ),
       bottomNavigationBar: NavigationBar(

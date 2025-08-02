@@ -3,6 +3,7 @@ import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_application_1/main.dart';
 import 'package:flutter_application_1/models/schema.dart';
+import 'package:flutter_application_1/services/library_service.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../theme.dart';
@@ -44,8 +45,8 @@ class _SettingsPageState extends ConsumerState<SettingsPage> {
             .insert(
               MusicDirectoriesCompanion(
                 path: Value(selectedDirectory),
-                dateAdded: Value(DateTime.now()),
-                isEnabled: const Value(true),
+                date_added: Value(DateTime.now()),
+                is_enabled: const Value(true),
               ),
             );
         await _loadFolders();
@@ -59,6 +60,11 @@ class _SettingsPageState extends ConsumerState<SettingsPage> {
       database.musicDirectories,
     )..where((tbl) => tbl.path.equals(path))).go();
     await _loadFolders();
+  }
+
+  Future<void> _scanLibrary() async {
+    final container = ProviderContainer();
+    await LibraryService().scanLibrary(container);
   }
 
   @override
@@ -135,6 +141,23 @@ class _SettingsPageState extends ConsumerState<SettingsPage> {
                       icon: const Icon(Icons.folder_open),
                       label: const Text('Add Folder'),
                       onPressed: _addFolder,
+                    ),
+                  ),
+                  const SizedBox(height: 16),
+                  SizedBox(
+                    width: double.infinity,
+                    child: ElevatedButton.icon(
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: AppTheme.secondary,
+                        foregroundColor: AppTheme.onSecondary,
+                        shape: RoundedRectangleBorder(
+                          borderRadius: AppTheme.radiusSm,
+                        ),
+                        padding: AppTheme.paddingMd,
+                      ),
+                      icon: const Icon(Icons.refresh),
+                      label: const Text('Scan Library Now'),
+                      onPressed: _scanLibrary,
                     ),
                   ),
                 ],

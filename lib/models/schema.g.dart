@@ -32,11 +32,11 @@ class $MusicDirectoriesTable extends MusicDirectories
     type: DriftSqlType.string,
     requiredDuringInsert: true,
   );
-  static const VerificationMeta _isEnabledMeta = const VerificationMeta(
-    'isEnabled',
+  static const VerificationMeta _is_enabledMeta = const VerificationMeta(
+    'is_enabled',
   );
   @override
-  late final GeneratedColumn<bool> isEnabled = GeneratedColumn<bool>(
+  late final GeneratedColumn<bool> is_enabled = GeneratedColumn<bool>(
     'is_enabled',
     aliasedName,
     false,
@@ -47,21 +47,21 @@ class $MusicDirectoriesTable extends MusicDirectories
     ),
     defaultValue: const Constant(true),
   );
-  static const VerificationMeta _lastScannedMeta = const VerificationMeta(
-    'lastScanned',
+  static const VerificationMeta _last_scannedMeta = const VerificationMeta(
+    'last_scanned',
   );
   @override
-  late final GeneratedColumn<int> lastScanned = GeneratedColumn<int>(
+  late final GeneratedColumn<int> last_scanned = GeneratedColumn<int>(
     'last_scanned',
     aliasedName,
     true,
     type: DriftSqlType.int,
     requiredDuringInsert: false,
   );
-  static const VerificationMeta _scanSubdirectoriesMeta =
-      const VerificationMeta('scanSubdirectories');
+  static const VerificationMeta _scan_subdirectoriesMeta =
+      const VerificationMeta('scan_subdirectories');
   @override
-  late final GeneratedColumn<bool> scanSubdirectories = GeneratedColumn<bool>(
+  late final GeneratedColumn<bool> scan_subdirectories = GeneratedColumn<bool>(
     'scan_subdirectories',
     aliasedName,
     false,
@@ -72,11 +72,11 @@ class $MusicDirectoriesTable extends MusicDirectories
     ),
     defaultValue: const Constant(true),
   );
-  static const VerificationMeta _totalSizeMeta = const VerificationMeta(
-    'totalSize',
+  static const VerificationMeta _total_sizeMeta = const VerificationMeta(
+    'total_size',
   );
   @override
-  late final GeneratedColumn<int> totalSize = GeneratedColumn<int>(
+  late final GeneratedColumn<int> total_size = GeneratedColumn<int>(
     'total_size',
     aliasedName,
     false,
@@ -84,11 +84,11 @@ class $MusicDirectoriesTable extends MusicDirectories
     requiredDuringInsert: false,
     defaultValue: const Constant(0),
   );
-  static const VerificationMeta _fileCountMeta = const VerificationMeta(
-    'fileCount',
+  static const VerificationMeta _file_countMeta = const VerificationMeta(
+    'file_count',
   );
   @override
-  late final GeneratedColumn<int> fileCount = GeneratedColumn<int>(
+  late final GeneratedColumn<int> file_count = GeneratedColumn<int>(
     'file_count',
     aliasedName,
     false,
@@ -96,21 +96,21 @@ class $MusicDirectoriesTable extends MusicDirectories
     requiredDuringInsert: false,
     defaultValue: const Constant(0),
   );
-  static const VerificationMeta _dateAddedMeta = const VerificationMeta(
-    'dateAdded',
+  static const VerificationMeta _date_addedMeta = const VerificationMeta(
+    'date_added',
   );
   @override
-  late final GeneratedColumn<DateTime> dateAdded = GeneratedColumn<DateTime>(
+  late final GeneratedColumn<DateTime> date_added = GeneratedColumn<DateTime>(
     'date_added',
     aliasedName,
     false,
     type: DriftSqlType.dateTime,
     requiredDuringInsert: true,
   );
-  static const VerificationMeta _excludedSubdirectoriesMeta =
-      const VerificationMeta('excludedSubdirectories');
+  static const VerificationMeta _excluded_subdirectoriesMeta =
+      const VerificationMeta('excluded_subdirectories');
   @override
-  late final GeneratedColumn<String> excludedSubdirectories =
+  late final GeneratedColumn<String> excluded_subdirectories =
       GeneratedColumn<String>(
         'excluded_subdirectories',
         aliasedName,
@@ -122,13 +122,13 @@ class $MusicDirectoriesTable extends MusicDirectories
   List<GeneratedColumn> get $columns => [
     id,
     path,
-    isEnabled,
-    lastScanned,
-    scanSubdirectories,
-    totalSize,
-    fileCount,
-    dateAdded,
-    excludedSubdirectories,
+    is_enabled,
+    last_scanned,
+    scan_subdirectories,
+    total_size,
+    file_count,
+    date_added,
+    excluded_subdirectories,
   ];
   @override
   String get aliasedName => _alias ?? actualTableName;
@@ -155,54 +155,54 @@ class $MusicDirectoriesTable extends MusicDirectories
     }
     if (data.containsKey('is_enabled')) {
       context.handle(
-        _isEnabledMeta,
-        isEnabled.isAcceptableOrUnknown(data['is_enabled']!, _isEnabledMeta),
+        _is_enabledMeta,
+        is_enabled.isAcceptableOrUnknown(data['is_enabled']!, _is_enabledMeta),
       );
     }
     if (data.containsKey('last_scanned')) {
       context.handle(
-        _lastScannedMeta,
-        lastScanned.isAcceptableOrUnknown(
+        _last_scannedMeta,
+        last_scanned.isAcceptableOrUnknown(
           data['last_scanned']!,
-          _lastScannedMeta,
+          _last_scannedMeta,
         ),
       );
     }
     if (data.containsKey('scan_subdirectories')) {
       context.handle(
-        _scanSubdirectoriesMeta,
-        scanSubdirectories.isAcceptableOrUnknown(
+        _scan_subdirectoriesMeta,
+        scan_subdirectories.isAcceptableOrUnknown(
           data['scan_subdirectories']!,
-          _scanSubdirectoriesMeta,
+          _scan_subdirectoriesMeta,
         ),
       );
     }
     if (data.containsKey('total_size')) {
       context.handle(
-        _totalSizeMeta,
-        totalSize.isAcceptableOrUnknown(data['total_size']!, _totalSizeMeta),
+        _total_sizeMeta,
+        total_size.isAcceptableOrUnknown(data['total_size']!, _total_sizeMeta),
       );
     }
     if (data.containsKey('file_count')) {
       context.handle(
-        _fileCountMeta,
-        fileCount.isAcceptableOrUnknown(data['file_count']!, _fileCountMeta),
+        _file_countMeta,
+        file_count.isAcceptableOrUnknown(data['file_count']!, _file_countMeta),
       );
     }
     if (data.containsKey('date_added')) {
       context.handle(
-        _dateAddedMeta,
-        dateAdded.isAcceptableOrUnknown(data['date_added']!, _dateAddedMeta),
+        _date_addedMeta,
+        date_added.isAcceptableOrUnknown(data['date_added']!, _date_addedMeta),
       );
     } else if (isInserting) {
-      context.missing(_dateAddedMeta);
+      context.missing(_date_addedMeta);
     }
     if (data.containsKey('excluded_subdirectories')) {
       context.handle(
-        _excludedSubdirectoriesMeta,
-        excludedSubdirectories.isAcceptableOrUnknown(
+        _excluded_subdirectoriesMeta,
+        excluded_subdirectories.isAcceptableOrUnknown(
           data['excluded_subdirectories']!,
-          _excludedSubdirectoriesMeta,
+          _excluded_subdirectoriesMeta,
         ),
       );
     }
@@ -223,31 +223,31 @@ class $MusicDirectoriesTable extends MusicDirectories
         DriftSqlType.string,
         data['${effectivePrefix}path'],
       )!,
-      isEnabled: attachedDatabase.typeMapping.read(
+      is_enabled: attachedDatabase.typeMapping.read(
         DriftSqlType.bool,
         data['${effectivePrefix}is_enabled'],
       )!,
-      lastScanned: attachedDatabase.typeMapping.read(
+      last_scanned: attachedDatabase.typeMapping.read(
         DriftSqlType.int,
         data['${effectivePrefix}last_scanned'],
       ),
-      scanSubdirectories: attachedDatabase.typeMapping.read(
+      scan_subdirectories: attachedDatabase.typeMapping.read(
         DriftSqlType.bool,
         data['${effectivePrefix}scan_subdirectories'],
       )!,
-      totalSize: attachedDatabase.typeMapping.read(
+      total_size: attachedDatabase.typeMapping.read(
         DriftSqlType.int,
         data['${effectivePrefix}total_size'],
       )!,
-      fileCount: attachedDatabase.typeMapping.read(
+      file_count: attachedDatabase.typeMapping.read(
         DriftSqlType.int,
         data['${effectivePrefix}file_count'],
       )!,
-      dateAdded: attachedDatabase.typeMapping.read(
+      date_added: attachedDatabase.typeMapping.read(
         DriftSqlType.dateTime,
         data['${effectivePrefix}date_added'],
       )!,
-      excludedSubdirectories: attachedDatabase.typeMapping.read(
+      excluded_subdirectories: attachedDatabase.typeMapping.read(
         DriftSqlType.string,
         data['${effectivePrefix}excluded_subdirectories'],
       ),
@@ -263,39 +263,41 @@ class $MusicDirectoriesTable extends MusicDirectories
 class MusicDirectory extends DataClass implements Insertable<MusicDirectory> {
   final int id;
   final String path;
-  final bool isEnabled;
-  final int? lastScanned;
-  final bool scanSubdirectories;
-  final int totalSize;
-  final int fileCount;
-  final DateTime dateAdded;
-  final String? excludedSubdirectories;
+  final bool is_enabled;
+  final int? last_scanned;
+  final bool scan_subdirectories;
+  final int total_size;
+  final int file_count;
+  final DateTime date_added;
+  final String? excluded_subdirectories;
   const MusicDirectory({
     required this.id,
     required this.path,
-    required this.isEnabled,
-    this.lastScanned,
-    required this.scanSubdirectories,
-    required this.totalSize,
-    required this.fileCount,
-    required this.dateAdded,
-    this.excludedSubdirectories,
+    required this.is_enabled,
+    this.last_scanned,
+    required this.scan_subdirectories,
+    required this.total_size,
+    required this.file_count,
+    required this.date_added,
+    this.excluded_subdirectories,
   });
   @override
   Map<String, Expression> toColumns(bool nullToAbsent) {
     final map = <String, Expression>{};
     map['id'] = Variable<int>(id);
     map['path'] = Variable<String>(path);
-    map['is_enabled'] = Variable<bool>(isEnabled);
-    if (!nullToAbsent || lastScanned != null) {
-      map['last_scanned'] = Variable<int>(lastScanned);
+    map['is_enabled'] = Variable<bool>(is_enabled);
+    if (!nullToAbsent || last_scanned != null) {
+      map['last_scanned'] = Variable<int>(last_scanned);
     }
-    map['scan_subdirectories'] = Variable<bool>(scanSubdirectories);
-    map['total_size'] = Variable<int>(totalSize);
-    map['file_count'] = Variable<int>(fileCount);
-    map['date_added'] = Variable<DateTime>(dateAdded);
-    if (!nullToAbsent || excludedSubdirectories != null) {
-      map['excluded_subdirectories'] = Variable<String>(excludedSubdirectories);
+    map['scan_subdirectories'] = Variable<bool>(scan_subdirectories);
+    map['total_size'] = Variable<int>(total_size);
+    map['file_count'] = Variable<int>(file_count);
+    map['date_added'] = Variable<DateTime>(date_added);
+    if (!nullToAbsent || excluded_subdirectories != null) {
+      map['excluded_subdirectories'] = Variable<String>(
+        excluded_subdirectories,
+      );
     }
     return map;
   }
@@ -304,17 +306,17 @@ class MusicDirectory extends DataClass implements Insertable<MusicDirectory> {
     return MusicDirectoriesCompanion(
       id: Value(id),
       path: Value(path),
-      isEnabled: Value(isEnabled),
-      lastScanned: lastScanned == null && nullToAbsent
+      is_enabled: Value(is_enabled),
+      last_scanned: last_scanned == null && nullToAbsent
           ? const Value.absent()
-          : Value(lastScanned),
-      scanSubdirectories: Value(scanSubdirectories),
-      totalSize: Value(totalSize),
-      fileCount: Value(fileCount),
-      dateAdded: Value(dateAdded),
-      excludedSubdirectories: excludedSubdirectories == null && nullToAbsent
+          : Value(last_scanned),
+      scan_subdirectories: Value(scan_subdirectories),
+      total_size: Value(total_size),
+      file_count: Value(file_count),
+      date_added: Value(date_added),
+      excluded_subdirectories: excluded_subdirectories == null && nullToAbsent
           ? const Value.absent()
-          : Value(excludedSubdirectories),
+          : Value(excluded_subdirectories),
     );
   }
 
@@ -326,14 +328,16 @@ class MusicDirectory extends DataClass implements Insertable<MusicDirectory> {
     return MusicDirectory(
       id: serializer.fromJson<int>(json['id']),
       path: serializer.fromJson<String>(json['path']),
-      isEnabled: serializer.fromJson<bool>(json['isEnabled']),
-      lastScanned: serializer.fromJson<int?>(json['lastScanned']),
-      scanSubdirectories: serializer.fromJson<bool>(json['scanSubdirectories']),
-      totalSize: serializer.fromJson<int>(json['totalSize']),
-      fileCount: serializer.fromJson<int>(json['fileCount']),
-      dateAdded: serializer.fromJson<DateTime>(json['dateAdded']),
-      excludedSubdirectories: serializer.fromJson<String?>(
-        json['excludedSubdirectories'],
+      is_enabled: serializer.fromJson<bool>(json['is_enabled']),
+      last_scanned: serializer.fromJson<int?>(json['last_scanned']),
+      scan_subdirectories: serializer.fromJson<bool>(
+        json['scan_subdirectories'],
+      ),
+      total_size: serializer.fromJson<int>(json['total_size']),
+      file_count: serializer.fromJson<int>(json['file_count']),
+      date_added: serializer.fromJson<DateTime>(json['date_added']),
+      excluded_subdirectories: serializer.fromJson<String?>(
+        json['excluded_subdirectories'],
       ),
     );
   }
@@ -343,14 +347,14 @@ class MusicDirectory extends DataClass implements Insertable<MusicDirectory> {
     return <String, dynamic>{
       'id': serializer.toJson<int>(id),
       'path': serializer.toJson<String>(path),
-      'isEnabled': serializer.toJson<bool>(isEnabled),
-      'lastScanned': serializer.toJson<int?>(lastScanned),
-      'scanSubdirectories': serializer.toJson<bool>(scanSubdirectories),
-      'totalSize': serializer.toJson<int>(totalSize),
-      'fileCount': serializer.toJson<int>(fileCount),
-      'dateAdded': serializer.toJson<DateTime>(dateAdded),
-      'excludedSubdirectories': serializer.toJson<String?>(
-        excludedSubdirectories,
+      'is_enabled': serializer.toJson<bool>(is_enabled),
+      'last_scanned': serializer.toJson<int?>(last_scanned),
+      'scan_subdirectories': serializer.toJson<bool>(scan_subdirectories),
+      'total_size': serializer.toJson<int>(total_size),
+      'file_count': serializer.toJson<int>(file_count),
+      'date_added': serializer.toJson<DateTime>(date_added),
+      'excluded_subdirectories': serializer.toJson<String?>(
+        excluded_subdirectories,
       ),
     };
   }
@@ -358,43 +362,51 @@ class MusicDirectory extends DataClass implements Insertable<MusicDirectory> {
   MusicDirectory copyWith({
     int? id,
     String? path,
-    bool? isEnabled,
-    Value<int?> lastScanned = const Value.absent(),
-    bool? scanSubdirectories,
-    int? totalSize,
-    int? fileCount,
-    DateTime? dateAdded,
-    Value<String?> excludedSubdirectories = const Value.absent(),
+    bool? is_enabled,
+    Value<int?> last_scanned = const Value.absent(),
+    bool? scan_subdirectories,
+    int? total_size,
+    int? file_count,
+    DateTime? date_added,
+    Value<String?> excluded_subdirectories = const Value.absent(),
   }) => MusicDirectory(
     id: id ?? this.id,
     path: path ?? this.path,
-    isEnabled: isEnabled ?? this.isEnabled,
-    lastScanned: lastScanned.present ? lastScanned.value : this.lastScanned,
-    scanSubdirectories: scanSubdirectories ?? this.scanSubdirectories,
-    totalSize: totalSize ?? this.totalSize,
-    fileCount: fileCount ?? this.fileCount,
-    dateAdded: dateAdded ?? this.dateAdded,
-    excludedSubdirectories: excludedSubdirectories.present
-        ? excludedSubdirectories.value
-        : this.excludedSubdirectories,
+    is_enabled: is_enabled ?? this.is_enabled,
+    last_scanned: last_scanned.present ? last_scanned.value : this.last_scanned,
+    scan_subdirectories: scan_subdirectories ?? this.scan_subdirectories,
+    total_size: total_size ?? this.total_size,
+    file_count: file_count ?? this.file_count,
+    date_added: date_added ?? this.date_added,
+    excluded_subdirectories: excluded_subdirectories.present
+        ? excluded_subdirectories.value
+        : this.excluded_subdirectories,
   );
   MusicDirectory copyWithCompanion(MusicDirectoriesCompanion data) {
     return MusicDirectory(
       id: data.id.present ? data.id.value : this.id,
       path: data.path.present ? data.path.value : this.path,
-      isEnabled: data.isEnabled.present ? data.isEnabled.value : this.isEnabled,
-      lastScanned: data.lastScanned.present
-          ? data.lastScanned.value
-          : this.lastScanned,
-      scanSubdirectories: data.scanSubdirectories.present
-          ? data.scanSubdirectories.value
-          : this.scanSubdirectories,
-      totalSize: data.totalSize.present ? data.totalSize.value : this.totalSize,
-      fileCount: data.fileCount.present ? data.fileCount.value : this.fileCount,
-      dateAdded: data.dateAdded.present ? data.dateAdded.value : this.dateAdded,
-      excludedSubdirectories: data.excludedSubdirectories.present
-          ? data.excludedSubdirectories.value
-          : this.excludedSubdirectories,
+      is_enabled: data.is_enabled.present
+          ? data.is_enabled.value
+          : this.is_enabled,
+      last_scanned: data.last_scanned.present
+          ? data.last_scanned.value
+          : this.last_scanned,
+      scan_subdirectories: data.scan_subdirectories.present
+          ? data.scan_subdirectories.value
+          : this.scan_subdirectories,
+      total_size: data.total_size.present
+          ? data.total_size.value
+          : this.total_size,
+      file_count: data.file_count.present
+          ? data.file_count.value
+          : this.file_count,
+      date_added: data.date_added.present
+          ? data.date_added.value
+          : this.date_added,
+      excluded_subdirectories: data.excluded_subdirectories.present
+          ? data.excluded_subdirectories.value
+          : this.excluded_subdirectories,
     );
   }
 
@@ -403,13 +415,13 @@ class MusicDirectory extends DataClass implements Insertable<MusicDirectory> {
     return (StringBuffer('MusicDirectory(')
           ..write('id: $id, ')
           ..write('path: $path, ')
-          ..write('isEnabled: $isEnabled, ')
-          ..write('lastScanned: $lastScanned, ')
-          ..write('scanSubdirectories: $scanSubdirectories, ')
-          ..write('totalSize: $totalSize, ')
-          ..write('fileCount: $fileCount, ')
-          ..write('dateAdded: $dateAdded, ')
-          ..write('excludedSubdirectories: $excludedSubdirectories')
+          ..write('is_enabled: $is_enabled, ')
+          ..write('last_scanned: $last_scanned, ')
+          ..write('scan_subdirectories: $scan_subdirectories, ')
+          ..write('total_size: $total_size, ')
+          ..write('file_count: $file_count, ')
+          ..write('date_added: $date_added, ')
+          ..write('excluded_subdirectories: $excluded_subdirectories')
           ..write(')'))
         .toString();
   }
@@ -418,13 +430,13 @@ class MusicDirectory extends DataClass implements Insertable<MusicDirectory> {
   int get hashCode => Object.hash(
     id,
     path,
-    isEnabled,
-    lastScanned,
-    scanSubdirectories,
-    totalSize,
-    fileCount,
-    dateAdded,
-    excludedSubdirectories,
+    is_enabled,
+    last_scanned,
+    scan_subdirectories,
+    total_size,
+    file_count,
+    date_added,
+    excluded_subdirectories,
   );
   @override
   bool operator ==(Object other) =>
@@ -432,95 +444,96 @@ class MusicDirectory extends DataClass implements Insertable<MusicDirectory> {
       (other is MusicDirectory &&
           other.id == this.id &&
           other.path == this.path &&
-          other.isEnabled == this.isEnabled &&
-          other.lastScanned == this.lastScanned &&
-          other.scanSubdirectories == this.scanSubdirectories &&
-          other.totalSize == this.totalSize &&
-          other.fileCount == this.fileCount &&
-          other.dateAdded == this.dateAdded &&
-          other.excludedSubdirectories == this.excludedSubdirectories);
+          other.is_enabled == this.is_enabled &&
+          other.last_scanned == this.last_scanned &&
+          other.scan_subdirectories == this.scan_subdirectories &&
+          other.total_size == this.total_size &&
+          other.file_count == this.file_count &&
+          other.date_added == this.date_added &&
+          other.excluded_subdirectories == this.excluded_subdirectories);
 }
 
 class MusicDirectoriesCompanion extends UpdateCompanion<MusicDirectory> {
   final Value<int> id;
   final Value<String> path;
-  final Value<bool> isEnabled;
-  final Value<int?> lastScanned;
-  final Value<bool> scanSubdirectories;
-  final Value<int> totalSize;
-  final Value<int> fileCount;
-  final Value<DateTime> dateAdded;
-  final Value<String?> excludedSubdirectories;
+  final Value<bool> is_enabled;
+  final Value<int?> last_scanned;
+  final Value<bool> scan_subdirectories;
+  final Value<int> total_size;
+  final Value<int> file_count;
+  final Value<DateTime> date_added;
+  final Value<String?> excluded_subdirectories;
   const MusicDirectoriesCompanion({
     this.id = const Value.absent(),
     this.path = const Value.absent(),
-    this.isEnabled = const Value.absent(),
-    this.lastScanned = const Value.absent(),
-    this.scanSubdirectories = const Value.absent(),
-    this.totalSize = const Value.absent(),
-    this.fileCount = const Value.absent(),
-    this.dateAdded = const Value.absent(),
-    this.excludedSubdirectories = const Value.absent(),
+    this.is_enabled = const Value.absent(),
+    this.last_scanned = const Value.absent(),
+    this.scan_subdirectories = const Value.absent(),
+    this.total_size = const Value.absent(),
+    this.file_count = const Value.absent(),
+    this.date_added = const Value.absent(),
+    this.excluded_subdirectories = const Value.absent(),
   });
   MusicDirectoriesCompanion.insert({
     this.id = const Value.absent(),
     required String path,
-    this.isEnabled = const Value.absent(),
-    this.lastScanned = const Value.absent(),
-    this.scanSubdirectories = const Value.absent(),
-    this.totalSize = const Value.absent(),
-    this.fileCount = const Value.absent(),
-    required DateTime dateAdded,
-    this.excludedSubdirectories = const Value.absent(),
+    this.is_enabled = const Value.absent(),
+    this.last_scanned = const Value.absent(),
+    this.scan_subdirectories = const Value.absent(),
+    this.total_size = const Value.absent(),
+    this.file_count = const Value.absent(),
+    required DateTime date_added,
+    this.excluded_subdirectories = const Value.absent(),
   }) : path = Value(path),
-       dateAdded = Value(dateAdded);
+       date_added = Value(date_added);
   static Insertable<MusicDirectory> custom({
     Expression<int>? id,
     Expression<String>? path,
-    Expression<bool>? isEnabled,
-    Expression<int>? lastScanned,
-    Expression<bool>? scanSubdirectories,
-    Expression<int>? totalSize,
-    Expression<int>? fileCount,
-    Expression<DateTime>? dateAdded,
-    Expression<String>? excludedSubdirectories,
+    Expression<bool>? is_enabled,
+    Expression<int>? last_scanned,
+    Expression<bool>? scan_subdirectories,
+    Expression<int>? total_size,
+    Expression<int>? file_count,
+    Expression<DateTime>? date_added,
+    Expression<String>? excluded_subdirectories,
   }) {
     return RawValuesInsertable({
       if (id != null) 'id': id,
       if (path != null) 'path': path,
-      if (isEnabled != null) 'is_enabled': isEnabled,
-      if (lastScanned != null) 'last_scanned': lastScanned,
-      if (scanSubdirectories != null) 'scan_subdirectories': scanSubdirectories,
-      if (totalSize != null) 'total_size': totalSize,
-      if (fileCount != null) 'file_count': fileCount,
-      if (dateAdded != null) 'date_added': dateAdded,
-      if (excludedSubdirectories != null)
-        'excluded_subdirectories': excludedSubdirectories,
+      if (is_enabled != null) 'is_enabled': is_enabled,
+      if (last_scanned != null) 'last_scanned': last_scanned,
+      if (scan_subdirectories != null)
+        'scan_subdirectories': scan_subdirectories,
+      if (total_size != null) 'total_size': total_size,
+      if (file_count != null) 'file_count': file_count,
+      if (date_added != null) 'date_added': date_added,
+      if (excluded_subdirectories != null)
+        'excluded_subdirectories': excluded_subdirectories,
     });
   }
 
   MusicDirectoriesCompanion copyWith({
     Value<int>? id,
     Value<String>? path,
-    Value<bool>? isEnabled,
-    Value<int?>? lastScanned,
-    Value<bool>? scanSubdirectories,
-    Value<int>? totalSize,
-    Value<int>? fileCount,
-    Value<DateTime>? dateAdded,
-    Value<String?>? excludedSubdirectories,
+    Value<bool>? is_enabled,
+    Value<int?>? last_scanned,
+    Value<bool>? scan_subdirectories,
+    Value<int>? total_size,
+    Value<int>? file_count,
+    Value<DateTime>? date_added,
+    Value<String?>? excluded_subdirectories,
   }) {
     return MusicDirectoriesCompanion(
       id: id ?? this.id,
       path: path ?? this.path,
-      isEnabled: isEnabled ?? this.isEnabled,
-      lastScanned: lastScanned ?? this.lastScanned,
-      scanSubdirectories: scanSubdirectories ?? this.scanSubdirectories,
-      totalSize: totalSize ?? this.totalSize,
-      fileCount: fileCount ?? this.fileCount,
-      dateAdded: dateAdded ?? this.dateAdded,
-      excludedSubdirectories:
-          excludedSubdirectories ?? this.excludedSubdirectories,
+      is_enabled: is_enabled ?? this.is_enabled,
+      last_scanned: last_scanned ?? this.last_scanned,
+      scan_subdirectories: scan_subdirectories ?? this.scan_subdirectories,
+      total_size: total_size ?? this.total_size,
+      file_count: file_count ?? this.file_count,
+      date_added: date_added ?? this.date_added,
+      excluded_subdirectories:
+          excluded_subdirectories ?? this.excluded_subdirectories,
     );
   }
 
@@ -533,27 +546,27 @@ class MusicDirectoriesCompanion extends UpdateCompanion<MusicDirectory> {
     if (path.present) {
       map['path'] = Variable<String>(path.value);
     }
-    if (isEnabled.present) {
-      map['is_enabled'] = Variable<bool>(isEnabled.value);
+    if (is_enabled.present) {
+      map['is_enabled'] = Variable<bool>(is_enabled.value);
     }
-    if (lastScanned.present) {
-      map['last_scanned'] = Variable<int>(lastScanned.value);
+    if (last_scanned.present) {
+      map['last_scanned'] = Variable<int>(last_scanned.value);
     }
-    if (scanSubdirectories.present) {
-      map['scan_subdirectories'] = Variable<bool>(scanSubdirectories.value);
+    if (scan_subdirectories.present) {
+      map['scan_subdirectories'] = Variable<bool>(scan_subdirectories.value);
     }
-    if (totalSize.present) {
-      map['total_size'] = Variable<int>(totalSize.value);
+    if (total_size.present) {
+      map['total_size'] = Variable<int>(total_size.value);
     }
-    if (fileCount.present) {
-      map['file_count'] = Variable<int>(fileCount.value);
+    if (file_count.present) {
+      map['file_count'] = Variable<int>(file_count.value);
     }
-    if (dateAdded.present) {
-      map['date_added'] = Variable<DateTime>(dateAdded.value);
+    if (date_added.present) {
+      map['date_added'] = Variable<DateTime>(date_added.value);
     }
-    if (excludedSubdirectories.present) {
+    if (excluded_subdirectories.present) {
       map['excluded_subdirectories'] = Variable<String>(
-        excludedSubdirectories.value,
+        excluded_subdirectories.value,
       );
     }
     return map;
@@ -564,13 +577,13 @@ class MusicDirectoriesCompanion extends UpdateCompanion<MusicDirectory> {
     return (StringBuffer('MusicDirectoriesCompanion(')
           ..write('id: $id, ')
           ..write('path: $path, ')
-          ..write('isEnabled: $isEnabled, ')
-          ..write('lastScanned: $lastScanned, ')
-          ..write('scanSubdirectories: $scanSubdirectories, ')
-          ..write('totalSize: $totalSize, ')
-          ..write('fileCount: $fileCount, ')
-          ..write('dateAdded: $dateAdded, ')
-          ..write('excludedSubdirectories: $excludedSubdirectories')
+          ..write('is_enabled: $is_enabled, ')
+          ..write('last_scanned: $last_scanned, ')
+          ..write('scan_subdirectories: $scan_subdirectories, ')
+          ..write('total_size: $total_size, ')
+          ..write('file_count: $file_count, ')
+          ..write('date_added: $date_added, ')
+          ..write('excluded_subdirectories: $excluded_subdirectories')
           ..write(')'))
         .toString();
   }
@@ -2784,19 +2797,6 @@ class $PlaylistTracksTable extends PlaylistTracks
   final GeneratedDatabase attachedDatabase;
   final String? _alias;
   $PlaylistTracksTable(this.attachedDatabase, [this._alias]);
-  static const VerificationMeta _idMeta = const VerificationMeta('id');
-  @override
-  late final GeneratedColumn<int> id = GeneratedColumn<int>(
-    'id',
-    aliasedName,
-    false,
-    hasAutoIncrement: true,
-    type: DriftSqlType.int,
-    requiredDuringInsert: false,
-    defaultConstraints: GeneratedColumn.constraintIsAlways(
-      'PRIMARY KEY AUTOINCREMENT',
-    ),
-  );
   static const VerificationMeta _playlistIdMeta = const VerificationMeta(
     'playlistId',
   );
@@ -2834,7 +2834,8 @@ class $PlaylistTracksTable extends PlaylistTracks
     aliasedName,
     false,
     type: DriftSqlType.int,
-    requiredDuringInsert: true,
+    requiredDuringInsert: false,
+    defaultValue: const Constant(0),
   );
   static const VerificationMeta _addedAtMeta = const VerificationMeta(
     'addedAt',
@@ -2850,7 +2851,6 @@ class $PlaylistTracksTable extends PlaylistTracks
   );
   @override
   List<GeneratedColumn> get $columns => [
-    id,
     playlistId,
     trackId,
     position,
@@ -2868,9 +2868,6 @@ class $PlaylistTracksTable extends PlaylistTracks
   }) {
     final context = VerificationContext();
     final data = instance.toColumns(true);
-    if (data.containsKey('id')) {
-      context.handle(_idMeta, id.isAcceptableOrUnknown(data['id']!, _idMeta));
-    }
     if (data.containsKey('playlist_id')) {
       context.handle(
         _playlistIdMeta,
@@ -2892,8 +2889,6 @@ class $PlaylistTracksTable extends PlaylistTracks
         _positionMeta,
         position.isAcceptableOrUnknown(data['position']!, _positionMeta),
       );
-    } else if (isInserting) {
-      context.missing(_positionMeta);
     }
     if (data.containsKey('added_at')) {
       context.handle(
@@ -2905,19 +2900,11 @@ class $PlaylistTracksTable extends PlaylistTracks
   }
 
   @override
-  Set<GeneratedColumn> get $primaryKey => {id};
-  @override
-  List<Set<GeneratedColumn>> get uniqueKeys => [
-    {playlistId, trackId},
-  ];
+  Set<GeneratedColumn> get $primaryKey => {playlistId, trackId};
   @override
   PlaylistTrack map(Map<String, dynamic> data, {String? tablePrefix}) {
     final effectivePrefix = tablePrefix != null ? '$tablePrefix.' : '';
     return PlaylistTrack(
-      id: attachedDatabase.typeMapping.read(
-        DriftSqlType.int,
-        data['${effectivePrefix}id'],
-      )!,
       playlistId: attachedDatabase.typeMapping.read(
         DriftSqlType.int,
         data['${effectivePrefix}playlist_id'],
@@ -2944,13 +2931,11 @@ class $PlaylistTracksTable extends PlaylistTracks
 }
 
 class PlaylistTrack extends DataClass implements Insertable<PlaylistTrack> {
-  final int id;
   final int playlistId;
   final int trackId;
   final int position;
   final DateTime addedAt;
   const PlaylistTrack({
-    required this.id,
     required this.playlistId,
     required this.trackId,
     required this.position,
@@ -2959,7 +2944,6 @@ class PlaylistTrack extends DataClass implements Insertable<PlaylistTrack> {
   @override
   Map<String, Expression> toColumns(bool nullToAbsent) {
     final map = <String, Expression>{};
-    map['id'] = Variable<int>(id);
     map['playlist_id'] = Variable<int>(playlistId);
     map['track_id'] = Variable<int>(trackId);
     map['position'] = Variable<int>(position);
@@ -2969,7 +2953,6 @@ class PlaylistTrack extends DataClass implements Insertable<PlaylistTrack> {
 
   PlaylistTracksCompanion toCompanion(bool nullToAbsent) {
     return PlaylistTracksCompanion(
-      id: Value(id),
       playlistId: Value(playlistId),
       trackId: Value(trackId),
       position: Value(position),
@@ -2983,7 +2966,6 @@ class PlaylistTrack extends DataClass implements Insertable<PlaylistTrack> {
   }) {
     serializer ??= driftRuntimeOptions.defaultSerializer;
     return PlaylistTrack(
-      id: serializer.fromJson<int>(json['id']),
       playlistId: serializer.fromJson<int>(json['playlistId']),
       trackId: serializer.fromJson<int>(json['trackId']),
       position: serializer.fromJson<int>(json['position']),
@@ -2994,7 +2976,6 @@ class PlaylistTrack extends DataClass implements Insertable<PlaylistTrack> {
   Map<String, dynamic> toJson({ValueSerializer? serializer}) {
     serializer ??= driftRuntimeOptions.defaultSerializer;
     return <String, dynamic>{
-      'id': serializer.toJson<int>(id),
       'playlistId': serializer.toJson<int>(playlistId),
       'trackId': serializer.toJson<int>(trackId),
       'position': serializer.toJson<int>(position),
@@ -3003,13 +2984,11 @@ class PlaylistTrack extends DataClass implements Insertable<PlaylistTrack> {
   }
 
   PlaylistTrack copyWith({
-    int? id,
     int? playlistId,
     int? trackId,
     int? position,
     DateTime? addedAt,
   }) => PlaylistTrack(
-    id: id ?? this.id,
     playlistId: playlistId ?? this.playlistId,
     trackId: trackId ?? this.trackId,
     position: position ?? this.position,
@@ -3017,7 +2996,6 @@ class PlaylistTrack extends DataClass implements Insertable<PlaylistTrack> {
   );
   PlaylistTrack copyWithCompanion(PlaylistTracksCompanion data) {
     return PlaylistTrack(
-      id: data.id.present ? data.id.value : this.id,
       playlistId: data.playlistId.present
           ? data.playlistId.value
           : this.playlistId,
@@ -3030,7 +3008,6 @@ class PlaylistTrack extends DataClass implements Insertable<PlaylistTrack> {
   @override
   String toString() {
     return (StringBuffer('PlaylistTrack(')
-          ..write('id: $id, ')
           ..write('playlistId: $playlistId, ')
           ..write('trackId: $trackId, ')
           ..write('position: $position, ')
@@ -3040,12 +3017,11 @@ class PlaylistTrack extends DataClass implements Insertable<PlaylistTrack> {
   }
 
   @override
-  int get hashCode => Object.hash(id, playlistId, trackId, position, addedAt);
+  int get hashCode => Object.hash(playlistId, trackId, position, addedAt);
   @override
   bool operator ==(Object other) =>
       identical(this, other) ||
       (other is PlaylistTrack &&
-          other.id == this.id &&
           other.playlistId == this.playlistId &&
           other.trackId == this.trackId &&
           other.position == this.position &&
@@ -3053,65 +3029,61 @@ class PlaylistTrack extends DataClass implements Insertable<PlaylistTrack> {
 }
 
 class PlaylistTracksCompanion extends UpdateCompanion<PlaylistTrack> {
-  final Value<int> id;
   final Value<int> playlistId;
   final Value<int> trackId;
   final Value<int> position;
   final Value<DateTime> addedAt;
+  final Value<int> rowid;
   const PlaylistTracksCompanion({
-    this.id = const Value.absent(),
     this.playlistId = const Value.absent(),
     this.trackId = const Value.absent(),
     this.position = const Value.absent(),
     this.addedAt = const Value.absent(),
+    this.rowid = const Value.absent(),
   });
   PlaylistTracksCompanion.insert({
-    this.id = const Value.absent(),
     required int playlistId,
     required int trackId,
-    required int position,
+    this.position = const Value.absent(),
     this.addedAt = const Value.absent(),
+    this.rowid = const Value.absent(),
   }) : playlistId = Value(playlistId),
-       trackId = Value(trackId),
-       position = Value(position);
+       trackId = Value(trackId);
   static Insertable<PlaylistTrack> custom({
-    Expression<int>? id,
     Expression<int>? playlistId,
     Expression<int>? trackId,
     Expression<int>? position,
     Expression<DateTime>? addedAt,
+    Expression<int>? rowid,
   }) {
     return RawValuesInsertable({
-      if (id != null) 'id': id,
       if (playlistId != null) 'playlist_id': playlistId,
       if (trackId != null) 'track_id': trackId,
       if (position != null) 'position': position,
       if (addedAt != null) 'added_at': addedAt,
+      if (rowid != null) 'rowid': rowid,
     });
   }
 
   PlaylistTracksCompanion copyWith({
-    Value<int>? id,
     Value<int>? playlistId,
     Value<int>? trackId,
     Value<int>? position,
     Value<DateTime>? addedAt,
+    Value<int>? rowid,
   }) {
     return PlaylistTracksCompanion(
-      id: id ?? this.id,
       playlistId: playlistId ?? this.playlistId,
       trackId: trackId ?? this.trackId,
       position: position ?? this.position,
       addedAt: addedAt ?? this.addedAt,
+      rowid: rowid ?? this.rowid,
     );
   }
 
   @override
   Map<String, Expression> toColumns(bool nullToAbsent) {
     final map = <String, Expression>{};
-    if (id.present) {
-      map['id'] = Variable<int>(id.value);
-    }
     if (playlistId.present) {
       map['playlist_id'] = Variable<int>(playlistId.value);
     }
@@ -3124,17 +3096,20 @@ class PlaylistTracksCompanion extends UpdateCompanion<PlaylistTrack> {
     if (addedAt.present) {
       map['added_at'] = Variable<DateTime>(addedAt.value);
     }
+    if (rowid.present) {
+      map['rowid'] = Variable<int>(rowid.value);
+    }
     return map;
   }
 
   @override
   String toString() {
     return (StringBuffer('PlaylistTracksCompanion(')
-          ..write('id: $id, ')
           ..write('playlistId: $playlistId, ')
           ..write('trackId: $trackId, ')
           ..write('position: $position, ')
-          ..write('addedAt: $addedAt')
+          ..write('addedAt: $addedAt, ')
+          ..write('rowid: $rowid')
           ..write(')'))
         .toString();
   }
@@ -3173,25 +3148,25 @@ typedef $$MusicDirectoriesTableCreateCompanionBuilder =
     MusicDirectoriesCompanion Function({
       Value<int> id,
       required String path,
-      Value<bool> isEnabled,
-      Value<int?> lastScanned,
-      Value<bool> scanSubdirectories,
-      Value<int> totalSize,
-      Value<int> fileCount,
-      required DateTime dateAdded,
-      Value<String?> excludedSubdirectories,
+      Value<bool> is_enabled,
+      Value<int?> last_scanned,
+      Value<bool> scan_subdirectories,
+      Value<int> total_size,
+      Value<int> file_count,
+      required DateTime date_added,
+      Value<String?> excluded_subdirectories,
     });
 typedef $$MusicDirectoriesTableUpdateCompanionBuilder =
     MusicDirectoriesCompanion Function({
       Value<int> id,
       Value<String> path,
-      Value<bool> isEnabled,
-      Value<int?> lastScanned,
-      Value<bool> scanSubdirectories,
-      Value<int> totalSize,
-      Value<int> fileCount,
-      Value<DateTime> dateAdded,
-      Value<String?> excludedSubdirectories,
+      Value<bool> is_enabled,
+      Value<int?> last_scanned,
+      Value<bool> scan_subdirectories,
+      Value<int> total_size,
+      Value<int> file_count,
+      Value<DateTime> date_added,
+      Value<String?> excluded_subdirectories,
     });
 
 class $$MusicDirectoriesTableFilterComposer
@@ -3213,38 +3188,38 @@ class $$MusicDirectoriesTableFilterComposer
     builder: (column) => ColumnFilters(column),
   );
 
-  ColumnFilters<bool> get isEnabled => $composableBuilder(
-    column: $table.isEnabled,
+  ColumnFilters<bool> get is_enabled => $composableBuilder(
+    column: $table.is_enabled,
     builder: (column) => ColumnFilters(column),
   );
 
-  ColumnFilters<int> get lastScanned => $composableBuilder(
-    column: $table.lastScanned,
+  ColumnFilters<int> get last_scanned => $composableBuilder(
+    column: $table.last_scanned,
     builder: (column) => ColumnFilters(column),
   );
 
-  ColumnFilters<bool> get scanSubdirectories => $composableBuilder(
-    column: $table.scanSubdirectories,
+  ColumnFilters<bool> get scan_subdirectories => $composableBuilder(
+    column: $table.scan_subdirectories,
     builder: (column) => ColumnFilters(column),
   );
 
-  ColumnFilters<int> get totalSize => $composableBuilder(
-    column: $table.totalSize,
+  ColumnFilters<int> get total_size => $composableBuilder(
+    column: $table.total_size,
     builder: (column) => ColumnFilters(column),
   );
 
-  ColumnFilters<int> get fileCount => $composableBuilder(
-    column: $table.fileCount,
+  ColumnFilters<int> get file_count => $composableBuilder(
+    column: $table.file_count,
     builder: (column) => ColumnFilters(column),
   );
 
-  ColumnFilters<DateTime> get dateAdded => $composableBuilder(
-    column: $table.dateAdded,
+  ColumnFilters<DateTime> get date_added => $composableBuilder(
+    column: $table.date_added,
     builder: (column) => ColumnFilters(column),
   );
 
-  ColumnFilters<String> get excludedSubdirectories => $composableBuilder(
-    column: $table.excludedSubdirectories,
+  ColumnFilters<String> get excluded_subdirectories => $composableBuilder(
+    column: $table.excluded_subdirectories,
     builder: (column) => ColumnFilters(column),
   );
 }
@@ -3268,38 +3243,38 @@ class $$MusicDirectoriesTableOrderingComposer
     builder: (column) => ColumnOrderings(column),
   );
 
-  ColumnOrderings<bool> get isEnabled => $composableBuilder(
-    column: $table.isEnabled,
+  ColumnOrderings<bool> get is_enabled => $composableBuilder(
+    column: $table.is_enabled,
     builder: (column) => ColumnOrderings(column),
   );
 
-  ColumnOrderings<int> get lastScanned => $composableBuilder(
-    column: $table.lastScanned,
+  ColumnOrderings<int> get last_scanned => $composableBuilder(
+    column: $table.last_scanned,
     builder: (column) => ColumnOrderings(column),
   );
 
-  ColumnOrderings<bool> get scanSubdirectories => $composableBuilder(
-    column: $table.scanSubdirectories,
+  ColumnOrderings<bool> get scan_subdirectories => $composableBuilder(
+    column: $table.scan_subdirectories,
     builder: (column) => ColumnOrderings(column),
   );
 
-  ColumnOrderings<int> get totalSize => $composableBuilder(
-    column: $table.totalSize,
+  ColumnOrderings<int> get total_size => $composableBuilder(
+    column: $table.total_size,
     builder: (column) => ColumnOrderings(column),
   );
 
-  ColumnOrderings<int> get fileCount => $composableBuilder(
-    column: $table.fileCount,
+  ColumnOrderings<int> get file_count => $composableBuilder(
+    column: $table.file_count,
     builder: (column) => ColumnOrderings(column),
   );
 
-  ColumnOrderings<DateTime> get dateAdded => $composableBuilder(
-    column: $table.dateAdded,
+  ColumnOrderings<DateTime> get date_added => $composableBuilder(
+    column: $table.date_added,
     builder: (column) => ColumnOrderings(column),
   );
 
-  ColumnOrderings<String> get excludedSubdirectories => $composableBuilder(
-    column: $table.excludedSubdirectories,
+  ColumnOrderings<String> get excluded_subdirectories => $composableBuilder(
+    column: $table.excluded_subdirectories,
     builder: (column) => ColumnOrderings(column),
   );
 }
@@ -3319,30 +3294,38 @@ class $$MusicDirectoriesTableAnnotationComposer
   GeneratedColumn<String> get path =>
       $composableBuilder(column: $table.path, builder: (column) => column);
 
-  GeneratedColumn<bool> get isEnabled =>
-      $composableBuilder(column: $table.isEnabled, builder: (column) => column);
-
-  GeneratedColumn<int> get lastScanned => $composableBuilder(
-    column: $table.lastScanned,
+  GeneratedColumn<bool> get is_enabled => $composableBuilder(
+    column: $table.is_enabled,
     builder: (column) => column,
   );
 
-  GeneratedColumn<bool> get scanSubdirectories => $composableBuilder(
-    column: $table.scanSubdirectories,
+  GeneratedColumn<int> get last_scanned => $composableBuilder(
+    column: $table.last_scanned,
     builder: (column) => column,
   );
 
-  GeneratedColumn<int> get totalSize =>
-      $composableBuilder(column: $table.totalSize, builder: (column) => column);
+  GeneratedColumn<bool> get scan_subdirectories => $composableBuilder(
+    column: $table.scan_subdirectories,
+    builder: (column) => column,
+  );
 
-  GeneratedColumn<int> get fileCount =>
-      $composableBuilder(column: $table.fileCount, builder: (column) => column);
+  GeneratedColumn<int> get total_size => $composableBuilder(
+    column: $table.total_size,
+    builder: (column) => column,
+  );
 
-  GeneratedColumn<DateTime> get dateAdded =>
-      $composableBuilder(column: $table.dateAdded, builder: (column) => column);
+  GeneratedColumn<int> get file_count => $composableBuilder(
+    column: $table.file_count,
+    builder: (column) => column,
+  );
 
-  GeneratedColumn<String> get excludedSubdirectories => $composableBuilder(
-    column: $table.excludedSubdirectories,
+  GeneratedColumn<DateTime> get date_added => $composableBuilder(
+    column: $table.date_added,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<String> get excluded_subdirectories => $composableBuilder(
+    column: $table.excluded_subdirectories,
     builder: (column) => column,
   );
 }
@@ -3386,45 +3369,45 @@ class $$MusicDirectoriesTableTableManager
               ({
                 Value<int> id = const Value.absent(),
                 Value<String> path = const Value.absent(),
-                Value<bool> isEnabled = const Value.absent(),
-                Value<int?> lastScanned = const Value.absent(),
-                Value<bool> scanSubdirectories = const Value.absent(),
-                Value<int> totalSize = const Value.absent(),
-                Value<int> fileCount = const Value.absent(),
-                Value<DateTime> dateAdded = const Value.absent(),
-                Value<String?> excludedSubdirectories = const Value.absent(),
+                Value<bool> is_enabled = const Value.absent(),
+                Value<int?> last_scanned = const Value.absent(),
+                Value<bool> scan_subdirectories = const Value.absent(),
+                Value<int> total_size = const Value.absent(),
+                Value<int> file_count = const Value.absent(),
+                Value<DateTime> date_added = const Value.absent(),
+                Value<String?> excluded_subdirectories = const Value.absent(),
               }) => MusicDirectoriesCompanion(
                 id: id,
                 path: path,
-                isEnabled: isEnabled,
-                lastScanned: lastScanned,
-                scanSubdirectories: scanSubdirectories,
-                totalSize: totalSize,
-                fileCount: fileCount,
-                dateAdded: dateAdded,
-                excludedSubdirectories: excludedSubdirectories,
+                is_enabled: is_enabled,
+                last_scanned: last_scanned,
+                scan_subdirectories: scan_subdirectories,
+                total_size: total_size,
+                file_count: file_count,
+                date_added: date_added,
+                excluded_subdirectories: excluded_subdirectories,
               ),
           createCompanionCallback:
               ({
                 Value<int> id = const Value.absent(),
                 required String path,
-                Value<bool> isEnabled = const Value.absent(),
-                Value<int?> lastScanned = const Value.absent(),
-                Value<bool> scanSubdirectories = const Value.absent(),
-                Value<int> totalSize = const Value.absent(),
-                Value<int> fileCount = const Value.absent(),
-                required DateTime dateAdded,
-                Value<String?> excludedSubdirectories = const Value.absent(),
+                Value<bool> is_enabled = const Value.absent(),
+                Value<int?> last_scanned = const Value.absent(),
+                Value<bool> scan_subdirectories = const Value.absent(),
+                Value<int> total_size = const Value.absent(),
+                Value<int> file_count = const Value.absent(),
+                required DateTime date_added,
+                Value<String?> excluded_subdirectories = const Value.absent(),
               }) => MusicDirectoriesCompanion.insert(
                 id: id,
                 path: path,
-                isEnabled: isEnabled,
-                lastScanned: lastScanned,
-                scanSubdirectories: scanSubdirectories,
-                totalSize: totalSize,
-                fileCount: fileCount,
-                dateAdded: dateAdded,
-                excludedSubdirectories: excludedSubdirectories,
+                is_enabled: is_enabled,
+                last_scanned: last_scanned,
+                scan_subdirectories: scan_subdirectories,
+                total_size: total_size,
+                file_count: file_count,
+                date_added: date_added,
+                excluded_subdirectories: excluded_subdirectories,
               ),
           withReferenceMapper: (p0) => p0
               .map((e) => (e.readTable(table), BaseReferences(db, table, e)))
@@ -6370,19 +6353,19 @@ typedef $$PlaylistTableProcessedTableManager =
     >;
 typedef $$PlaylistTracksTableCreateCompanionBuilder =
     PlaylistTracksCompanion Function({
-      Value<int> id,
       required int playlistId,
       required int trackId,
-      required int position,
+      Value<int> position,
       Value<DateTime> addedAt,
+      Value<int> rowid,
     });
 typedef $$PlaylistTracksTableUpdateCompanionBuilder =
     PlaylistTracksCompanion Function({
-      Value<int> id,
       Value<int> playlistId,
       Value<int> trackId,
       Value<int> position,
       Value<DateTime> addedAt,
+      Value<int> rowid,
     });
 
 final class $$PlaylistTracksTableReferences
@@ -6440,11 +6423,6 @@ class $$PlaylistTracksTableFilterComposer
     super.$addJoinBuilderToRootComposer,
     super.$removeJoinBuilderFromRootComposer,
   });
-  ColumnFilters<int> get id => $composableBuilder(
-    column: $table.id,
-    builder: (column) => ColumnFilters(column),
-  );
-
   ColumnFilters<int> get position => $composableBuilder(
     column: $table.position,
     builder: (column) => ColumnFilters(column),
@@ -6511,11 +6489,6 @@ class $$PlaylistTracksTableOrderingComposer
     super.$addJoinBuilderToRootComposer,
     super.$removeJoinBuilderFromRootComposer,
   });
-  ColumnOrderings<int> get id => $composableBuilder(
-    column: $table.id,
-    builder: (column) => ColumnOrderings(column),
-  );
-
   ColumnOrderings<int> get position => $composableBuilder(
     column: $table.position,
     builder: (column) => ColumnOrderings(column),
@@ -6582,9 +6555,6 @@ class $$PlaylistTracksTableAnnotationComposer
     super.$addJoinBuilderToRootComposer,
     super.$removeJoinBuilderFromRootComposer,
   });
-  GeneratedColumn<int> get id =>
-      $composableBuilder(column: $table.id, builder: (column) => column);
-
   GeneratedColumn<int> get position =>
       $composableBuilder(column: $table.position, builder: (column) => column);
 
@@ -6668,31 +6638,31 @@ class $$PlaylistTracksTableTableManager
               $$PlaylistTracksTableAnnotationComposer($db: db, $table: table),
           updateCompanionCallback:
               ({
-                Value<int> id = const Value.absent(),
                 Value<int> playlistId = const Value.absent(),
                 Value<int> trackId = const Value.absent(),
                 Value<int> position = const Value.absent(),
                 Value<DateTime> addedAt = const Value.absent(),
+                Value<int> rowid = const Value.absent(),
               }) => PlaylistTracksCompanion(
-                id: id,
                 playlistId: playlistId,
                 trackId: trackId,
                 position: position,
                 addedAt: addedAt,
+                rowid: rowid,
               ),
           createCompanionCallback:
               ({
-                Value<int> id = const Value.absent(),
                 required int playlistId,
                 required int trackId,
-                required int position,
+                Value<int> position = const Value.absent(),
                 Value<DateTime> addedAt = const Value.absent(),
+                Value<int> rowid = const Value.absent(),
               }) => PlaylistTracksCompanion.insert(
-                id: id,
                 playlistId: playlistId,
                 trackId: trackId,
                 position: position,
                 addedAt: addedAt,
+                rowid: rowid,
               ),
           withReferenceMapper: (p0) => p0
               .map(

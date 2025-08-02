@@ -4,6 +4,7 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_application_1/main.dart';
 import 'package:flutter_application_1/theme.dart';
+import 'package:flutter_application_1/widgets/home_scan_banner.dart';
 import 'package:flutter_application_1/widgets/playlists.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
@@ -30,22 +31,129 @@ class SongListView extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final tracksAsync = ref.watch(tracksProvider);
 
-    return Padding(
-      padding: AppTheme.paddingSm,
-      child: tracksAsync.when(
-        data: (tracks) => ListView.separated(
-          itemCount: tracks.length,
-          itemBuilder: (context, index) => SongListViewItem(
-            track: tracks[index],
-            tracks: tracks,
-            index: index,
+    return Column(
+      children: [
+        HomeScanBanner(),
+        // Song count header with improved spacing
+        Container(
+          width: double.infinity,
+          margin: const EdgeInsets.only(top: 8, bottom: 4),
+          padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
+          decoration: BoxDecoration(
+            color: AppTheme.surface.withOpacity(0.3),
+            borderRadius: const BorderRadius.only(
+              bottomLeft: Radius.circular(12),
+              bottomRight: Radius.circular(12),
+            ),
           ),
-          separatorBuilder: (context, index) =>
-              const Divider(height: 10, color: Colors.transparent),
+          child: tracksAsync.when(
+            data: (tracks) => Row(
+              children: [
+                Icon(
+                  Icons.library_music,
+                  size: 20,
+                  color: AppTheme.primary.withOpacity(0.8),
+                ),
+                const SizedBox(width: 8),
+                Text(
+                  '${tracks.length} song${tracks.length != 1 ? 's' : ''} in library',
+                  style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                    color: AppTheme.onBackground.withOpacity(0.8),
+                    fontWeight: FontWeight.w500,
+                  ),
+                ),
+              ],
+            ),
+            loading: () => Row(
+              children: [
+                SizedBox(
+                  width: 16,
+                  height: 16,
+                  child: CircularProgressIndicator(
+                    strokeWidth: 2,
+                    valueColor: AlwaysStoppedAnimation<Color>(
+                      AppTheme.primary.withOpacity(0.6),
+                    ),
+                  ),
+                ),
+                const SizedBox(width: 8),
+                Text(
+                  'Loading songs...',
+                  style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                    color: AppTheme.onBackground.withOpacity(0.6),
+                  ),
+                ),
+              ],
+            ),
+            error: (e, _) => Row(
+              children: [
+                Icon(
+                  Icons.error_outline,
+                  size: 20,
+                  color: AppTheme.error.withOpacity(0.8),
+                ),
+                const SizedBox(width: 8),
+                Text(
+                  'Error loading songs',
+                  style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                    color: AppTheme.error.withOpacity(0.8),
+                  ),
+                ),
+              ],
+            ),
+          ),
         ),
-        loading: () => const Center(child: CircularProgressIndicator()),
-        error: (e, _) => Center(child: Text('Error: $e')),
-      ),
+        const SizedBox(height: 8),
+        Expanded(
+          child: Padding(
+            padding: AppTheme.paddingSm,
+            child: tracksAsync.when(
+              data: (tracks) => tracks.isEmpty
+                  ? Center(
+                      child: Column(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          Icon(
+                            Icons.library_music_outlined,
+                            size: 64,
+                            color: AppTheme.onBackground.withOpacity(0.3),
+                          ),
+                          const SizedBox(height: 16),
+                          Text(
+                            'No songs found',
+                            style: Theme.of(context).textTheme.titleLarge
+                                ?.copyWith(
+                                  color: AppTheme.onBackground.withOpacity(0.6),
+                                ),
+                          ),
+                          const SizedBox(height: 8),
+                          Text(
+                            'Add music folders in Settings to get started',
+                            style: Theme.of(context).textTheme.bodyMedium
+                                ?.copyWith(
+                                  color: AppTheme.onBackground.withOpacity(0.5),
+                                ),
+                            textAlign: TextAlign.center,
+                          ),
+                        ],
+                      ),
+                    )
+                  : ListView.separated(
+                      itemCount: tracks.length,
+                      itemBuilder: (context, index) => SongListViewItem(
+                        track: tracks[index],
+                        tracks: tracks,
+                        index: index,
+                      ),
+                      separatorBuilder: (context, index) =>
+                          const Divider(height: 10, color: Colors.transparent),
+                    ),
+              loading: () => const Center(child: CircularProgressIndicator()),
+              error: (e, _) => Center(child: Text('Error: $e')),
+            ),
+          ),
+        ),
+      ],
     );
   }
 }

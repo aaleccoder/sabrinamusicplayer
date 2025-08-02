@@ -528,7 +528,7 @@ class AppDatabase extends _$AppDatabase {
     final playlistTrack = PlaylistTracksCompanion.insert(
       playlistId: playlistId,
       trackId: trackId,
-      position: 0,
+      position: const Value.absent(), // Position can be set later
     );
 
     await into(playlistTracks).insert(
@@ -545,7 +545,7 @@ class AppDatabase extends _$AppDatabase {
           PlaylistTracksCompanion.insert(
             playlistId: playlistId,
             trackId: trackId,
-            position: 0,
+            position: const Value.absent(),
           ),
           mode: InsertMode.insertOrIgnore, // Prevent duplicates
         );

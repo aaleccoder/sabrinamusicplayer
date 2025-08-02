@@ -34,36 +34,58 @@ class MainActivity: FlutterActivity() {
     }
 
     private fun getMetadata(filePath: String): Map<String, String?> {
-        val retriever = MediaMetadataRetriever()
-        val uri = Uri.parse(filePath)
-        retriever.setDataSource(this, uri)
-        val metadata = mutableMapOf<String, String?>()
+        var retriever: MediaMetadataRetriever? = null
+        try {
+            retriever = MediaMetadataRetriever()
+            
+            // Use file path directly instead of URI for better performance
+            retriever.setDataSource(filePath)
+            
+            val metadata = mutableMapOf<String, String?>()
 
-        val keyMap = mapOf(
-            "album" to MediaMetadataRetriever.METADATA_KEY_ALBUM,
-            "artist" to MediaMetadataRetriever.METADATA_KEY_ARTIST,
-            "album_artist" to MediaMetadataRetriever.METADATA_KEY_ALBUMARTIST,
-            "author" to MediaMetadataRetriever.METADATA_KEY_AUTHOR,
-            "composer" to MediaMetadataRetriever.METADATA_KEY_COMPOSER,
-            "date" to MediaMetadataRetriever.METADATA_KEY_DATE,
-            "genre" to MediaMetadataRetriever.METADATA_KEY_GENRE,
-            "title" to MediaMetadataRetriever.METADATA_KEY_TITLE,
-            "year" to MediaMetadataRetriever.METADATA_KEY_YEAR,
-            "duration" to MediaMetadataRetriever.METADATA_KEY_DURATION,
-            "track_number" to MediaMetadataRetriever.METADATA_KEY_CD_TRACK_NUMBER,
-            "bitrate" to MediaMetadataRetriever.METADATA_KEY_BITRATE
-        )
+            // Optimized key mapping - only extract essential metadata first
+            val essentialKeyMap = mapOf(
+                "title" to MediaMetadataRetriever.METADATA_KEY_TITLE,
+                "artist" to MediaMetadataRetriever.METADATA_KEY_ARTIST,
+                "album" to MediaMetadataRetriever.METADATA_KEY_ALBUM,
+                "genre" to MediaMetadataRetriever.METADATA_KEY_GENRE,
+                "year" to MediaMetadataRetriever.METADATA_KEY_YEAR,
+                "track_number" to MediaMetadataRetriever.METADATA_KEY_CD_TRACK_NUMBER,
+                "duration" to MediaMetadataRetriever.METADATA_KEY_DURATION
+            )
 
-        for ((key, value) in keyMap) {
-            metadata[key] = retriever.extractMetadata(value)
+            // Extract essential metadata
+            for ((key, value) in essentialKeyMap) {
+                metadata[key] = retriever.extractMetadata(value)
+            }
+
+            // Extract album art with optimizations
+            val art = retriever.embeddedPicture
+            if (art != null && art.isNotEmpty()) {
+                try {
+                    // Only process reasonable sized album art (< 2MB)
+                    if (art.size <= 2_000_000) {
+                        metadata["album_art"] = Base64.encodeToString(art, Base64.NO_WRAP)
+                    } else {
+                        // Skip oversized album art to avoid performance issues
+                        android.util.Log.w("MetadataService", "Skipping oversized album art (${art.size} bytes) for: $filePath")
+                    }
+                } catch (e: Exception) {
+                    android.util.Log.e("MetadataService", "Error encoding album art for: $filePath", e)
+                }
+            }
+
+            return metadata
+            
+        } catch (e: Exception) {
+            android.util.Log.e("MetadataService", "Error extracting metadata from: $filePath", e)
+            return emptyMap()
+        } finally {
+            try {
+                retriever?.release()
+            } catch (e: Exception) {
+                android.util.Log.e("MetadataService", "Error releasing metadata retriever", e)
+            }
         }
-
-        val art = retriever.embeddedPicture
-        if (art != null) {
-            metadata["album_art"] = Base64.encodeToString(art, Base64.NO_WRAP)
-        }
-
-        retriever.release()
-        return metadata
     }
 }
