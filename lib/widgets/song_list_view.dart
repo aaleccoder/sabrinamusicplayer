@@ -48,7 +48,6 @@ class SongListView extends ConsumerWidget {
               child: const SearchBarWidget(),
             ),
 
-            // Song count header
             _buildSongCountHeader(context, tracksAsync),
             _buildShuffleRow(context, ref, tracksAsync),
 

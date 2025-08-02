@@ -265,7 +265,12 @@ class AudioPlayerNotifier extends StateNotifier<AudioPlayerState> {
     if (tracks.isNotEmpty && _audioHandler != null) {
       await createQueue(tracks);
       await _audioHandler!.shuffleQueue();
-      await _audioHandler!.play();
+      final shuffledQueue = state.queue ?? [];
+      if (shuffledQueue.isNotEmpty) {
+        await play(shuffledQueue[0]);
+      } else {
+        await _audioHandler!.play();
+      }
     }
   }
 
