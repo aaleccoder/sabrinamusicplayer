@@ -9,7 +9,6 @@ class MetadataService {
 
   Future<List<Map<String, String?>>> getAllMusicFiles() async {
     try {
-      // Add a timeout to prevent the app from hanging if the native call takes too long
       final List<dynamic>? musicFiles = await _channel
           .invokeMethod('getAllMusicFiles')
           .timeout(const Duration(seconds: 60));
@@ -18,7 +17,6 @@ class MetadataService {
         return [];
       }
 
-      // Efficiently cast the result to the expected type
       return musicFiles.map((dynamic file) {
         return (file as Map<dynamic, dynamic>).cast<String, String?>();
       }).toList();
@@ -58,6 +56,18 @@ class MetadataService {
       return null;
     } catch (e) {
       debugPrint("Unexpected error getting full-size album art: $e");
+      return null;
+    }
+  }
+
+  Future<String?> getPathFromUri(String uri) async {
+    try {
+      final String? path = await _channel.invokeMethod('getPathFromUri', {
+        'uri': uri,
+      });
+      return path;
+    } on PlatformException catch (e) {
+      debugPrint("Failed to get path from URI: '${e.message}'.");
       return null;
     }
   }

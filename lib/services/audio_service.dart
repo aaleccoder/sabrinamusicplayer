@@ -1,6 +1,8 @@
 import 'package:flutter_application_1/widgets/song_list_view.dart';
 import 'package:just_audio/just_audio.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:audio_service/audio_service.dart';
+import 'package:flutter_application_1/services/background_audio_handler.dart';
 
 class AudioPlayerState {
   final TrackItem? currentTrack;
@@ -49,40 +51,87 @@ class AudioPlayerState {
 }
 
 class AudioPlayerNotifier extends StateNotifier<AudioPlayerState> {
-  final AudioPlayer _audioPlayer = AudioPlayer();
+  BackgroundAudioHandler? _audioHandler;
   List<TrackItem> _originalQueue = [];
 
   AudioPlayerNotifier() : super(AudioPlayerState()) {
-    _audioPlayer.playerStateStream.listen((playerState) {
-      if (playerState.processingState == ProcessingState.completed) {
-        next();
+    _initializeAudioService();
+  }
+
+  Future<void> _initializeAudioService() async {
+    _audioHandler = await AudioService.init(
+      builder: () => BackgroundAudioHandler(),
+      config: AudioServiceConfig(
+        androidNotificationChannelId:
+            'com.example.flutter_application_1.channel.audio',
+        androidNotificationChannelName: 'Music Player',
+        androidNotificationChannelDescription: 'Music playback controls',
+        androidNotificationOngoing: true,
+        androidNotificationIcon: 'mipmap/ic_launcher',
+        androidShowNotificationBadge: true,
+        androidStopForegroundOnPause: false,
+        fastForwardInterval: const Duration(seconds: 10),
+        rewindInterval: const Duration(seconds: 10),
+        preloadArtwork: true,
+        artDownscaleWidth: 200,
+        artDownscaleHeight: 200,
+      ),
+    );
+
+    // Listen to audio handler events and update state
+    _audioHandler?.playbackState.listen((playbackState) {
+      state = state.copyWith(
+        isPlaying: playbackState.playing,
+        position: playbackState.updatePosition,
+        bufferedPosition: playbackState.bufferedPosition,
+      );
+    });
+
+    _audioHandler?.mediaItem.listen((mediaItem) {
+      if (mediaItem != null) {
+        final currentTrack = TrackItem(
+          id: mediaItem.extras?['trackId'] ?? 0,
+          title: mediaItem.title,
+          artist: mediaItem.artist ?? '',
+          cover: mediaItem.artUri?.toString() ?? '',
+          fileuri: mediaItem.id,
+        );
+
+        state = state.copyWith(
+          currentTrack: currentTrack,
+          duration: mediaItem.duration,
+        );
       }
     });
 
-    _audioPlayer.playingStream.listen((playing) {
-      state = state.copyWith(isPlaying: playing);
-    });
+    _audioHandler?.queue.listen((queue) {
+      final trackQueue = queue
+          .map(
+            (mediaItem) => TrackItem(
+              id: mediaItem.extras?['trackId'] ?? 0,
+              title: mediaItem.title,
+              artist: mediaItem.artist ?? '',
+              cover: mediaItem.artUri?.toString() ?? '',
+              fileuri: mediaItem.id,
+            ),
+          )
+          .toList();
 
-    _audioPlayer.positionStream.listen((position) {
-      state = state.copyWith(position: position);
-    });
-
-    _audioPlayer.bufferedPositionStream.listen((bufferedPosition) {
-      state = state.copyWith(bufferedPosition: bufferedPosition);
-    });
-
-    _audioPlayer.durationStream.listen((duration) {
-      state = state.copyWith(duration: duration);
+      state = state.copyWith(
+        queue: trackQueue,
+        currentIndex: _audioHandler?.currentIndex ?? 0,
+      );
     });
   }
 
   Future<void> createQueue(List<TrackItem> tracks) async {
-    if (tracks.isNotEmpty) {
+    if (tracks.isNotEmpty && _audioHandler != null) {
       _originalQueue = List.from(tracks);
-      await _audioPlayer.stop();
-      await _audioPlayer.setAudioSource(
-        AudioSource.uri(Uri.parse(tracks[0].fileuri)),
-      );
+      final mediaItems = tracks
+          .map(BackgroundAudioHandler.trackToMediaItem)
+          .toList();
+      await _audioHandler!.addQueueItems(mediaItems);
+
       state = state.copyWith(
         queue: tracks,
         currentTrack: tracks[0],
@@ -94,60 +143,46 @@ class AudioPlayerNotifier extends StateNotifier<AudioPlayerState> {
   }
 
   Future<void> play(TrackItem track) async {
+    if (_audioHandler == null) return;
+
+    // If it's a new track, play it with the current queue
     if (state.currentTrack?.fileuri != track.fileuri) {
-      state = state.copyWith(currentTrack: track);
-      await _audioPlayer.setAudioSource(
-        AudioSource.uri(Uri.parse(track.fileuri)),
-      );
+      final currentQueue = state.queue ?? [track];
+      await _audioHandler!.playTrack(track, currentQueue);
+    } else {
+      // Just resume playback
+      await _audioHandler!.play();
     }
-    await _audioPlayer.play();
   }
 
   Future<void> next() async {
-    if (state.queue != null && state.queue!.isNotEmpty) {
-      final nextIndex = (state.currentIndex + 1) % state.queue!.length;
-      final nextTrack = state.queue![nextIndex];
-      await _audioPlayer.setAudioSource(
-        AudioSource.uri(Uri.parse(nextTrack.fileuri)),
-      );
-      await _audioPlayer.play();
-      state = state.copyWith(
-        currentTrack: nextTrack,
-        currentIndex: nextIndex,
-        position: Duration.zero,
-        bufferedPosition: Duration.zero,
-      );
+    if (_audioHandler != null) {
+      await _audioHandler!.skipToNext();
     }
   }
 
   Future<void> previous() async {
-    if (state.queue != null && state.queue!.isNotEmpty) {
-      final previousIndex =
-          (state.currentIndex - 1 + state.queue!.length) % state.queue!.length;
-      final previousTrack = state.queue![previousIndex];
-      await _audioPlayer.setAudioSource(
-        AudioSource.uri(Uri.parse(previousTrack.fileuri)),
-      );
-      await _audioPlayer.play();
-      state = state.copyWith(
-        currentTrack: previousTrack,
-        currentIndex: previousIndex,
-        position: Duration.zero,
-        bufferedPosition: Duration.zero,
-      );
+    if (_audioHandler != null) {
+      await _audioHandler!.skipToPrevious();
     }
   }
 
   Future<void> unpause() async {
-    await _audioPlayer.play();
+    if (_audioHandler != null) {
+      await _audioHandler!.play();
+    }
   }
 
   Future<void> pause() async {
-    await _audioPlayer.pause();
+    if (_audioHandler != null) {
+      await _audioHandler!.pause();
+    }
   }
 
   Future<void> stop() async {
-    await _audioPlayer.stop();
+    if (_audioHandler != null) {
+      await _audioHandler!.stop();
+    }
     state = state.copyWith(
       position: Duration.zero,
       bufferedPosition: Duration.zero,
@@ -165,14 +200,48 @@ class AudioPlayerNotifier extends StateNotifier<AudioPlayerState> {
   }
 
   Future<void> seek(Duration position) async {
-    await _audioPlayer.seek(position);
+    if (_audioHandler != null) {
+      await _audioHandler!.seek(position);
+    }
   }
 
   Future<void> playAllShuffled(List<TrackItem> tracks) async {
-    if (tracks.isNotEmpty) {
-      final shuffledQueue = List<TrackItem>.from(tracks)..shuffle();
-      await createQueue(shuffledQueue);
-      await play(shuffledQueue[0]);
+    if (tracks.isNotEmpty && _audioHandler != null) {
+      await createQueue(tracks);
+      await _audioHandler!.shuffleQueue();
+      await _audioHandler!.play();
+    }
+  }
+
+  /// Get the audio handler for direct access
+  BackgroundAudioHandler? get audioHandler => _audioHandler;
+
+  /// Set repeat mode
+  Future<void> setRepeatMode(AudioServiceRepeatMode repeatMode) async {
+    if (_audioHandler != null) {
+      await _audioHandler!.setRepeatMode(repeatMode);
+    }
+  }
+
+  /// Set shuffle mode
+  Future<void> setShuffleMode(AudioServiceShuffleMode shuffleMode) async {
+    if (_audioHandler != null) {
+      await _audioHandler!.setShuffleMode(shuffleMode);
+    }
+  }
+
+  /// Get current repeat mode
+  AudioServiceRepeatMode get repeatMode =>
+      _audioHandler?.repeatMode ?? AudioServiceRepeatMode.none;
+
+  /// Get current shuffle mode
+  AudioServiceShuffleMode get shuffleMode =>
+      _audioHandler?.shuffleMode ?? AudioServiceShuffleMode.none;
+
+  /// Toggle shuffle mode
+  Future<void> toggleShuffle() async {
+    if (_audioHandler != null) {
+      await _audioHandler!.customAction('shuffle');
     }
   }
 }

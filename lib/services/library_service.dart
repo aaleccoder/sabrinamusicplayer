@@ -31,22 +31,9 @@ class LibraryService {
 
       // Fetch all music files from the MediaStore
       final allMusicFiles = await metadataService.getAllMusicFiles();
-      if (allMusicFiles.isEmpty) {
-        debugPrint('No music files found on the device.');
-        progressNotifier.finishScanning();
-        ref.invalidate(tracksProvider);
-        ref.invalidate(albumsProvider);
-        ref.invalidate(artistsProvider);
-        ref.invalidate(genresProvider);
-        return;
-      }
-
-      progressNotifier.startScanning(totalFiles: allMusicFiles.length);
-      debugPrint('Found ${allMusicFiles.length} music files.');
-
-      // Get existing tracks to avoid duplicates
-      final existingTracks = await database.select(database.tracks).get();
-      final existingFilePaths = existingTracks.map((t) => t.fileuri).toSet();
+      final allDeviceFilePaths = allMusicFiles
+          .map((f) => f['path'] as String)
+          .toSet();
 
       // Get excluded directories
       final excludedDirs = await database
@@ -54,15 +41,58 @@ class LibraryService {
           .get();
       final excludedPaths = excludedDirs.map((d) => d.path).toSet();
 
+      // Get existing tracks from the database
+      final existingTracks = await database.select(database.tracks).get();
+      final tracksToDelete = <int>{};
+
+      // Find tracks to delete (orphaned or in excluded folders)
+      for (final track in existingTracks) {
+        final trackPath = await metadataService.getPathFromUri(track.fileuri);
+        bool isInExcluded =
+            trackPath != null &&
+            excludedPaths.any((p) => trackPath.startsWith(p));
+        if (isInExcluded || !allDeviceFilePaths.contains(track.fileuri)) {
+          tracksToDelete.add(track.id);
+        }
+      }
+
+      // Perform deletion if needed
+      if (tracksToDelete.isNotEmpty) {
+        await (database.delete(
+          database.tracks,
+        )..where((t) => t.id.isIn(tracksToDelete))).go();
+        debugPrint(
+          'Deleted ${tracksToDelete.length} orphaned or excluded tracks.',
+        );
+        await database.cleanupOrphanedMetadata();
+        // Invalidate providers to reflect deletions immediately
+        ref.invalidate(tracksProvider);
+        ref.invalidate(albumsProvider);
+        ref.invalidate(artistsProvider);
+        ref.invalidate(genresProvider);
+      }
+
+      if (allMusicFiles.isEmpty) {
+        debugPrint('No music files found on the device.');
+        progressNotifier.finishScanning();
+        return;
+      }
+
+      progressNotifier.startScanning(totalFiles: allMusicFiles.length);
+      debugPrint('Found ${allMusicFiles.length} music files.');
+
+      // Re-fetch existing tracks to get a clean state for processing new files
+      final currentTracks = await database.select(database.tracks).get();
+      final currentFilePaths = currentTracks.map((t) => t.fileuri).toSet();
+
       // Filter out already existing files and files in excluded directories
       final newFilesToProcess = allMusicFiles.where((f) {
-        if (existingFilePaths.contains(f['path'])) {
+        final path = f['path'] as String;
+        if (currentFilePaths.contains(path)) {
           return false;
         }
-        for (final excludedPath in excludedPaths) {
-          if (f['path']!.startsWith(excludedPath)) {
-            return false;
-          }
+        if (excludedPaths.any((p) => path.startsWith(p))) {
+          return false;
         }
         return true;
       }).toList();
@@ -70,10 +100,6 @@ class LibraryService {
       if (newFilesToProcess.isEmpty) {
         debugPrint('No new music files to process.');
         progressNotifier.finishScanning();
-        ref.invalidate(tracksProvider);
-        ref.invalidate(albumsProvider);
-        ref.invalidate(artistsProvider);
-        ref.invalidate(genresProvider);
         return;
       }
 
@@ -318,5 +344,46 @@ class LibraryService {
       }
     }
     return idMap;
+  }
+
+  Future<void> addExcludedDirectoryAndRemoveTracks(
+    WidgetRef ref,
+    String path,
+  ) async {
+    final database = ref.read(appDatabaseProvider);
+    final metadataService = MetadataService();
+
+    // Add to excluded directories table
+    await database
+        .into(database.excludedDirectories)
+        .insert(ExcludedDirectoriesCompanion.insert(path: path));
+
+    // Get all tracks to find which ones to delete
+    final allTracks = await database.select(database.tracks).get();
+    final tracksToDelete = <int>[];
+
+    for (final track in allTracks) {
+      // We need to resolve the file path from the URI to compare with the excluded path
+      final trackPath = await metadataService.getPathFromUri(track.fileuri);
+      if (trackPath != null && trackPath.startsWith(path)) {
+        tracksToDelete.add(track.id);
+      }
+    }
+
+    if (tracksToDelete.isNotEmpty) {
+      // Delete tracks from that directory
+      await (database.delete(
+        database.tracks,
+      )..where((t) => t.id.isIn(tracksToDelete))).go();
+
+      // Clean up orphaned metadata
+      await database.cleanupOrphanedMetadata();
+
+      // Invalidate providers to refresh UI
+      ref.invalidate(tracksProvider);
+      ref.invalidate(albumsProvider);
+      ref.invalidate(artistsProvider);
+      ref.invalidate(genresProvider);
+    }
   }
 }

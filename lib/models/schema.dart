@@ -608,6 +608,27 @@ class AppDatabase extends _$AppDatabase {
     await (delete(tracks)..where((t) => t.fileuri.like('$path%'))).go();
   }
 
+  Future<void> cleanupOrphanedMetadata() async {
+    // Delete albums that have no tracks
+    await customStatement('''
+      DELETE FROM albums
+      WHERE id NOT IN (SELECT DISTINCT album_id FROM tracks WHERE album_id IS NOT NULL)
+    ''');
+
+    // Delete artists that have no tracks AND no albums
+    await customStatement('''
+      DELETE FROM artists
+      WHERE id NOT IN (SELECT DISTINCT artist_id FROM tracks WHERE artist_id IS NOT NULL)
+      AND id NOT IN (SELECT DISTINCT artist_id FROM albums WHERE artist_id IS NOT NULL)
+    ''');
+
+    // Delete genres that have no tracks
+    await customStatement('''
+      DELETE FROM genres
+      WHERE id NOT IN (SELECT DISTINCT genre_id FROM tracks WHERE genre_id IS NOT NULL)
+    ''');
+  }
+
   Future<void> clearDatabase() async {
     await transaction(() async {
       for (final table in allTables) {
