@@ -186,7 +186,9 @@ class MainApp extends StatelessWidget {
     return MaterialApp(
       onGenerateRoute: AppRoutes.generateRoute,
       debugShowCheckedModeBanner: false,
+
       theme: ThemeData(
+        fontFamily: "Sora",
         colorScheme: ColorScheme.dark(
           primary: AppTheme.primary,
           secondary: AppTheme.secondary,
@@ -348,13 +350,13 @@ class _HomeState extends ConsumerState<Home> with TickerProviderStateMixin {
             Positioned(
               left: 0,
               right: 0,
-              bottom: 100, // Navigation bar height (60) + margin (16)
+              bottom: 90, // Navigation bar height (60) + margin (16)
               child: MiniPlayer(),
             ),
             Positioned(
-              left: 16,
-              right: 16,
-              bottom: 16,
+              left: 8,
+              right: 8,
+              bottom: 4,
               child: _buildModernNavigationBar(),
             ),
             LibraryScanningOverlay(),

@@ -47,6 +47,7 @@ class SongListView extends ConsumerWidget {
 
             // Song count header
             _buildSongCountHeader(context, tracksAsync),
+            _buildShuffleRow(context, ref, tracksAsync),
 
             // Songs list
             Expanded(child: _buildSongsList(context, tracksAsync)),
@@ -158,6 +159,51 @@ class SongListView extends ConsumerWidget {
           ],
         ),
       ),
+    );
+  }
+
+  Widget _buildShuffleRow(
+    BuildContext context,
+    WidgetRef ref,
+    AsyncValue<List<TrackItem>> tracksAsync,
+  ) {
+    return tracksAsync.when(
+      data: (tracks) {
+        if (tracks.isEmpty) {
+          return const SizedBox.shrink();
+        }
+        return Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 16.0),
+          child: Row(
+            mainAxisAlignment: MainAxisAlignment.end,
+            children: [
+              TextButton.icon(
+                onPressed: () {
+                  ref
+                      .read(audioPlayerNotifierProvider.notifier)
+                      .playAllShuffled(tracks);
+                },
+                icon: Icon(Icons.shuffle, color: AppTheme.primary, size: 16),
+                label: Text(
+                  'Shuffle Play',
+                  style: TextStyle(color: AppTheme.primary),
+                ),
+                style: TextButton.styleFrom(
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 12,
+                    vertical: 8,
+                  ),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(8),
+                  ),
+                ),
+              ),
+            ],
+          ),
+        );
+      },
+      loading: () => const SizedBox.shrink(),
+      error: (e, _) => const SizedBox.shrink(),
     );
   }
 

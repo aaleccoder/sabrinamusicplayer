@@ -6,6 +6,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter_application_1/main.dart';
 import 'package:flutter_application_1/services/metadata_service.dart';
 import 'package:flutter_application_1/theme.dart';
+import 'package:flutter_application_1/services/audio_service.dart';
+import 'package:palette_generator/palette_generator.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 class PlayerScreen extends ConsumerStatefulWidget {
@@ -68,16 +70,22 @@ class _PlayerScreenState extends ConsumerState<PlayerScreen>
       if (uri.isScheme('file')) {
         final file = File.fromUri(uri);
         if (file.existsSync()) {
-          // This is a simplified color extraction - in a real app you'd use a package like palette_generator
-          return [
-            AppTheme.primary.withOpacity(0.8),
-            AppTheme.secondary.withOpacity(0.6),
-            AppTheme.background,
-          ];
+          final imageProvider = FileImage(file);
+          final palette = await PaletteGenerator.fromImageProvider(
+            imageProvider,
+            size: const Size(100, 100), // Smaller size for faster processing
+          );
+
+          final dominantColor =
+              palette.dominantColor?.color ?? AppTheme.primary;
+          final vibrantColor =
+              palette.vibrantColor?.color ?? AppTheme.secondary;
+
+          return [dominantColor, vibrantColor, AppTheme.background];
         }
       }
     } catch (e) {
-      // Fallback
+      // Fallback to default colors
     }
 
     return [AppTheme.primary, AppTheme.background];
@@ -88,6 +96,21 @@ class _PlayerScreenState extends ConsumerState<PlayerScreen>
     final audioService = ref.watch(audioPlayerNotifierProvider.notifier);
     final audioState = ref.watch(audioPlayerNotifierProvider);
     final currentTrack = audioState.currentTrack;
+
+    ref.listen(
+      audioPlayerNotifierProvider.select((value) => value.currentTrack),
+      (previous, next) {
+        if (previous != next && next != null) {
+          _extractColorsFromImage(next.cover).then((colors) {
+            if (mounted) {
+              setState(() {
+                _dominantColors = colors;
+              });
+            }
+          });
+        }
+      },
+    );
 
     return GestureDetector(
       onVerticalDragEnd: (details) {
@@ -131,47 +154,39 @@ class _PlayerScreenState extends ConsumerState<PlayerScreen>
           position: _slideAnimation,
           child: ScaleTransition(
             scale: _scaleAnimation,
-            child: FutureBuilder<List<Color>>(
-              future: _extractColorsFromImage(currentTrack?.cover),
-              builder: (context, colorSnapshot) {
-                final colors = colorSnapshot.data ?? _dominantColors;
-
-                return Container(
-                  decoration: BoxDecoration(
-                    gradient: LinearGradient(
-                      begin: Alignment.topCenter,
-                      end: Alignment.center,
-                      colors: [
-                        colors[0].withOpacity(0.6),
-                        colors.length > 1
-                            ? colors[1].withOpacity(0.4)
-                            : colors[0].withOpacity(0.3),
-                        AppTheme.background.withOpacity(0.9),
-                        AppTheme.background,
-                      ],
-                      stops: const [0.0, 0.3, 0.7, 1.0],
-                    ),
+            child: AnimatedContainer(
+              duration: AppTheme.animationSlow,
+              decoration: BoxDecoration(
+                gradient: LinearGradient(
+                  begin: Alignment.topCenter,
+                  end: Alignment.bottomCenter,
+                  colors: [
+                    _dominantColors[0].withOpacity(0.8),
+                    _dominantColors.length > 1
+                        ? _dominantColors[1].withOpacity(0.6)
+                        : _dominantColors[0].withOpacity(0.5),
+                    AppTheme.background,
+                  ],
+                ),
+              ),
+              child: SafeArea(
+                child: Padding(
+                  padding: const EdgeInsets.fromLTRB(10, 10, 10, 0),
+                  child: Column(
+                    children: [
+                      const Spacer(),
+                      _buildAlbumArtSection(currentTrack),
+                      const SizedBox(height: 40),
+                      _buildTrackInfoSection(currentTrack),
+                      const Spacer(),
+                      _buildSeekerSection(audioService, audioState),
+                      _buildControlsSection(audioService, audioState),
+                      const SizedBox(height: 20),
+                      _buildAudioInfoSection(currentTrack),
+                    ],
                   ),
-                  child: SafeArea(
-                    child: Padding(
-                      padding: const EdgeInsets.all(10),
-                      child: Column(
-                        children: [
-                          const Spacer(),
-                          _buildAlbumArtSection(currentTrack),
-                          const SizedBox(height: 40),
-                          _buildTrackInfoSection(currentTrack),
-                          const Spacer(),
-                          _buildControlsSection(audioService, audioState),
-                          const SizedBox(height: 20),
-                          _buildAudioInfoSection(currentTrack),
-                          const SizedBox(height: 40),
-                        ],
-                      ),
-                    ),
-                  ),
-                );
-              },
+                ),
+              ),
             ),
           ),
         ),
@@ -183,9 +198,20 @@ class _PlayerScreenState extends ConsumerState<PlayerScreen>
     return AnimatedSwitcher(
       duration: AppTheme.animationSlow,
       transitionBuilder: (Widget child, Animation<double> animation) {
+        final slideAnimation =
+            Tween<Offset>(
+              begin: const Offset(0.5, 0.0),
+              end: Offset.zero,
+            ).animate(
+              CurvedAnimation(parent: animation, curve: Curves.easeOutCubic),
+            );
+
         return FadeTransition(
           opacity: animation,
-          child: ScaleTransition(scale: animation, child: child),
+          child: SlideTransition(
+            position: slideAnimation,
+            child: ScaleTransition(scale: animation, child: child),
+          ),
         );
       },
       child: currentTrack != null
@@ -383,6 +409,75 @@ class _PlayerScreenState extends ConsumerState<PlayerScreen>
               ),
             ),
     );
+  }
+
+  Widget _buildSeekerSection(
+    AudioPlayerNotifier audioService,
+    AudioPlayerState audioState,
+  ) {
+    final duration = audioState.duration ?? Duration.zero;
+    final position = audioState.position;
+
+    final double sliderMax = duration.inMilliseconds > 0
+        ? duration.inMilliseconds.toDouble()
+        : 1.0;
+    final double sliderValue = position.inMilliseconds.toDouble().clamp(
+      0.0,
+      sliderMax,
+    );
+
+    return Container(
+      padding: AppTheme.paddingLg,
+      child: Column(
+        children: [
+          SliderTheme(
+            data: SliderTheme.of(context).copyWith(
+              trackHeight: 4.0,
+              thumbShape: const RoundSliderThumbShape(enabledThumbRadius: 6.0),
+              overlayShape: const RoundSliderOverlayShape(overlayRadius: 18.0),
+              activeTrackColor: AppTheme.primary,
+              inactiveTrackColor: AppTheme.onSurface.withOpacity(0.2),
+              thumbColor: AppTheme.primary,
+              overlayColor: AppTheme.primary.withOpacity(0.2),
+            ),
+            child: Slider(
+              value: sliderValue,
+              max: sliderMax,
+              onChanged: (value) {
+                audioService.seek(Duration(milliseconds: value.toInt()));
+              },
+            ),
+          ),
+          const SizedBox(height: 4),
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              Text(
+                _formatDuration(position),
+                style: AppTheme.textTheme.labelSmall?.copyWith(
+                  color: AppTheme.onSurface.withOpacity(0.7),
+                  fontWeight: FontWeight.w500,
+                ),
+              ),
+              Text(
+                _formatDuration(duration),
+                style: AppTheme.textTheme.labelSmall?.copyWith(
+                  color: AppTheme.onSurface.withOpacity(0.7),
+                  fontWeight: FontWeight.w500,
+                ),
+              ),
+            ],
+          ),
+        ],
+      ),
+    );
+  }
+
+  String _formatDuration(Duration duration) {
+    String twoDigits(int n) => n.toString().padLeft(2, '0');
+    final minutes = twoDigits(duration.inMinutes.remainder(60));
+    final seconds = twoDigits(duration.inSeconds.remainder(60));
+    return '$minutes:$seconds';
   }
 
   Widget _buildControlsSection(audioService, audioState) {
