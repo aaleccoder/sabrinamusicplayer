@@ -44,8 +44,8 @@ class _SettingsPageState extends ConsumerState<SettingsPage> {
             .insert(
               MusicDirectoriesCompanion(
                 path: Value(selectedDirectory),
-                date_added: Value(DateTime.now()),
-                is_enabled: const Value(true),
+                dateAdded: Value(DateTime.now()),
+                isEnabled: const Value(true),
               ),
             );
         await _loadFolders();

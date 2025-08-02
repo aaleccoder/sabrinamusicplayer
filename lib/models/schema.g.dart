@@ -32,11 +32,11 @@ class $MusicDirectoriesTable extends MusicDirectories
     type: DriftSqlType.string,
     requiredDuringInsert: true,
   );
-  static const VerificationMeta _is_enabledMeta = const VerificationMeta(
-    'is_enabled',
+  static const VerificationMeta _isEnabledMeta = const VerificationMeta(
+    'isEnabled',
   );
   @override
-  late final GeneratedColumn<bool> is_enabled = GeneratedColumn<bool>(
+  late final GeneratedColumn<bool> isEnabled = GeneratedColumn<bool>(
     'is_enabled',
     aliasedName,
     false,
@@ -47,21 +47,21 @@ class $MusicDirectoriesTable extends MusicDirectories
     ),
     defaultValue: const Constant(true),
   );
-  static const VerificationMeta _last_scannedMeta = const VerificationMeta(
-    'last_scanned',
+  static const VerificationMeta _lastScannedMeta = const VerificationMeta(
+    'lastScanned',
   );
   @override
-  late final GeneratedColumn<int> last_scanned = GeneratedColumn<int>(
+  late final GeneratedColumn<int> lastScanned = GeneratedColumn<int>(
     'last_scanned',
     aliasedName,
     true,
     type: DriftSqlType.int,
     requiredDuringInsert: false,
   );
-  static const VerificationMeta _scan_subdirectoriesMeta =
-      const VerificationMeta('scan_subdirectories');
+  static const VerificationMeta _scanSubdirectoriesMeta =
+      const VerificationMeta('scanSubdirectories');
   @override
-  late final GeneratedColumn<bool> scan_subdirectories = GeneratedColumn<bool>(
+  late final GeneratedColumn<bool> scanSubdirectories = GeneratedColumn<bool>(
     'scan_subdirectories',
     aliasedName,
     false,
@@ -72,11 +72,11 @@ class $MusicDirectoriesTable extends MusicDirectories
     ),
     defaultValue: const Constant(true),
   );
-  static const VerificationMeta _total_sizeMeta = const VerificationMeta(
-    'total_size',
+  static const VerificationMeta _totalSizeMeta = const VerificationMeta(
+    'totalSize',
   );
   @override
-  late final GeneratedColumn<int> total_size = GeneratedColumn<int>(
+  late final GeneratedColumn<int> totalSize = GeneratedColumn<int>(
     'total_size',
     aliasedName,
     false,
@@ -84,11 +84,11 @@ class $MusicDirectoriesTable extends MusicDirectories
     requiredDuringInsert: false,
     defaultValue: const Constant(0),
   );
-  static const VerificationMeta _file_countMeta = const VerificationMeta(
-    'file_count',
+  static const VerificationMeta _fileCountMeta = const VerificationMeta(
+    'fileCount',
   );
   @override
-  late final GeneratedColumn<int> file_count = GeneratedColumn<int>(
+  late final GeneratedColumn<int> fileCount = GeneratedColumn<int>(
     'file_count',
     aliasedName,
     false,
@@ -96,21 +96,21 @@ class $MusicDirectoriesTable extends MusicDirectories
     requiredDuringInsert: false,
     defaultValue: const Constant(0),
   );
-  static const VerificationMeta _date_addedMeta = const VerificationMeta(
-    'date_added',
+  static const VerificationMeta _dateAddedMeta = const VerificationMeta(
+    'dateAdded',
   );
   @override
-  late final GeneratedColumn<DateTime> date_added = GeneratedColumn<DateTime>(
+  late final GeneratedColumn<DateTime> dateAdded = GeneratedColumn<DateTime>(
     'date_added',
     aliasedName,
     false,
     type: DriftSqlType.dateTime,
     requiredDuringInsert: true,
   );
-  static const VerificationMeta _excluded_subdirectoriesMeta =
-      const VerificationMeta('excluded_subdirectories');
+  static const VerificationMeta _excludedSubdirectoriesMeta =
+      const VerificationMeta('excludedSubdirectories');
   @override
-  late final GeneratedColumn<String> excluded_subdirectories =
+  late final GeneratedColumn<String> excludedSubdirectories =
       GeneratedColumn<String>(
         'excluded_subdirectories',
         aliasedName,
@@ -122,13 +122,13 @@ class $MusicDirectoriesTable extends MusicDirectories
   List<GeneratedColumn> get $columns => [
     id,
     path,
-    is_enabled,
-    last_scanned,
-    scan_subdirectories,
-    total_size,
-    file_count,
-    date_added,
-    excluded_subdirectories,
+    isEnabled,
+    lastScanned,
+    scanSubdirectories,
+    totalSize,
+    fileCount,
+    dateAdded,
+    excludedSubdirectories,
   ];
   @override
   String get aliasedName => _alias ?? actualTableName;
@@ -155,54 +155,54 @@ class $MusicDirectoriesTable extends MusicDirectories
     }
     if (data.containsKey('is_enabled')) {
       context.handle(
-        _is_enabledMeta,
-        is_enabled.isAcceptableOrUnknown(data['is_enabled']!, _is_enabledMeta),
+        _isEnabledMeta,
+        isEnabled.isAcceptableOrUnknown(data['is_enabled']!, _isEnabledMeta),
       );
     }
     if (data.containsKey('last_scanned')) {
       context.handle(
-        _last_scannedMeta,
-        last_scanned.isAcceptableOrUnknown(
+        _lastScannedMeta,
+        lastScanned.isAcceptableOrUnknown(
           data['last_scanned']!,
-          _last_scannedMeta,
+          _lastScannedMeta,
         ),
       );
     }
     if (data.containsKey('scan_subdirectories')) {
       context.handle(
-        _scan_subdirectoriesMeta,
-        scan_subdirectories.isAcceptableOrUnknown(
+        _scanSubdirectoriesMeta,
+        scanSubdirectories.isAcceptableOrUnknown(
           data['scan_subdirectories']!,
-          _scan_subdirectoriesMeta,
+          _scanSubdirectoriesMeta,
         ),
       );
     }
     if (data.containsKey('total_size')) {
       context.handle(
-        _total_sizeMeta,
-        total_size.isAcceptableOrUnknown(data['total_size']!, _total_sizeMeta),
+        _totalSizeMeta,
+        totalSize.isAcceptableOrUnknown(data['total_size']!, _totalSizeMeta),
       );
     }
     if (data.containsKey('file_count')) {
       context.handle(
-        _file_countMeta,
-        file_count.isAcceptableOrUnknown(data['file_count']!, _file_countMeta),
+        _fileCountMeta,
+        fileCount.isAcceptableOrUnknown(data['file_count']!, _fileCountMeta),
       );
     }
     if (data.containsKey('date_added')) {
       context.handle(
-        _date_addedMeta,
-        date_added.isAcceptableOrUnknown(data['date_added']!, _date_addedMeta),
+        _dateAddedMeta,
+        dateAdded.isAcceptableOrUnknown(data['date_added']!, _dateAddedMeta),
       );
     } else if (isInserting) {
-      context.missing(_date_addedMeta);
+      context.missing(_dateAddedMeta);
     }
     if (data.containsKey('excluded_subdirectories')) {
       context.handle(
-        _excluded_subdirectoriesMeta,
-        excluded_subdirectories.isAcceptableOrUnknown(
+        _excludedSubdirectoriesMeta,
+        excludedSubdirectories.isAcceptableOrUnknown(
           data['excluded_subdirectories']!,
-          _excluded_subdirectoriesMeta,
+          _excludedSubdirectoriesMeta,
         ),
       );
     }
@@ -223,31 +223,31 @@ class $MusicDirectoriesTable extends MusicDirectories
         DriftSqlType.string,
         data['${effectivePrefix}path'],
       )!,
-      is_enabled: attachedDatabase.typeMapping.read(
+      isEnabled: attachedDatabase.typeMapping.read(
         DriftSqlType.bool,
         data['${effectivePrefix}is_enabled'],
       )!,
-      last_scanned: attachedDatabase.typeMapping.read(
+      lastScanned: attachedDatabase.typeMapping.read(
         DriftSqlType.int,
         data['${effectivePrefix}last_scanned'],
       ),
-      scan_subdirectories: attachedDatabase.typeMapping.read(
+      scanSubdirectories: attachedDatabase.typeMapping.read(
         DriftSqlType.bool,
         data['${effectivePrefix}scan_subdirectories'],
       )!,
-      total_size: attachedDatabase.typeMapping.read(
+      totalSize: attachedDatabase.typeMapping.read(
         DriftSqlType.int,
         data['${effectivePrefix}total_size'],
       )!,
-      file_count: attachedDatabase.typeMapping.read(
+      fileCount: attachedDatabase.typeMapping.read(
         DriftSqlType.int,
         data['${effectivePrefix}file_count'],
       )!,
-      date_added: attachedDatabase.typeMapping.read(
+      dateAdded: attachedDatabase.typeMapping.read(
         DriftSqlType.dateTime,
         data['${effectivePrefix}date_added'],
       )!,
-      excluded_subdirectories: attachedDatabase.typeMapping.read(
+      excludedSubdirectories: attachedDatabase.typeMapping.read(
         DriftSqlType.string,
         data['${effectivePrefix}excluded_subdirectories'],
       ),
@@ -263,41 +263,39 @@ class $MusicDirectoriesTable extends MusicDirectories
 class MusicDirectory extends DataClass implements Insertable<MusicDirectory> {
   final int id;
   final String path;
-  final bool is_enabled;
-  final int? last_scanned;
-  final bool scan_subdirectories;
-  final int total_size;
-  final int file_count;
-  final DateTime date_added;
-  final String? excluded_subdirectories;
+  final bool isEnabled;
+  final int? lastScanned;
+  final bool scanSubdirectories;
+  final int totalSize;
+  final int fileCount;
+  final DateTime dateAdded;
+  final String? excludedSubdirectories;
   const MusicDirectory({
     required this.id,
     required this.path,
-    required this.is_enabled,
-    this.last_scanned,
-    required this.scan_subdirectories,
-    required this.total_size,
-    required this.file_count,
-    required this.date_added,
-    this.excluded_subdirectories,
+    required this.isEnabled,
+    this.lastScanned,
+    required this.scanSubdirectories,
+    required this.totalSize,
+    required this.fileCount,
+    required this.dateAdded,
+    this.excludedSubdirectories,
   });
   @override
   Map<String, Expression> toColumns(bool nullToAbsent) {
     final map = <String, Expression>{};
     map['id'] = Variable<int>(id);
     map['path'] = Variable<String>(path);
-    map['is_enabled'] = Variable<bool>(is_enabled);
-    if (!nullToAbsent || last_scanned != null) {
-      map['last_scanned'] = Variable<int>(last_scanned);
+    map['is_enabled'] = Variable<bool>(isEnabled);
+    if (!nullToAbsent || lastScanned != null) {
+      map['last_scanned'] = Variable<int>(lastScanned);
     }
-    map['scan_subdirectories'] = Variable<bool>(scan_subdirectories);
-    map['total_size'] = Variable<int>(total_size);
-    map['file_count'] = Variable<int>(file_count);
-    map['date_added'] = Variable<DateTime>(date_added);
-    if (!nullToAbsent || excluded_subdirectories != null) {
-      map['excluded_subdirectories'] = Variable<String>(
-        excluded_subdirectories,
-      );
+    map['scan_subdirectories'] = Variable<bool>(scanSubdirectories);
+    map['total_size'] = Variable<int>(totalSize);
+    map['file_count'] = Variable<int>(fileCount);
+    map['date_added'] = Variable<DateTime>(dateAdded);
+    if (!nullToAbsent || excludedSubdirectories != null) {
+      map['excluded_subdirectories'] = Variable<String>(excludedSubdirectories);
     }
     return map;
   }
@@ -306,17 +304,17 @@ class MusicDirectory extends DataClass implements Insertable<MusicDirectory> {
     return MusicDirectoriesCompanion(
       id: Value(id),
       path: Value(path),
-      is_enabled: Value(is_enabled),
-      last_scanned: last_scanned == null && nullToAbsent
+      isEnabled: Value(isEnabled),
+      lastScanned: lastScanned == null && nullToAbsent
           ? const Value.absent()
-          : Value(last_scanned),
-      scan_subdirectories: Value(scan_subdirectories),
-      total_size: Value(total_size),
-      file_count: Value(file_count),
-      date_added: Value(date_added),
-      excluded_subdirectories: excluded_subdirectories == null && nullToAbsent
+          : Value(lastScanned),
+      scanSubdirectories: Value(scanSubdirectories),
+      totalSize: Value(totalSize),
+      fileCount: Value(fileCount),
+      dateAdded: Value(dateAdded),
+      excludedSubdirectories: excludedSubdirectories == null && nullToAbsent
           ? const Value.absent()
-          : Value(excluded_subdirectories),
+          : Value(excludedSubdirectories),
     );
   }
 
@@ -328,16 +326,14 @@ class MusicDirectory extends DataClass implements Insertable<MusicDirectory> {
     return MusicDirectory(
       id: serializer.fromJson<int>(json['id']),
       path: serializer.fromJson<String>(json['path']),
-      is_enabled: serializer.fromJson<bool>(json['is_enabled']),
-      last_scanned: serializer.fromJson<int?>(json['last_scanned']),
-      scan_subdirectories: serializer.fromJson<bool>(
-        json['scan_subdirectories'],
-      ),
-      total_size: serializer.fromJson<int>(json['total_size']),
-      file_count: serializer.fromJson<int>(json['file_count']),
-      date_added: serializer.fromJson<DateTime>(json['date_added']),
-      excluded_subdirectories: serializer.fromJson<String?>(
-        json['excluded_subdirectories'],
+      isEnabled: serializer.fromJson<bool>(json['isEnabled']),
+      lastScanned: serializer.fromJson<int?>(json['lastScanned']),
+      scanSubdirectories: serializer.fromJson<bool>(json['scanSubdirectories']),
+      totalSize: serializer.fromJson<int>(json['totalSize']),
+      fileCount: serializer.fromJson<int>(json['fileCount']),
+      dateAdded: serializer.fromJson<DateTime>(json['dateAdded']),
+      excludedSubdirectories: serializer.fromJson<String?>(
+        json['excludedSubdirectories'],
       ),
     );
   }
@@ -347,14 +343,14 @@ class MusicDirectory extends DataClass implements Insertable<MusicDirectory> {
     return <String, dynamic>{
       'id': serializer.toJson<int>(id),
       'path': serializer.toJson<String>(path),
-      'is_enabled': serializer.toJson<bool>(is_enabled),
-      'last_scanned': serializer.toJson<int?>(last_scanned),
-      'scan_subdirectories': serializer.toJson<bool>(scan_subdirectories),
-      'total_size': serializer.toJson<int>(total_size),
-      'file_count': serializer.toJson<int>(file_count),
-      'date_added': serializer.toJson<DateTime>(date_added),
-      'excluded_subdirectories': serializer.toJson<String?>(
-        excluded_subdirectories,
+      'isEnabled': serializer.toJson<bool>(isEnabled),
+      'lastScanned': serializer.toJson<int?>(lastScanned),
+      'scanSubdirectories': serializer.toJson<bool>(scanSubdirectories),
+      'totalSize': serializer.toJson<int>(totalSize),
+      'fileCount': serializer.toJson<int>(fileCount),
+      'dateAdded': serializer.toJson<DateTime>(dateAdded),
+      'excludedSubdirectories': serializer.toJson<String?>(
+        excludedSubdirectories,
       ),
     };
   }
@@ -362,51 +358,43 @@ class MusicDirectory extends DataClass implements Insertable<MusicDirectory> {
   MusicDirectory copyWith({
     int? id,
     String? path,
-    bool? is_enabled,
-    Value<int?> last_scanned = const Value.absent(),
-    bool? scan_subdirectories,
-    int? total_size,
-    int? file_count,
-    DateTime? date_added,
-    Value<String?> excluded_subdirectories = const Value.absent(),
+    bool? isEnabled,
+    Value<int?> lastScanned = const Value.absent(),
+    bool? scanSubdirectories,
+    int? totalSize,
+    int? fileCount,
+    DateTime? dateAdded,
+    Value<String?> excludedSubdirectories = const Value.absent(),
   }) => MusicDirectory(
     id: id ?? this.id,
     path: path ?? this.path,
-    is_enabled: is_enabled ?? this.is_enabled,
-    last_scanned: last_scanned.present ? last_scanned.value : this.last_scanned,
-    scan_subdirectories: scan_subdirectories ?? this.scan_subdirectories,
-    total_size: total_size ?? this.total_size,
-    file_count: file_count ?? this.file_count,
-    date_added: date_added ?? this.date_added,
-    excluded_subdirectories: excluded_subdirectories.present
-        ? excluded_subdirectories.value
-        : this.excluded_subdirectories,
+    isEnabled: isEnabled ?? this.isEnabled,
+    lastScanned: lastScanned.present ? lastScanned.value : this.lastScanned,
+    scanSubdirectories: scanSubdirectories ?? this.scanSubdirectories,
+    totalSize: totalSize ?? this.totalSize,
+    fileCount: fileCount ?? this.fileCount,
+    dateAdded: dateAdded ?? this.dateAdded,
+    excludedSubdirectories: excludedSubdirectories.present
+        ? excludedSubdirectories.value
+        : this.excludedSubdirectories,
   );
   MusicDirectory copyWithCompanion(MusicDirectoriesCompanion data) {
     return MusicDirectory(
       id: data.id.present ? data.id.value : this.id,
       path: data.path.present ? data.path.value : this.path,
-      is_enabled: data.is_enabled.present
-          ? data.is_enabled.value
-          : this.is_enabled,
-      last_scanned: data.last_scanned.present
-          ? data.last_scanned.value
-          : this.last_scanned,
-      scan_subdirectories: data.scan_subdirectories.present
-          ? data.scan_subdirectories.value
-          : this.scan_subdirectories,
-      total_size: data.total_size.present
-          ? data.total_size.value
-          : this.total_size,
-      file_count: data.file_count.present
-          ? data.file_count.value
-          : this.file_count,
-      date_added: data.date_added.present
-          ? data.date_added.value
-          : this.date_added,
-      excluded_subdirectories: data.excluded_subdirectories.present
-          ? data.excluded_subdirectories.value
-          : this.excluded_subdirectories,
+      isEnabled: data.isEnabled.present ? data.isEnabled.value : this.isEnabled,
+      lastScanned: data.lastScanned.present
+          ? data.lastScanned.value
+          : this.lastScanned,
+      scanSubdirectories: data.scanSubdirectories.present
+          ? data.scanSubdirectories.value
+          : this.scanSubdirectories,
+      totalSize: data.totalSize.present ? data.totalSize.value : this.totalSize,
+      fileCount: data.fileCount.present ? data.fileCount.value : this.fileCount,
+      dateAdded: data.dateAdded.present ? data.dateAdded.value : this.dateAdded,
+      excludedSubdirectories: data.excludedSubdirectories.present
+          ? data.excludedSubdirectories.value
+          : this.excludedSubdirectories,
     );
   }
 
@@ -415,13 +403,13 @@ class MusicDirectory extends DataClass implements Insertable<MusicDirectory> {
     return (StringBuffer('MusicDirectory(')
           ..write('id: $id, ')
           ..write('path: $path, ')
-          ..write('is_enabled: $is_enabled, ')
-          ..write('last_scanned: $last_scanned, ')
-          ..write('scan_subdirectories: $scan_subdirectories, ')
-          ..write('total_size: $total_size, ')
-          ..write('file_count: $file_count, ')
-          ..write('date_added: $date_added, ')
-          ..write('excluded_subdirectories: $excluded_subdirectories')
+          ..write('isEnabled: $isEnabled, ')
+          ..write('lastScanned: $lastScanned, ')
+          ..write('scanSubdirectories: $scanSubdirectories, ')
+          ..write('totalSize: $totalSize, ')
+          ..write('fileCount: $fileCount, ')
+          ..write('dateAdded: $dateAdded, ')
+          ..write('excludedSubdirectories: $excludedSubdirectories')
           ..write(')'))
         .toString();
   }
@@ -430,13 +418,13 @@ class MusicDirectory extends DataClass implements Insertable<MusicDirectory> {
   int get hashCode => Object.hash(
     id,
     path,
-    is_enabled,
-    last_scanned,
-    scan_subdirectories,
-    total_size,
-    file_count,
-    date_added,
-    excluded_subdirectories,
+    isEnabled,
+    lastScanned,
+    scanSubdirectories,
+    totalSize,
+    fileCount,
+    dateAdded,
+    excludedSubdirectories,
   );
   @override
   bool operator ==(Object other) =>
@@ -444,96 +432,95 @@ class MusicDirectory extends DataClass implements Insertable<MusicDirectory> {
       (other is MusicDirectory &&
           other.id == this.id &&
           other.path == this.path &&
-          other.is_enabled == this.is_enabled &&
-          other.last_scanned == this.last_scanned &&
-          other.scan_subdirectories == this.scan_subdirectories &&
-          other.total_size == this.total_size &&
-          other.file_count == this.file_count &&
-          other.date_added == this.date_added &&
-          other.excluded_subdirectories == this.excluded_subdirectories);
+          other.isEnabled == this.isEnabled &&
+          other.lastScanned == this.lastScanned &&
+          other.scanSubdirectories == this.scanSubdirectories &&
+          other.totalSize == this.totalSize &&
+          other.fileCount == this.fileCount &&
+          other.dateAdded == this.dateAdded &&
+          other.excludedSubdirectories == this.excludedSubdirectories);
 }
 
 class MusicDirectoriesCompanion extends UpdateCompanion<MusicDirectory> {
   final Value<int> id;
   final Value<String> path;
-  final Value<bool> is_enabled;
-  final Value<int?> last_scanned;
-  final Value<bool> scan_subdirectories;
-  final Value<int> total_size;
-  final Value<int> file_count;
-  final Value<DateTime> date_added;
-  final Value<String?> excluded_subdirectories;
+  final Value<bool> isEnabled;
+  final Value<int?> lastScanned;
+  final Value<bool> scanSubdirectories;
+  final Value<int> totalSize;
+  final Value<int> fileCount;
+  final Value<DateTime> dateAdded;
+  final Value<String?> excludedSubdirectories;
   const MusicDirectoriesCompanion({
     this.id = const Value.absent(),
     this.path = const Value.absent(),
-    this.is_enabled = const Value.absent(),
-    this.last_scanned = const Value.absent(),
-    this.scan_subdirectories = const Value.absent(),
-    this.total_size = const Value.absent(),
-    this.file_count = const Value.absent(),
-    this.date_added = const Value.absent(),
-    this.excluded_subdirectories = const Value.absent(),
+    this.isEnabled = const Value.absent(),
+    this.lastScanned = const Value.absent(),
+    this.scanSubdirectories = const Value.absent(),
+    this.totalSize = const Value.absent(),
+    this.fileCount = const Value.absent(),
+    this.dateAdded = const Value.absent(),
+    this.excludedSubdirectories = const Value.absent(),
   });
   MusicDirectoriesCompanion.insert({
     this.id = const Value.absent(),
     required String path,
-    this.is_enabled = const Value.absent(),
-    this.last_scanned = const Value.absent(),
-    this.scan_subdirectories = const Value.absent(),
-    this.total_size = const Value.absent(),
-    this.file_count = const Value.absent(),
-    required DateTime date_added,
-    this.excluded_subdirectories = const Value.absent(),
+    this.isEnabled = const Value.absent(),
+    this.lastScanned = const Value.absent(),
+    this.scanSubdirectories = const Value.absent(),
+    this.totalSize = const Value.absent(),
+    this.fileCount = const Value.absent(),
+    required DateTime dateAdded,
+    this.excludedSubdirectories = const Value.absent(),
   }) : path = Value(path),
-       date_added = Value(date_added);
+       dateAdded = Value(dateAdded);
   static Insertable<MusicDirectory> custom({
     Expression<int>? id,
     Expression<String>? path,
-    Expression<bool>? is_enabled,
-    Expression<int>? last_scanned,
-    Expression<bool>? scan_subdirectories,
-    Expression<int>? total_size,
-    Expression<int>? file_count,
-    Expression<DateTime>? date_added,
-    Expression<String>? excluded_subdirectories,
+    Expression<bool>? isEnabled,
+    Expression<int>? lastScanned,
+    Expression<bool>? scanSubdirectories,
+    Expression<int>? totalSize,
+    Expression<int>? fileCount,
+    Expression<DateTime>? dateAdded,
+    Expression<String>? excludedSubdirectories,
   }) {
     return RawValuesInsertable({
       if (id != null) 'id': id,
       if (path != null) 'path': path,
-      if (is_enabled != null) 'is_enabled': is_enabled,
-      if (last_scanned != null) 'last_scanned': last_scanned,
-      if (scan_subdirectories != null)
-        'scan_subdirectories': scan_subdirectories,
-      if (total_size != null) 'total_size': total_size,
-      if (file_count != null) 'file_count': file_count,
-      if (date_added != null) 'date_added': date_added,
-      if (excluded_subdirectories != null)
-        'excluded_subdirectories': excluded_subdirectories,
+      if (isEnabled != null) 'is_enabled': isEnabled,
+      if (lastScanned != null) 'last_scanned': lastScanned,
+      if (scanSubdirectories != null) 'scan_subdirectories': scanSubdirectories,
+      if (totalSize != null) 'total_size': totalSize,
+      if (fileCount != null) 'file_count': fileCount,
+      if (dateAdded != null) 'date_added': dateAdded,
+      if (excludedSubdirectories != null)
+        'excluded_subdirectories': excludedSubdirectories,
     });
   }
 
   MusicDirectoriesCompanion copyWith({
     Value<int>? id,
     Value<String>? path,
-    Value<bool>? is_enabled,
-    Value<int?>? last_scanned,
-    Value<bool>? scan_subdirectories,
-    Value<int>? total_size,
-    Value<int>? file_count,
-    Value<DateTime>? date_added,
-    Value<String?>? excluded_subdirectories,
+    Value<bool>? isEnabled,
+    Value<int?>? lastScanned,
+    Value<bool>? scanSubdirectories,
+    Value<int>? totalSize,
+    Value<int>? fileCount,
+    Value<DateTime>? dateAdded,
+    Value<String?>? excludedSubdirectories,
   }) {
     return MusicDirectoriesCompanion(
       id: id ?? this.id,
       path: path ?? this.path,
-      is_enabled: is_enabled ?? this.is_enabled,
-      last_scanned: last_scanned ?? this.last_scanned,
-      scan_subdirectories: scan_subdirectories ?? this.scan_subdirectories,
-      total_size: total_size ?? this.total_size,
-      file_count: file_count ?? this.file_count,
-      date_added: date_added ?? this.date_added,
-      excluded_subdirectories:
-          excluded_subdirectories ?? this.excluded_subdirectories,
+      isEnabled: isEnabled ?? this.isEnabled,
+      lastScanned: lastScanned ?? this.lastScanned,
+      scanSubdirectories: scanSubdirectories ?? this.scanSubdirectories,
+      totalSize: totalSize ?? this.totalSize,
+      fileCount: fileCount ?? this.fileCount,
+      dateAdded: dateAdded ?? this.dateAdded,
+      excludedSubdirectories:
+          excludedSubdirectories ?? this.excludedSubdirectories,
     );
   }
 
@@ -546,27 +533,27 @@ class MusicDirectoriesCompanion extends UpdateCompanion<MusicDirectory> {
     if (path.present) {
       map['path'] = Variable<String>(path.value);
     }
-    if (is_enabled.present) {
-      map['is_enabled'] = Variable<bool>(is_enabled.value);
+    if (isEnabled.present) {
+      map['is_enabled'] = Variable<bool>(isEnabled.value);
     }
-    if (last_scanned.present) {
-      map['last_scanned'] = Variable<int>(last_scanned.value);
+    if (lastScanned.present) {
+      map['last_scanned'] = Variable<int>(lastScanned.value);
     }
-    if (scan_subdirectories.present) {
-      map['scan_subdirectories'] = Variable<bool>(scan_subdirectories.value);
+    if (scanSubdirectories.present) {
+      map['scan_subdirectories'] = Variable<bool>(scanSubdirectories.value);
     }
-    if (total_size.present) {
-      map['total_size'] = Variable<int>(total_size.value);
+    if (totalSize.present) {
+      map['total_size'] = Variable<int>(totalSize.value);
     }
-    if (file_count.present) {
-      map['file_count'] = Variable<int>(file_count.value);
+    if (fileCount.present) {
+      map['file_count'] = Variable<int>(fileCount.value);
     }
-    if (date_added.present) {
-      map['date_added'] = Variable<DateTime>(date_added.value);
+    if (dateAdded.present) {
+      map['date_added'] = Variable<DateTime>(dateAdded.value);
     }
-    if (excluded_subdirectories.present) {
+    if (excludedSubdirectories.present) {
       map['excluded_subdirectories'] = Variable<String>(
-        excluded_subdirectories.value,
+        excludedSubdirectories.value,
       );
     }
     return map;
@@ -577,13 +564,13 @@ class MusicDirectoriesCompanion extends UpdateCompanion<MusicDirectory> {
     return (StringBuffer('MusicDirectoriesCompanion(')
           ..write('id: $id, ')
           ..write('path: $path, ')
-          ..write('is_enabled: $is_enabled, ')
-          ..write('last_scanned: $last_scanned, ')
-          ..write('scan_subdirectories: $scan_subdirectories, ')
-          ..write('total_size: $total_size, ')
-          ..write('file_count: $file_count, ')
-          ..write('date_added: $date_added, ')
-          ..write('excluded_subdirectories: $excluded_subdirectories')
+          ..write('isEnabled: $isEnabled, ')
+          ..write('lastScanned: $lastScanned, ')
+          ..write('scanSubdirectories: $scanSubdirectories, ')
+          ..write('totalSize: $totalSize, ')
+          ..write('fileCount: $fileCount, ')
+          ..write('dateAdded: $dateAdded, ')
+          ..write('excludedSubdirectories: $excludedSubdirectories')
           ..write(')'))
         .toString();
   }
@@ -2385,6 +2372,774 @@ class TracksCompanion extends UpdateCompanion<Track> {
   }
 }
 
+class $PlaylistTable extends Playlist
+    with TableInfo<$PlaylistTable, PlaylistData> {
+  @override
+  final GeneratedDatabase attachedDatabase;
+  final String? _alias;
+  $PlaylistTable(this.attachedDatabase, [this._alias]);
+  static const VerificationMeta _idMeta = const VerificationMeta('id');
+  @override
+  late final GeneratedColumn<int> id = GeneratedColumn<int>(
+    'id',
+    aliasedName,
+    false,
+    hasAutoIncrement: true,
+    type: DriftSqlType.int,
+    requiredDuringInsert: false,
+    defaultConstraints: GeneratedColumn.constraintIsAlways(
+      'PRIMARY KEY AUTOINCREMENT',
+    ),
+  );
+  static const VerificationMeta _nameMeta = const VerificationMeta('name');
+  @override
+  late final GeneratedColumn<String> name = GeneratedColumn<String>(
+    'name',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _descriptionMeta = const VerificationMeta(
+    'description',
+  );
+  @override
+  late final GeneratedColumn<String> description = GeneratedColumn<String>(
+    'description',
+    aliasedName,
+    true,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+  );
+  static const VerificationMeta _coverImageMeta = const VerificationMeta(
+    'coverImage',
+  );
+  @override
+  late final GeneratedColumn<String> coverImage = GeneratedColumn<String>(
+    'cover_image',
+    aliasedName,
+    true,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+  );
+  static const VerificationMeta _createdAtMeta = const VerificationMeta(
+    'createdAt',
+  );
+  @override
+  late final GeneratedColumn<DateTime> createdAt = GeneratedColumn<DateTime>(
+    'created_at',
+    aliasedName,
+    false,
+    type: DriftSqlType.dateTime,
+    requiredDuringInsert: false,
+    defaultValue: currentDateAndTime,
+  );
+  static const VerificationMeta _updatedAtMeta = const VerificationMeta(
+    'updatedAt',
+  );
+  @override
+  late final GeneratedColumn<DateTime> updatedAt = GeneratedColumn<DateTime>(
+    'updated_at',
+    aliasedName,
+    true,
+    type: DriftSqlType.dateTime,
+    requiredDuringInsert: false,
+  );
+  @override
+  List<GeneratedColumn> get $columns => [
+    id,
+    name,
+    description,
+    coverImage,
+    createdAt,
+    updatedAt,
+  ];
+  @override
+  String get aliasedName => _alias ?? actualTableName;
+  @override
+  String get actualTableName => $name;
+  static const String $name = 'playlist';
+  @override
+  VerificationContext validateIntegrity(
+    Insertable<PlaylistData> instance, {
+    bool isInserting = false,
+  }) {
+    final context = VerificationContext();
+    final data = instance.toColumns(true);
+    if (data.containsKey('id')) {
+      context.handle(_idMeta, id.isAcceptableOrUnknown(data['id']!, _idMeta));
+    }
+    if (data.containsKey('name')) {
+      context.handle(
+        _nameMeta,
+        name.isAcceptableOrUnknown(data['name']!, _nameMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_nameMeta);
+    }
+    if (data.containsKey('description')) {
+      context.handle(
+        _descriptionMeta,
+        description.isAcceptableOrUnknown(
+          data['description']!,
+          _descriptionMeta,
+        ),
+      );
+    }
+    if (data.containsKey('cover_image')) {
+      context.handle(
+        _coverImageMeta,
+        coverImage.isAcceptableOrUnknown(data['cover_image']!, _coverImageMeta),
+      );
+    }
+    if (data.containsKey('created_at')) {
+      context.handle(
+        _createdAtMeta,
+        createdAt.isAcceptableOrUnknown(data['created_at']!, _createdAtMeta),
+      );
+    }
+    if (data.containsKey('updated_at')) {
+      context.handle(
+        _updatedAtMeta,
+        updatedAt.isAcceptableOrUnknown(data['updated_at']!, _updatedAtMeta),
+      );
+    }
+    return context;
+  }
+
+  @override
+  Set<GeneratedColumn> get $primaryKey => {id};
+  @override
+  PlaylistData map(Map<String, dynamic> data, {String? tablePrefix}) {
+    final effectivePrefix = tablePrefix != null ? '$tablePrefix.' : '';
+    return PlaylistData(
+      id: attachedDatabase.typeMapping.read(
+        DriftSqlType.int,
+        data['${effectivePrefix}id'],
+      )!,
+      name: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}name'],
+      )!,
+      description: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}description'],
+      ),
+      coverImage: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}cover_image'],
+      ),
+      createdAt: attachedDatabase.typeMapping.read(
+        DriftSqlType.dateTime,
+        data['${effectivePrefix}created_at'],
+      )!,
+      updatedAt: attachedDatabase.typeMapping.read(
+        DriftSqlType.dateTime,
+        data['${effectivePrefix}updated_at'],
+      ),
+    );
+  }
+
+  @override
+  $PlaylistTable createAlias(String alias) {
+    return $PlaylistTable(attachedDatabase, alias);
+  }
+}
+
+class PlaylistData extends DataClass implements Insertable<PlaylistData> {
+  final int id;
+  final String name;
+  final String? description;
+  final String? coverImage;
+  final DateTime createdAt;
+  final DateTime? updatedAt;
+  const PlaylistData({
+    required this.id,
+    required this.name,
+    this.description,
+    this.coverImage,
+    required this.createdAt,
+    this.updatedAt,
+  });
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    map['id'] = Variable<int>(id);
+    map['name'] = Variable<String>(name);
+    if (!nullToAbsent || description != null) {
+      map['description'] = Variable<String>(description);
+    }
+    if (!nullToAbsent || coverImage != null) {
+      map['cover_image'] = Variable<String>(coverImage);
+    }
+    map['created_at'] = Variable<DateTime>(createdAt);
+    if (!nullToAbsent || updatedAt != null) {
+      map['updated_at'] = Variable<DateTime>(updatedAt);
+    }
+    return map;
+  }
+
+  PlaylistCompanion toCompanion(bool nullToAbsent) {
+    return PlaylistCompanion(
+      id: Value(id),
+      name: Value(name),
+      description: description == null && nullToAbsent
+          ? const Value.absent()
+          : Value(description),
+      coverImage: coverImage == null && nullToAbsent
+          ? const Value.absent()
+          : Value(coverImage),
+      createdAt: Value(createdAt),
+      updatedAt: updatedAt == null && nullToAbsent
+          ? const Value.absent()
+          : Value(updatedAt),
+    );
+  }
+
+  factory PlaylistData.fromJson(
+    Map<String, dynamic> json, {
+    ValueSerializer? serializer,
+  }) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return PlaylistData(
+      id: serializer.fromJson<int>(json['id']),
+      name: serializer.fromJson<String>(json['name']),
+      description: serializer.fromJson<String?>(json['description']),
+      coverImage: serializer.fromJson<String?>(json['coverImage']),
+      createdAt: serializer.fromJson<DateTime>(json['createdAt']),
+      updatedAt: serializer.fromJson<DateTime?>(json['updatedAt']),
+    );
+  }
+  @override
+  Map<String, dynamic> toJson({ValueSerializer? serializer}) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return <String, dynamic>{
+      'id': serializer.toJson<int>(id),
+      'name': serializer.toJson<String>(name),
+      'description': serializer.toJson<String?>(description),
+      'coverImage': serializer.toJson<String?>(coverImage),
+      'createdAt': serializer.toJson<DateTime>(createdAt),
+      'updatedAt': serializer.toJson<DateTime?>(updatedAt),
+    };
+  }
+
+  PlaylistData copyWith({
+    int? id,
+    String? name,
+    Value<String?> description = const Value.absent(),
+    Value<String?> coverImage = const Value.absent(),
+    DateTime? createdAt,
+    Value<DateTime?> updatedAt = const Value.absent(),
+  }) => PlaylistData(
+    id: id ?? this.id,
+    name: name ?? this.name,
+    description: description.present ? description.value : this.description,
+    coverImage: coverImage.present ? coverImage.value : this.coverImage,
+    createdAt: createdAt ?? this.createdAt,
+    updatedAt: updatedAt.present ? updatedAt.value : this.updatedAt,
+  );
+  PlaylistData copyWithCompanion(PlaylistCompanion data) {
+    return PlaylistData(
+      id: data.id.present ? data.id.value : this.id,
+      name: data.name.present ? data.name.value : this.name,
+      description: data.description.present
+          ? data.description.value
+          : this.description,
+      coverImage: data.coverImage.present
+          ? data.coverImage.value
+          : this.coverImage,
+      createdAt: data.createdAt.present ? data.createdAt.value : this.createdAt,
+      updatedAt: data.updatedAt.present ? data.updatedAt.value : this.updatedAt,
+    );
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('PlaylistData(')
+          ..write('id: $id, ')
+          ..write('name: $name, ')
+          ..write('description: $description, ')
+          ..write('coverImage: $coverImage, ')
+          ..write('createdAt: $createdAt, ')
+          ..write('updatedAt: $updatedAt')
+          ..write(')'))
+        .toString();
+  }
+
+  @override
+  int get hashCode =>
+      Object.hash(id, name, description, coverImage, createdAt, updatedAt);
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      (other is PlaylistData &&
+          other.id == this.id &&
+          other.name == this.name &&
+          other.description == this.description &&
+          other.coverImage == this.coverImage &&
+          other.createdAt == this.createdAt &&
+          other.updatedAt == this.updatedAt);
+}
+
+class PlaylistCompanion extends UpdateCompanion<PlaylistData> {
+  final Value<int> id;
+  final Value<String> name;
+  final Value<String?> description;
+  final Value<String?> coverImage;
+  final Value<DateTime> createdAt;
+  final Value<DateTime?> updatedAt;
+  const PlaylistCompanion({
+    this.id = const Value.absent(),
+    this.name = const Value.absent(),
+    this.description = const Value.absent(),
+    this.coverImage = const Value.absent(),
+    this.createdAt = const Value.absent(),
+    this.updatedAt = const Value.absent(),
+  });
+  PlaylistCompanion.insert({
+    this.id = const Value.absent(),
+    required String name,
+    this.description = const Value.absent(),
+    this.coverImage = const Value.absent(),
+    this.createdAt = const Value.absent(),
+    this.updatedAt = const Value.absent(),
+  }) : name = Value(name);
+  static Insertable<PlaylistData> custom({
+    Expression<int>? id,
+    Expression<String>? name,
+    Expression<String>? description,
+    Expression<String>? coverImage,
+    Expression<DateTime>? createdAt,
+    Expression<DateTime>? updatedAt,
+  }) {
+    return RawValuesInsertable({
+      if (id != null) 'id': id,
+      if (name != null) 'name': name,
+      if (description != null) 'description': description,
+      if (coverImage != null) 'cover_image': coverImage,
+      if (createdAt != null) 'created_at': createdAt,
+      if (updatedAt != null) 'updated_at': updatedAt,
+    });
+  }
+
+  PlaylistCompanion copyWith({
+    Value<int>? id,
+    Value<String>? name,
+    Value<String?>? description,
+    Value<String?>? coverImage,
+    Value<DateTime>? createdAt,
+    Value<DateTime?>? updatedAt,
+  }) {
+    return PlaylistCompanion(
+      id: id ?? this.id,
+      name: name ?? this.name,
+      description: description ?? this.description,
+      coverImage: coverImage ?? this.coverImage,
+      createdAt: createdAt ?? this.createdAt,
+      updatedAt: updatedAt ?? this.updatedAt,
+    );
+  }
+
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    if (id.present) {
+      map['id'] = Variable<int>(id.value);
+    }
+    if (name.present) {
+      map['name'] = Variable<String>(name.value);
+    }
+    if (description.present) {
+      map['description'] = Variable<String>(description.value);
+    }
+    if (coverImage.present) {
+      map['cover_image'] = Variable<String>(coverImage.value);
+    }
+    if (createdAt.present) {
+      map['created_at'] = Variable<DateTime>(createdAt.value);
+    }
+    if (updatedAt.present) {
+      map['updated_at'] = Variable<DateTime>(updatedAt.value);
+    }
+    return map;
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('PlaylistCompanion(')
+          ..write('id: $id, ')
+          ..write('name: $name, ')
+          ..write('description: $description, ')
+          ..write('coverImage: $coverImage, ')
+          ..write('createdAt: $createdAt, ')
+          ..write('updatedAt: $updatedAt')
+          ..write(')'))
+        .toString();
+  }
+}
+
+class $PlaylistTracksTable extends PlaylistTracks
+    with TableInfo<$PlaylistTracksTable, PlaylistTrack> {
+  @override
+  final GeneratedDatabase attachedDatabase;
+  final String? _alias;
+  $PlaylistTracksTable(this.attachedDatabase, [this._alias]);
+  static const VerificationMeta _idMeta = const VerificationMeta('id');
+  @override
+  late final GeneratedColumn<int> id = GeneratedColumn<int>(
+    'id',
+    aliasedName,
+    false,
+    hasAutoIncrement: true,
+    type: DriftSqlType.int,
+    requiredDuringInsert: false,
+    defaultConstraints: GeneratedColumn.constraintIsAlways(
+      'PRIMARY KEY AUTOINCREMENT',
+    ),
+  );
+  static const VerificationMeta _playlistIdMeta = const VerificationMeta(
+    'playlistId',
+  );
+  @override
+  late final GeneratedColumn<int> playlistId = GeneratedColumn<int>(
+    'playlist_id',
+    aliasedName,
+    false,
+    type: DriftSqlType.int,
+    requiredDuringInsert: true,
+    defaultConstraints: GeneratedColumn.constraintIsAlways(
+      'REFERENCES playlist (id)',
+    ),
+  );
+  static const VerificationMeta _trackIdMeta = const VerificationMeta(
+    'trackId',
+  );
+  @override
+  late final GeneratedColumn<int> trackId = GeneratedColumn<int>(
+    'track_id',
+    aliasedName,
+    false,
+    type: DriftSqlType.int,
+    requiredDuringInsert: true,
+    defaultConstraints: GeneratedColumn.constraintIsAlways(
+      'REFERENCES tracks (id)',
+    ),
+  );
+  static const VerificationMeta _positionMeta = const VerificationMeta(
+    'position',
+  );
+  @override
+  late final GeneratedColumn<int> position = GeneratedColumn<int>(
+    'position',
+    aliasedName,
+    false,
+    type: DriftSqlType.int,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _addedAtMeta = const VerificationMeta(
+    'addedAt',
+  );
+  @override
+  late final GeneratedColumn<DateTime> addedAt = GeneratedColumn<DateTime>(
+    'added_at',
+    aliasedName,
+    false,
+    type: DriftSqlType.dateTime,
+    requiredDuringInsert: false,
+    defaultValue: currentDateAndTime,
+  );
+  @override
+  List<GeneratedColumn> get $columns => [
+    id,
+    playlistId,
+    trackId,
+    position,
+    addedAt,
+  ];
+  @override
+  String get aliasedName => _alias ?? actualTableName;
+  @override
+  String get actualTableName => $name;
+  static const String $name = 'playlist_tracks';
+  @override
+  VerificationContext validateIntegrity(
+    Insertable<PlaylistTrack> instance, {
+    bool isInserting = false,
+  }) {
+    final context = VerificationContext();
+    final data = instance.toColumns(true);
+    if (data.containsKey('id')) {
+      context.handle(_idMeta, id.isAcceptableOrUnknown(data['id']!, _idMeta));
+    }
+    if (data.containsKey('playlist_id')) {
+      context.handle(
+        _playlistIdMeta,
+        playlistId.isAcceptableOrUnknown(data['playlist_id']!, _playlistIdMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_playlistIdMeta);
+    }
+    if (data.containsKey('track_id')) {
+      context.handle(
+        _trackIdMeta,
+        trackId.isAcceptableOrUnknown(data['track_id']!, _trackIdMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_trackIdMeta);
+    }
+    if (data.containsKey('position')) {
+      context.handle(
+        _positionMeta,
+        position.isAcceptableOrUnknown(data['position']!, _positionMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_positionMeta);
+    }
+    if (data.containsKey('added_at')) {
+      context.handle(
+        _addedAtMeta,
+        addedAt.isAcceptableOrUnknown(data['added_at']!, _addedAtMeta),
+      );
+    }
+    return context;
+  }
+
+  @override
+  Set<GeneratedColumn> get $primaryKey => {id};
+  @override
+  List<Set<GeneratedColumn>> get uniqueKeys => [
+    {playlistId, trackId},
+  ];
+  @override
+  PlaylistTrack map(Map<String, dynamic> data, {String? tablePrefix}) {
+    final effectivePrefix = tablePrefix != null ? '$tablePrefix.' : '';
+    return PlaylistTrack(
+      id: attachedDatabase.typeMapping.read(
+        DriftSqlType.int,
+        data['${effectivePrefix}id'],
+      )!,
+      playlistId: attachedDatabase.typeMapping.read(
+        DriftSqlType.int,
+        data['${effectivePrefix}playlist_id'],
+      )!,
+      trackId: attachedDatabase.typeMapping.read(
+        DriftSqlType.int,
+        data['${effectivePrefix}track_id'],
+      )!,
+      position: attachedDatabase.typeMapping.read(
+        DriftSqlType.int,
+        data['${effectivePrefix}position'],
+      )!,
+      addedAt: attachedDatabase.typeMapping.read(
+        DriftSqlType.dateTime,
+        data['${effectivePrefix}added_at'],
+      )!,
+    );
+  }
+
+  @override
+  $PlaylistTracksTable createAlias(String alias) {
+    return $PlaylistTracksTable(attachedDatabase, alias);
+  }
+}
+
+class PlaylistTrack extends DataClass implements Insertable<PlaylistTrack> {
+  final int id;
+  final int playlistId;
+  final int trackId;
+  final int position;
+  final DateTime addedAt;
+  const PlaylistTrack({
+    required this.id,
+    required this.playlistId,
+    required this.trackId,
+    required this.position,
+    required this.addedAt,
+  });
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    map['id'] = Variable<int>(id);
+    map['playlist_id'] = Variable<int>(playlistId);
+    map['track_id'] = Variable<int>(trackId);
+    map['position'] = Variable<int>(position);
+    map['added_at'] = Variable<DateTime>(addedAt);
+    return map;
+  }
+
+  PlaylistTracksCompanion toCompanion(bool nullToAbsent) {
+    return PlaylistTracksCompanion(
+      id: Value(id),
+      playlistId: Value(playlistId),
+      trackId: Value(trackId),
+      position: Value(position),
+      addedAt: Value(addedAt),
+    );
+  }
+
+  factory PlaylistTrack.fromJson(
+    Map<String, dynamic> json, {
+    ValueSerializer? serializer,
+  }) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return PlaylistTrack(
+      id: serializer.fromJson<int>(json['id']),
+      playlistId: serializer.fromJson<int>(json['playlistId']),
+      trackId: serializer.fromJson<int>(json['trackId']),
+      position: serializer.fromJson<int>(json['position']),
+      addedAt: serializer.fromJson<DateTime>(json['addedAt']),
+    );
+  }
+  @override
+  Map<String, dynamic> toJson({ValueSerializer? serializer}) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return <String, dynamic>{
+      'id': serializer.toJson<int>(id),
+      'playlistId': serializer.toJson<int>(playlistId),
+      'trackId': serializer.toJson<int>(trackId),
+      'position': serializer.toJson<int>(position),
+      'addedAt': serializer.toJson<DateTime>(addedAt),
+    };
+  }
+
+  PlaylistTrack copyWith({
+    int? id,
+    int? playlistId,
+    int? trackId,
+    int? position,
+    DateTime? addedAt,
+  }) => PlaylistTrack(
+    id: id ?? this.id,
+    playlistId: playlistId ?? this.playlistId,
+    trackId: trackId ?? this.trackId,
+    position: position ?? this.position,
+    addedAt: addedAt ?? this.addedAt,
+  );
+  PlaylistTrack copyWithCompanion(PlaylistTracksCompanion data) {
+    return PlaylistTrack(
+      id: data.id.present ? data.id.value : this.id,
+      playlistId: data.playlistId.present
+          ? data.playlistId.value
+          : this.playlistId,
+      trackId: data.trackId.present ? data.trackId.value : this.trackId,
+      position: data.position.present ? data.position.value : this.position,
+      addedAt: data.addedAt.present ? data.addedAt.value : this.addedAt,
+    );
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('PlaylistTrack(')
+          ..write('id: $id, ')
+          ..write('playlistId: $playlistId, ')
+          ..write('trackId: $trackId, ')
+          ..write('position: $position, ')
+          ..write('addedAt: $addedAt')
+          ..write(')'))
+        .toString();
+  }
+
+  @override
+  int get hashCode => Object.hash(id, playlistId, trackId, position, addedAt);
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      (other is PlaylistTrack &&
+          other.id == this.id &&
+          other.playlistId == this.playlistId &&
+          other.trackId == this.trackId &&
+          other.position == this.position &&
+          other.addedAt == this.addedAt);
+}
+
+class PlaylistTracksCompanion extends UpdateCompanion<PlaylistTrack> {
+  final Value<int> id;
+  final Value<int> playlistId;
+  final Value<int> trackId;
+  final Value<int> position;
+  final Value<DateTime> addedAt;
+  const PlaylistTracksCompanion({
+    this.id = const Value.absent(),
+    this.playlistId = const Value.absent(),
+    this.trackId = const Value.absent(),
+    this.position = const Value.absent(),
+    this.addedAt = const Value.absent(),
+  });
+  PlaylistTracksCompanion.insert({
+    this.id = const Value.absent(),
+    required int playlistId,
+    required int trackId,
+    required int position,
+    this.addedAt = const Value.absent(),
+  }) : playlistId = Value(playlistId),
+       trackId = Value(trackId),
+       position = Value(position);
+  static Insertable<PlaylistTrack> custom({
+    Expression<int>? id,
+    Expression<int>? playlistId,
+    Expression<int>? trackId,
+    Expression<int>? position,
+    Expression<DateTime>? addedAt,
+  }) {
+    return RawValuesInsertable({
+      if (id != null) 'id': id,
+      if (playlistId != null) 'playlist_id': playlistId,
+      if (trackId != null) 'track_id': trackId,
+      if (position != null) 'position': position,
+      if (addedAt != null) 'added_at': addedAt,
+    });
+  }
+
+  PlaylistTracksCompanion copyWith({
+    Value<int>? id,
+    Value<int>? playlistId,
+    Value<int>? trackId,
+    Value<int>? position,
+    Value<DateTime>? addedAt,
+  }) {
+    return PlaylistTracksCompanion(
+      id: id ?? this.id,
+      playlistId: playlistId ?? this.playlistId,
+      trackId: trackId ?? this.trackId,
+      position: position ?? this.position,
+      addedAt: addedAt ?? this.addedAt,
+    );
+  }
+
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    if (id.present) {
+      map['id'] = Variable<int>(id.value);
+    }
+    if (playlistId.present) {
+      map['playlist_id'] = Variable<int>(playlistId.value);
+    }
+    if (trackId.present) {
+      map['track_id'] = Variable<int>(trackId.value);
+    }
+    if (position.present) {
+      map['position'] = Variable<int>(position.value);
+    }
+    if (addedAt.present) {
+      map['added_at'] = Variable<DateTime>(addedAt.value);
+    }
+    return map;
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('PlaylistTracksCompanion(')
+          ..write('id: $id, ')
+          ..write('playlistId: $playlistId, ')
+          ..write('trackId: $trackId, ')
+          ..write('position: $position, ')
+          ..write('addedAt: $addedAt')
+          ..write(')'))
+        .toString();
+  }
+}
+
 abstract class _$AppDatabase extends GeneratedDatabase {
   _$AppDatabase(QueryExecutor e) : super(e);
   $AppDatabaseManager get managers => $AppDatabaseManager(this);
@@ -2396,6 +3151,8 @@ abstract class _$AppDatabase extends GeneratedDatabase {
   late final $ArtistsTable artists = $ArtistsTable(this);
   late final $AlbumsTable albums = $AlbumsTable(this);
   late final $TracksTable tracks = $TracksTable(this);
+  late final $PlaylistTable playlist = $PlaylistTable(this);
+  late final $PlaylistTracksTable playlistTracks = $PlaylistTracksTable(this);
   @override
   Iterable<TableInfo<Table, Object?>> get allTables =>
       allSchemaEntities.whereType<TableInfo<Table, Object?>>();
@@ -2407,6 +3164,8 @@ abstract class _$AppDatabase extends GeneratedDatabase {
     artists,
     albums,
     tracks,
+    playlist,
+    playlistTracks,
   ];
 }
 
@@ -2414,25 +3173,25 @@ typedef $$MusicDirectoriesTableCreateCompanionBuilder =
     MusicDirectoriesCompanion Function({
       Value<int> id,
       required String path,
-      Value<bool> is_enabled,
-      Value<int?> last_scanned,
-      Value<bool> scan_subdirectories,
-      Value<int> total_size,
-      Value<int> file_count,
-      required DateTime date_added,
-      Value<String?> excluded_subdirectories,
+      Value<bool> isEnabled,
+      Value<int?> lastScanned,
+      Value<bool> scanSubdirectories,
+      Value<int> totalSize,
+      Value<int> fileCount,
+      required DateTime dateAdded,
+      Value<String?> excludedSubdirectories,
     });
 typedef $$MusicDirectoriesTableUpdateCompanionBuilder =
     MusicDirectoriesCompanion Function({
       Value<int> id,
       Value<String> path,
-      Value<bool> is_enabled,
-      Value<int?> last_scanned,
-      Value<bool> scan_subdirectories,
-      Value<int> total_size,
-      Value<int> file_count,
-      Value<DateTime> date_added,
-      Value<String?> excluded_subdirectories,
+      Value<bool> isEnabled,
+      Value<int?> lastScanned,
+      Value<bool> scanSubdirectories,
+      Value<int> totalSize,
+      Value<int> fileCount,
+      Value<DateTime> dateAdded,
+      Value<String?> excludedSubdirectories,
     });
 
 class $$MusicDirectoriesTableFilterComposer
@@ -2454,38 +3213,38 @@ class $$MusicDirectoriesTableFilterComposer
     builder: (column) => ColumnFilters(column),
   );
 
-  ColumnFilters<bool> get is_enabled => $composableBuilder(
-    column: $table.is_enabled,
+  ColumnFilters<bool> get isEnabled => $composableBuilder(
+    column: $table.isEnabled,
     builder: (column) => ColumnFilters(column),
   );
 
-  ColumnFilters<int> get last_scanned => $composableBuilder(
-    column: $table.last_scanned,
+  ColumnFilters<int> get lastScanned => $composableBuilder(
+    column: $table.lastScanned,
     builder: (column) => ColumnFilters(column),
   );
 
-  ColumnFilters<bool> get scan_subdirectories => $composableBuilder(
-    column: $table.scan_subdirectories,
+  ColumnFilters<bool> get scanSubdirectories => $composableBuilder(
+    column: $table.scanSubdirectories,
     builder: (column) => ColumnFilters(column),
   );
 
-  ColumnFilters<int> get total_size => $composableBuilder(
-    column: $table.total_size,
+  ColumnFilters<int> get totalSize => $composableBuilder(
+    column: $table.totalSize,
     builder: (column) => ColumnFilters(column),
   );
 
-  ColumnFilters<int> get file_count => $composableBuilder(
-    column: $table.file_count,
+  ColumnFilters<int> get fileCount => $composableBuilder(
+    column: $table.fileCount,
     builder: (column) => ColumnFilters(column),
   );
 
-  ColumnFilters<DateTime> get date_added => $composableBuilder(
-    column: $table.date_added,
+  ColumnFilters<DateTime> get dateAdded => $composableBuilder(
+    column: $table.dateAdded,
     builder: (column) => ColumnFilters(column),
   );
 
-  ColumnFilters<String> get excluded_subdirectories => $composableBuilder(
-    column: $table.excluded_subdirectories,
+  ColumnFilters<String> get excludedSubdirectories => $composableBuilder(
+    column: $table.excludedSubdirectories,
     builder: (column) => ColumnFilters(column),
   );
 }
@@ -2509,38 +3268,38 @@ class $$MusicDirectoriesTableOrderingComposer
     builder: (column) => ColumnOrderings(column),
   );
 
-  ColumnOrderings<bool> get is_enabled => $composableBuilder(
-    column: $table.is_enabled,
+  ColumnOrderings<bool> get isEnabled => $composableBuilder(
+    column: $table.isEnabled,
     builder: (column) => ColumnOrderings(column),
   );
 
-  ColumnOrderings<int> get last_scanned => $composableBuilder(
-    column: $table.last_scanned,
+  ColumnOrderings<int> get lastScanned => $composableBuilder(
+    column: $table.lastScanned,
     builder: (column) => ColumnOrderings(column),
   );
 
-  ColumnOrderings<bool> get scan_subdirectories => $composableBuilder(
-    column: $table.scan_subdirectories,
+  ColumnOrderings<bool> get scanSubdirectories => $composableBuilder(
+    column: $table.scanSubdirectories,
     builder: (column) => ColumnOrderings(column),
   );
 
-  ColumnOrderings<int> get total_size => $composableBuilder(
-    column: $table.total_size,
+  ColumnOrderings<int> get totalSize => $composableBuilder(
+    column: $table.totalSize,
     builder: (column) => ColumnOrderings(column),
   );
 
-  ColumnOrderings<int> get file_count => $composableBuilder(
-    column: $table.file_count,
+  ColumnOrderings<int> get fileCount => $composableBuilder(
+    column: $table.fileCount,
     builder: (column) => ColumnOrderings(column),
   );
 
-  ColumnOrderings<DateTime> get date_added => $composableBuilder(
-    column: $table.date_added,
+  ColumnOrderings<DateTime> get dateAdded => $composableBuilder(
+    column: $table.dateAdded,
     builder: (column) => ColumnOrderings(column),
   );
 
-  ColumnOrderings<String> get excluded_subdirectories => $composableBuilder(
-    column: $table.excluded_subdirectories,
+  ColumnOrderings<String> get excludedSubdirectories => $composableBuilder(
+    column: $table.excludedSubdirectories,
     builder: (column) => ColumnOrderings(column),
   );
 }
@@ -2560,38 +3319,30 @@ class $$MusicDirectoriesTableAnnotationComposer
   GeneratedColumn<String> get path =>
       $composableBuilder(column: $table.path, builder: (column) => column);
 
-  GeneratedColumn<bool> get is_enabled => $composableBuilder(
-    column: $table.is_enabled,
+  GeneratedColumn<bool> get isEnabled =>
+      $composableBuilder(column: $table.isEnabled, builder: (column) => column);
+
+  GeneratedColumn<int> get lastScanned => $composableBuilder(
+    column: $table.lastScanned,
     builder: (column) => column,
   );
 
-  GeneratedColumn<int> get last_scanned => $composableBuilder(
-    column: $table.last_scanned,
+  GeneratedColumn<bool> get scanSubdirectories => $composableBuilder(
+    column: $table.scanSubdirectories,
     builder: (column) => column,
   );
 
-  GeneratedColumn<bool> get scan_subdirectories => $composableBuilder(
-    column: $table.scan_subdirectories,
-    builder: (column) => column,
-  );
+  GeneratedColumn<int> get totalSize =>
+      $composableBuilder(column: $table.totalSize, builder: (column) => column);
 
-  GeneratedColumn<int> get total_size => $composableBuilder(
-    column: $table.total_size,
-    builder: (column) => column,
-  );
+  GeneratedColumn<int> get fileCount =>
+      $composableBuilder(column: $table.fileCount, builder: (column) => column);
 
-  GeneratedColumn<int> get file_count => $composableBuilder(
-    column: $table.file_count,
-    builder: (column) => column,
-  );
+  GeneratedColumn<DateTime> get dateAdded =>
+      $composableBuilder(column: $table.dateAdded, builder: (column) => column);
 
-  GeneratedColumn<DateTime> get date_added => $composableBuilder(
-    column: $table.date_added,
-    builder: (column) => column,
-  );
-
-  GeneratedColumn<String> get excluded_subdirectories => $composableBuilder(
-    column: $table.excluded_subdirectories,
+  GeneratedColumn<String> get excludedSubdirectories => $composableBuilder(
+    column: $table.excludedSubdirectories,
     builder: (column) => column,
   );
 }
@@ -2635,45 +3386,45 @@ class $$MusicDirectoriesTableTableManager
               ({
                 Value<int> id = const Value.absent(),
                 Value<String> path = const Value.absent(),
-                Value<bool> is_enabled = const Value.absent(),
-                Value<int?> last_scanned = const Value.absent(),
-                Value<bool> scan_subdirectories = const Value.absent(),
-                Value<int> total_size = const Value.absent(),
-                Value<int> file_count = const Value.absent(),
-                Value<DateTime> date_added = const Value.absent(),
-                Value<String?> excluded_subdirectories = const Value.absent(),
+                Value<bool> isEnabled = const Value.absent(),
+                Value<int?> lastScanned = const Value.absent(),
+                Value<bool> scanSubdirectories = const Value.absent(),
+                Value<int> totalSize = const Value.absent(),
+                Value<int> fileCount = const Value.absent(),
+                Value<DateTime> dateAdded = const Value.absent(),
+                Value<String?> excludedSubdirectories = const Value.absent(),
               }) => MusicDirectoriesCompanion(
                 id: id,
                 path: path,
-                is_enabled: is_enabled,
-                last_scanned: last_scanned,
-                scan_subdirectories: scan_subdirectories,
-                total_size: total_size,
-                file_count: file_count,
-                date_added: date_added,
-                excluded_subdirectories: excluded_subdirectories,
+                isEnabled: isEnabled,
+                lastScanned: lastScanned,
+                scanSubdirectories: scanSubdirectories,
+                totalSize: totalSize,
+                fileCount: fileCount,
+                dateAdded: dateAdded,
+                excludedSubdirectories: excludedSubdirectories,
               ),
           createCompanionCallback:
               ({
                 Value<int> id = const Value.absent(),
                 required String path,
-                Value<bool> is_enabled = const Value.absent(),
-                Value<int?> last_scanned = const Value.absent(),
-                Value<bool> scan_subdirectories = const Value.absent(),
-                Value<int> total_size = const Value.absent(),
-                Value<int> file_count = const Value.absent(),
-                required DateTime date_added,
-                Value<String?> excluded_subdirectories = const Value.absent(),
+                Value<bool> isEnabled = const Value.absent(),
+                Value<int?> lastScanned = const Value.absent(),
+                Value<bool> scanSubdirectories = const Value.absent(),
+                Value<int> totalSize = const Value.absent(),
+                Value<int> fileCount = const Value.absent(),
+                required DateTime dateAdded,
+                Value<String?> excludedSubdirectories = const Value.absent(),
               }) => MusicDirectoriesCompanion.insert(
                 id: id,
                 path: path,
-                is_enabled: is_enabled,
-                last_scanned: last_scanned,
-                scan_subdirectories: scan_subdirectories,
-                total_size: total_size,
-                file_count: file_count,
-                date_added: date_added,
-                excluded_subdirectories: excluded_subdirectories,
+                isEnabled: isEnabled,
+                lastScanned: lastScanned,
+                scanSubdirectories: scanSubdirectories,
+                totalSize: totalSize,
+                fileCount: fileCount,
+                dateAdded: dateAdded,
+                excludedSubdirectories: excludedSubdirectories,
               ),
           withReferenceMapper: (p0) => p0
               .map((e) => (e.readTable(table), BaseReferences(db, table, e)))
@@ -4567,6 +5318,24 @@ final class $$TracksTableReferences
       manager.$state.copyWith(prefetchedData: [item]),
     );
   }
+
+  static MultiTypedResultKey<$PlaylistTracksTable, List<PlaylistTrack>>
+  _playlistTracksRefsTable(_$AppDatabase db) => MultiTypedResultKey.fromTable(
+    db.playlistTracks,
+    aliasName: $_aliasNameGenerator(db.tracks.id, db.playlistTracks.trackId),
+  );
+
+  $$PlaylistTracksTableProcessedTableManager get playlistTracksRefs {
+    final manager = $$PlaylistTracksTableTableManager(
+      $_db,
+      $_db.playlistTracks,
+    ).filter((f) => f.trackId.id.sqlEquals($_itemColumn<int>('id')!));
+
+    final cache = $_typedResult.readTableOrNull(_playlistTracksRefsTable($_db));
+    return ProcessedTableManager(
+      manager.$state.copyWith(prefetchedData: cache),
+    );
+  }
 }
 
 class $$TracksTableFilterComposer
@@ -4713,6 +5482,31 @@ class $$TracksTableFilterComposer
           ),
     );
     return composer;
+  }
+
+  Expression<bool> playlistTracksRefs(
+    Expression<bool> Function($$PlaylistTracksTableFilterComposer f) f,
+  ) {
+    final $$PlaylistTracksTableFilterComposer composer = $composerBuilder(
+      composer: this,
+      getCurrentColumn: (t) => t.id,
+      referencedTable: $db.playlistTracks,
+      getReferencedColumn: (t) => t.trackId,
+      builder:
+          (
+            joinBuilder, {
+            $addJoinBuilderToRootComposer,
+            $removeJoinBuilderFromRootComposer,
+          }) => $$PlaylistTracksTableFilterComposer(
+            $db: $db,
+            $table: $db.playlistTracks,
+            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+            joinBuilder: joinBuilder,
+            $removeJoinBuilderFromRootComposer:
+                $removeJoinBuilderFromRootComposer,
+          ),
+    );
+    return f(composer);
   }
 }
 
@@ -4992,6 +5786,31 @@ class $$TracksTableAnnotationComposer
     );
     return composer;
   }
+
+  Expression<T> playlistTracksRefs<T extends Object>(
+    Expression<T> Function($$PlaylistTracksTableAnnotationComposer a) f,
+  ) {
+    final $$PlaylistTracksTableAnnotationComposer composer = $composerBuilder(
+      composer: this,
+      getCurrentColumn: (t) => t.id,
+      referencedTable: $db.playlistTracks,
+      getReferencedColumn: (t) => t.trackId,
+      builder:
+          (
+            joinBuilder, {
+            $addJoinBuilderToRootComposer,
+            $removeJoinBuilderFromRootComposer,
+          }) => $$PlaylistTracksTableAnnotationComposer(
+            $db: $db,
+            $table: $db.playlistTracks,
+            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+            joinBuilder: joinBuilder,
+            $removeJoinBuilderFromRootComposer:
+                $removeJoinBuilderFromRootComposer,
+          ),
+    );
+    return f(composer);
+  }
 }
 
 class $$TracksTableTableManager
@@ -5012,6 +5831,7 @@ class $$TracksTableTableManager
             bool albumId,
             bool artistId,
             bool genreId,
+            bool playlistTracksRefs,
           })
         > {
   $$TracksTableTableManager(_$AppDatabase db, $TracksTable table)
@@ -5097,10 +5917,13 @@ class $$TracksTableTableManager
                 albumId = false,
                 artistId = false,
                 genreId = false,
+                playlistTracksRefs = false,
               }) {
                 return PrefetchHooks(
                   db: db,
-                  explicitlyWatchedTables: [],
+                  explicitlyWatchedTables: [
+                    if (playlistTracksRefs) db.playlistTracks,
+                  ],
                   addJoins:
                       <
                         T extends TableManagerState<
@@ -5173,7 +5996,29 @@ class $$TracksTableTableManager
                         return state;
                       },
                   getPrefetchedDataCallback: (items) async {
-                    return [];
+                    return [
+                      if (playlistTracksRefs)
+                        await $_getPrefetchedData<
+                          Track,
+                          $TracksTable,
+                          PlaylistTrack
+                        >(
+                          currentTable: table,
+                          referencedTable: $$TracksTableReferences
+                              ._playlistTracksRefsTable(db),
+                          managerFromTypedResult: (p0) =>
+                              $$TracksTableReferences(
+                                db,
+                                table,
+                                p0,
+                              ).playlistTracksRefs,
+                          referencedItemsForCurrentItem:
+                              (item, referencedItems) => referencedItems.where(
+                                (e) => e.trackId == item.id,
+                              ),
+                          typedResults: items,
+                        ),
+                    ];
                   },
                 );
               },
@@ -5198,7 +6043,738 @@ typedef $$TracksTableProcessedTableManager =
         bool albumId,
         bool artistId,
         bool genreId,
+        bool playlistTracksRefs,
       })
+    >;
+typedef $$PlaylistTableCreateCompanionBuilder =
+    PlaylistCompanion Function({
+      Value<int> id,
+      required String name,
+      Value<String?> description,
+      Value<String?> coverImage,
+      Value<DateTime> createdAt,
+      Value<DateTime?> updatedAt,
+    });
+typedef $$PlaylistTableUpdateCompanionBuilder =
+    PlaylistCompanion Function({
+      Value<int> id,
+      Value<String> name,
+      Value<String?> description,
+      Value<String?> coverImage,
+      Value<DateTime> createdAt,
+      Value<DateTime?> updatedAt,
+    });
+
+final class $$PlaylistTableReferences
+    extends BaseReferences<_$AppDatabase, $PlaylistTable, PlaylistData> {
+  $$PlaylistTableReferences(super.$_db, super.$_table, super.$_typedResult);
+
+  static MultiTypedResultKey<$PlaylistTracksTable, List<PlaylistTrack>>
+  _playlistTracksRefsTable(_$AppDatabase db) => MultiTypedResultKey.fromTable(
+    db.playlistTracks,
+    aliasName: $_aliasNameGenerator(
+      db.playlist.id,
+      db.playlistTracks.playlistId,
+    ),
+  );
+
+  $$PlaylistTracksTableProcessedTableManager get playlistTracksRefs {
+    final manager = $$PlaylistTracksTableTableManager(
+      $_db,
+      $_db.playlistTracks,
+    ).filter((f) => f.playlistId.id.sqlEquals($_itemColumn<int>('id')!));
+
+    final cache = $_typedResult.readTableOrNull(_playlistTracksRefsTable($_db));
+    return ProcessedTableManager(
+      manager.$state.copyWith(prefetchedData: cache),
+    );
+  }
+}
+
+class $$PlaylistTableFilterComposer
+    extends Composer<_$AppDatabase, $PlaylistTable> {
+  $$PlaylistTableFilterComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnFilters<int> get id => $composableBuilder(
+    column: $table.id,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get name => $composableBuilder(
+    column: $table.name,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get description => $composableBuilder(
+    column: $table.description,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get coverImage => $composableBuilder(
+    column: $table.coverImage,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<DateTime> get createdAt => $composableBuilder(
+    column: $table.createdAt,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<DateTime> get updatedAt => $composableBuilder(
+    column: $table.updatedAt,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  Expression<bool> playlistTracksRefs(
+    Expression<bool> Function($$PlaylistTracksTableFilterComposer f) f,
+  ) {
+    final $$PlaylistTracksTableFilterComposer composer = $composerBuilder(
+      composer: this,
+      getCurrentColumn: (t) => t.id,
+      referencedTable: $db.playlistTracks,
+      getReferencedColumn: (t) => t.playlistId,
+      builder:
+          (
+            joinBuilder, {
+            $addJoinBuilderToRootComposer,
+            $removeJoinBuilderFromRootComposer,
+          }) => $$PlaylistTracksTableFilterComposer(
+            $db: $db,
+            $table: $db.playlistTracks,
+            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+            joinBuilder: joinBuilder,
+            $removeJoinBuilderFromRootComposer:
+                $removeJoinBuilderFromRootComposer,
+          ),
+    );
+    return f(composer);
+  }
+}
+
+class $$PlaylistTableOrderingComposer
+    extends Composer<_$AppDatabase, $PlaylistTable> {
+  $$PlaylistTableOrderingComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnOrderings<int> get id => $composableBuilder(
+    column: $table.id,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get name => $composableBuilder(
+    column: $table.name,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get description => $composableBuilder(
+    column: $table.description,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get coverImage => $composableBuilder(
+    column: $table.coverImage,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<DateTime> get createdAt => $composableBuilder(
+    column: $table.createdAt,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<DateTime> get updatedAt => $composableBuilder(
+    column: $table.updatedAt,
+    builder: (column) => ColumnOrderings(column),
+  );
+}
+
+class $$PlaylistTableAnnotationComposer
+    extends Composer<_$AppDatabase, $PlaylistTable> {
+  $$PlaylistTableAnnotationComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  GeneratedColumn<int> get id =>
+      $composableBuilder(column: $table.id, builder: (column) => column);
+
+  GeneratedColumn<String> get name =>
+      $composableBuilder(column: $table.name, builder: (column) => column);
+
+  GeneratedColumn<String> get description => $composableBuilder(
+    column: $table.description,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<String> get coverImage => $composableBuilder(
+    column: $table.coverImage,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<DateTime> get createdAt =>
+      $composableBuilder(column: $table.createdAt, builder: (column) => column);
+
+  GeneratedColumn<DateTime> get updatedAt =>
+      $composableBuilder(column: $table.updatedAt, builder: (column) => column);
+
+  Expression<T> playlistTracksRefs<T extends Object>(
+    Expression<T> Function($$PlaylistTracksTableAnnotationComposer a) f,
+  ) {
+    final $$PlaylistTracksTableAnnotationComposer composer = $composerBuilder(
+      composer: this,
+      getCurrentColumn: (t) => t.id,
+      referencedTable: $db.playlistTracks,
+      getReferencedColumn: (t) => t.playlistId,
+      builder:
+          (
+            joinBuilder, {
+            $addJoinBuilderToRootComposer,
+            $removeJoinBuilderFromRootComposer,
+          }) => $$PlaylistTracksTableAnnotationComposer(
+            $db: $db,
+            $table: $db.playlistTracks,
+            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+            joinBuilder: joinBuilder,
+            $removeJoinBuilderFromRootComposer:
+                $removeJoinBuilderFromRootComposer,
+          ),
+    );
+    return f(composer);
+  }
+}
+
+class $$PlaylistTableTableManager
+    extends
+        RootTableManager<
+          _$AppDatabase,
+          $PlaylistTable,
+          PlaylistData,
+          $$PlaylistTableFilterComposer,
+          $$PlaylistTableOrderingComposer,
+          $$PlaylistTableAnnotationComposer,
+          $$PlaylistTableCreateCompanionBuilder,
+          $$PlaylistTableUpdateCompanionBuilder,
+          (PlaylistData, $$PlaylistTableReferences),
+          PlaylistData,
+          PrefetchHooks Function({bool playlistTracksRefs})
+        > {
+  $$PlaylistTableTableManager(_$AppDatabase db, $PlaylistTable table)
+    : super(
+        TableManagerState(
+          db: db,
+          table: table,
+          createFilteringComposer: () =>
+              $$PlaylistTableFilterComposer($db: db, $table: table),
+          createOrderingComposer: () =>
+              $$PlaylistTableOrderingComposer($db: db, $table: table),
+          createComputedFieldComposer: () =>
+              $$PlaylistTableAnnotationComposer($db: db, $table: table),
+          updateCompanionCallback:
+              ({
+                Value<int> id = const Value.absent(),
+                Value<String> name = const Value.absent(),
+                Value<String?> description = const Value.absent(),
+                Value<String?> coverImage = const Value.absent(),
+                Value<DateTime> createdAt = const Value.absent(),
+                Value<DateTime?> updatedAt = const Value.absent(),
+              }) => PlaylistCompanion(
+                id: id,
+                name: name,
+                description: description,
+                coverImage: coverImage,
+                createdAt: createdAt,
+                updatedAt: updatedAt,
+              ),
+          createCompanionCallback:
+              ({
+                Value<int> id = const Value.absent(),
+                required String name,
+                Value<String?> description = const Value.absent(),
+                Value<String?> coverImage = const Value.absent(),
+                Value<DateTime> createdAt = const Value.absent(),
+                Value<DateTime?> updatedAt = const Value.absent(),
+              }) => PlaylistCompanion.insert(
+                id: id,
+                name: name,
+                description: description,
+                coverImage: coverImage,
+                createdAt: createdAt,
+                updatedAt: updatedAt,
+              ),
+          withReferenceMapper: (p0) => p0
+              .map(
+                (e) => (
+                  e.readTable(table),
+                  $$PlaylistTableReferences(db, table, e),
+                ),
+              )
+              .toList(),
+          prefetchHooksCallback: ({playlistTracksRefs = false}) {
+            return PrefetchHooks(
+              db: db,
+              explicitlyWatchedTables: [
+                if (playlistTracksRefs) db.playlistTracks,
+              ],
+              addJoins: null,
+              getPrefetchedDataCallback: (items) async {
+                return [
+                  if (playlistTracksRefs)
+                    await $_getPrefetchedData<
+                      PlaylistData,
+                      $PlaylistTable,
+                      PlaylistTrack
+                    >(
+                      currentTable: table,
+                      referencedTable: $$PlaylistTableReferences
+                          ._playlistTracksRefsTable(db),
+                      managerFromTypedResult: (p0) => $$PlaylistTableReferences(
+                        db,
+                        table,
+                        p0,
+                      ).playlistTracksRefs,
+                      referencedItemsForCurrentItem: (item, referencedItems) =>
+                          referencedItems.where((e) => e.playlistId == item.id),
+                      typedResults: items,
+                    ),
+                ];
+              },
+            );
+          },
+        ),
+      );
+}
+
+typedef $$PlaylistTableProcessedTableManager =
+    ProcessedTableManager<
+      _$AppDatabase,
+      $PlaylistTable,
+      PlaylistData,
+      $$PlaylistTableFilterComposer,
+      $$PlaylistTableOrderingComposer,
+      $$PlaylistTableAnnotationComposer,
+      $$PlaylistTableCreateCompanionBuilder,
+      $$PlaylistTableUpdateCompanionBuilder,
+      (PlaylistData, $$PlaylistTableReferences),
+      PlaylistData,
+      PrefetchHooks Function({bool playlistTracksRefs})
+    >;
+typedef $$PlaylistTracksTableCreateCompanionBuilder =
+    PlaylistTracksCompanion Function({
+      Value<int> id,
+      required int playlistId,
+      required int trackId,
+      required int position,
+      Value<DateTime> addedAt,
+    });
+typedef $$PlaylistTracksTableUpdateCompanionBuilder =
+    PlaylistTracksCompanion Function({
+      Value<int> id,
+      Value<int> playlistId,
+      Value<int> trackId,
+      Value<int> position,
+      Value<DateTime> addedAt,
+    });
+
+final class $$PlaylistTracksTableReferences
+    extends BaseReferences<_$AppDatabase, $PlaylistTracksTable, PlaylistTrack> {
+  $$PlaylistTracksTableReferences(
+    super.$_db,
+    super.$_table,
+    super.$_typedResult,
+  );
+
+  static $PlaylistTable _playlistIdTable(_$AppDatabase db) =>
+      db.playlist.createAlias(
+        $_aliasNameGenerator(db.playlistTracks.playlistId, db.playlist.id),
+      );
+
+  $$PlaylistTableProcessedTableManager get playlistId {
+    final $_column = $_itemColumn<int>('playlist_id')!;
+
+    final manager = $$PlaylistTableTableManager(
+      $_db,
+      $_db.playlist,
+    ).filter((f) => f.id.sqlEquals($_column));
+    final item = $_typedResult.readTableOrNull(_playlistIdTable($_db));
+    if (item == null) return manager;
+    return ProcessedTableManager(
+      manager.$state.copyWith(prefetchedData: [item]),
+    );
+  }
+
+  static $TracksTable _trackIdTable(_$AppDatabase db) => db.tracks.createAlias(
+    $_aliasNameGenerator(db.playlistTracks.trackId, db.tracks.id),
+  );
+
+  $$TracksTableProcessedTableManager get trackId {
+    final $_column = $_itemColumn<int>('track_id')!;
+
+    final manager = $$TracksTableTableManager(
+      $_db,
+      $_db.tracks,
+    ).filter((f) => f.id.sqlEquals($_column));
+    final item = $_typedResult.readTableOrNull(_trackIdTable($_db));
+    if (item == null) return manager;
+    return ProcessedTableManager(
+      manager.$state.copyWith(prefetchedData: [item]),
+    );
+  }
+}
+
+class $$PlaylistTracksTableFilterComposer
+    extends Composer<_$AppDatabase, $PlaylistTracksTable> {
+  $$PlaylistTracksTableFilterComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnFilters<int> get id => $composableBuilder(
+    column: $table.id,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<int> get position => $composableBuilder(
+    column: $table.position,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<DateTime> get addedAt => $composableBuilder(
+    column: $table.addedAt,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  $$PlaylistTableFilterComposer get playlistId {
+    final $$PlaylistTableFilterComposer composer = $composerBuilder(
+      composer: this,
+      getCurrentColumn: (t) => t.playlistId,
+      referencedTable: $db.playlist,
+      getReferencedColumn: (t) => t.id,
+      builder:
+          (
+            joinBuilder, {
+            $addJoinBuilderToRootComposer,
+            $removeJoinBuilderFromRootComposer,
+          }) => $$PlaylistTableFilterComposer(
+            $db: $db,
+            $table: $db.playlist,
+            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+            joinBuilder: joinBuilder,
+            $removeJoinBuilderFromRootComposer:
+                $removeJoinBuilderFromRootComposer,
+          ),
+    );
+    return composer;
+  }
+
+  $$TracksTableFilterComposer get trackId {
+    final $$TracksTableFilterComposer composer = $composerBuilder(
+      composer: this,
+      getCurrentColumn: (t) => t.trackId,
+      referencedTable: $db.tracks,
+      getReferencedColumn: (t) => t.id,
+      builder:
+          (
+            joinBuilder, {
+            $addJoinBuilderToRootComposer,
+            $removeJoinBuilderFromRootComposer,
+          }) => $$TracksTableFilterComposer(
+            $db: $db,
+            $table: $db.tracks,
+            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+            joinBuilder: joinBuilder,
+            $removeJoinBuilderFromRootComposer:
+                $removeJoinBuilderFromRootComposer,
+          ),
+    );
+    return composer;
+  }
+}
+
+class $$PlaylistTracksTableOrderingComposer
+    extends Composer<_$AppDatabase, $PlaylistTracksTable> {
+  $$PlaylistTracksTableOrderingComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnOrderings<int> get id => $composableBuilder(
+    column: $table.id,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<int> get position => $composableBuilder(
+    column: $table.position,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<DateTime> get addedAt => $composableBuilder(
+    column: $table.addedAt,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  $$PlaylistTableOrderingComposer get playlistId {
+    final $$PlaylistTableOrderingComposer composer = $composerBuilder(
+      composer: this,
+      getCurrentColumn: (t) => t.playlistId,
+      referencedTable: $db.playlist,
+      getReferencedColumn: (t) => t.id,
+      builder:
+          (
+            joinBuilder, {
+            $addJoinBuilderToRootComposer,
+            $removeJoinBuilderFromRootComposer,
+          }) => $$PlaylistTableOrderingComposer(
+            $db: $db,
+            $table: $db.playlist,
+            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+            joinBuilder: joinBuilder,
+            $removeJoinBuilderFromRootComposer:
+                $removeJoinBuilderFromRootComposer,
+          ),
+    );
+    return composer;
+  }
+
+  $$TracksTableOrderingComposer get trackId {
+    final $$TracksTableOrderingComposer composer = $composerBuilder(
+      composer: this,
+      getCurrentColumn: (t) => t.trackId,
+      referencedTable: $db.tracks,
+      getReferencedColumn: (t) => t.id,
+      builder:
+          (
+            joinBuilder, {
+            $addJoinBuilderToRootComposer,
+            $removeJoinBuilderFromRootComposer,
+          }) => $$TracksTableOrderingComposer(
+            $db: $db,
+            $table: $db.tracks,
+            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+            joinBuilder: joinBuilder,
+            $removeJoinBuilderFromRootComposer:
+                $removeJoinBuilderFromRootComposer,
+          ),
+    );
+    return composer;
+  }
+}
+
+class $$PlaylistTracksTableAnnotationComposer
+    extends Composer<_$AppDatabase, $PlaylistTracksTable> {
+  $$PlaylistTracksTableAnnotationComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  GeneratedColumn<int> get id =>
+      $composableBuilder(column: $table.id, builder: (column) => column);
+
+  GeneratedColumn<int> get position =>
+      $composableBuilder(column: $table.position, builder: (column) => column);
+
+  GeneratedColumn<DateTime> get addedAt =>
+      $composableBuilder(column: $table.addedAt, builder: (column) => column);
+
+  $$PlaylistTableAnnotationComposer get playlistId {
+    final $$PlaylistTableAnnotationComposer composer = $composerBuilder(
+      composer: this,
+      getCurrentColumn: (t) => t.playlistId,
+      referencedTable: $db.playlist,
+      getReferencedColumn: (t) => t.id,
+      builder:
+          (
+            joinBuilder, {
+            $addJoinBuilderToRootComposer,
+            $removeJoinBuilderFromRootComposer,
+          }) => $$PlaylistTableAnnotationComposer(
+            $db: $db,
+            $table: $db.playlist,
+            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+            joinBuilder: joinBuilder,
+            $removeJoinBuilderFromRootComposer:
+                $removeJoinBuilderFromRootComposer,
+          ),
+    );
+    return composer;
+  }
+
+  $$TracksTableAnnotationComposer get trackId {
+    final $$TracksTableAnnotationComposer composer = $composerBuilder(
+      composer: this,
+      getCurrentColumn: (t) => t.trackId,
+      referencedTable: $db.tracks,
+      getReferencedColumn: (t) => t.id,
+      builder:
+          (
+            joinBuilder, {
+            $addJoinBuilderToRootComposer,
+            $removeJoinBuilderFromRootComposer,
+          }) => $$TracksTableAnnotationComposer(
+            $db: $db,
+            $table: $db.tracks,
+            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+            joinBuilder: joinBuilder,
+            $removeJoinBuilderFromRootComposer:
+                $removeJoinBuilderFromRootComposer,
+          ),
+    );
+    return composer;
+  }
+}
+
+class $$PlaylistTracksTableTableManager
+    extends
+        RootTableManager<
+          _$AppDatabase,
+          $PlaylistTracksTable,
+          PlaylistTrack,
+          $$PlaylistTracksTableFilterComposer,
+          $$PlaylistTracksTableOrderingComposer,
+          $$PlaylistTracksTableAnnotationComposer,
+          $$PlaylistTracksTableCreateCompanionBuilder,
+          $$PlaylistTracksTableUpdateCompanionBuilder,
+          (PlaylistTrack, $$PlaylistTracksTableReferences),
+          PlaylistTrack,
+          PrefetchHooks Function({bool playlistId, bool trackId})
+        > {
+  $$PlaylistTracksTableTableManager(
+    _$AppDatabase db,
+    $PlaylistTracksTable table,
+  ) : super(
+        TableManagerState(
+          db: db,
+          table: table,
+          createFilteringComposer: () =>
+              $$PlaylistTracksTableFilterComposer($db: db, $table: table),
+          createOrderingComposer: () =>
+              $$PlaylistTracksTableOrderingComposer($db: db, $table: table),
+          createComputedFieldComposer: () =>
+              $$PlaylistTracksTableAnnotationComposer($db: db, $table: table),
+          updateCompanionCallback:
+              ({
+                Value<int> id = const Value.absent(),
+                Value<int> playlistId = const Value.absent(),
+                Value<int> trackId = const Value.absent(),
+                Value<int> position = const Value.absent(),
+                Value<DateTime> addedAt = const Value.absent(),
+              }) => PlaylistTracksCompanion(
+                id: id,
+                playlistId: playlistId,
+                trackId: trackId,
+                position: position,
+                addedAt: addedAt,
+              ),
+          createCompanionCallback:
+              ({
+                Value<int> id = const Value.absent(),
+                required int playlistId,
+                required int trackId,
+                required int position,
+                Value<DateTime> addedAt = const Value.absent(),
+              }) => PlaylistTracksCompanion.insert(
+                id: id,
+                playlistId: playlistId,
+                trackId: trackId,
+                position: position,
+                addedAt: addedAt,
+              ),
+          withReferenceMapper: (p0) => p0
+              .map(
+                (e) => (
+                  e.readTable(table),
+                  $$PlaylistTracksTableReferences(db, table, e),
+                ),
+              )
+              .toList(),
+          prefetchHooksCallback: ({playlistId = false, trackId = false}) {
+            return PrefetchHooks(
+              db: db,
+              explicitlyWatchedTables: [],
+              addJoins:
+                  <
+                    T extends TableManagerState<
+                      dynamic,
+                      dynamic,
+                      dynamic,
+                      dynamic,
+                      dynamic,
+                      dynamic,
+                      dynamic,
+                      dynamic,
+                      dynamic,
+                      dynamic,
+                      dynamic
+                    >
+                  >(state) {
+                    if (playlistId) {
+                      state =
+                          state.withJoin(
+                                currentTable: table,
+                                currentColumn: table.playlistId,
+                                referencedTable: $$PlaylistTracksTableReferences
+                                    ._playlistIdTable(db),
+                                referencedColumn:
+                                    $$PlaylistTracksTableReferences
+                                        ._playlistIdTable(db)
+                                        .id,
+                              )
+                              as T;
+                    }
+                    if (trackId) {
+                      state =
+                          state.withJoin(
+                                currentTable: table,
+                                currentColumn: table.trackId,
+                                referencedTable: $$PlaylistTracksTableReferences
+                                    ._trackIdTable(db),
+                                referencedColumn:
+                                    $$PlaylistTracksTableReferences
+                                        ._trackIdTable(db)
+                                        .id,
+                              )
+                              as T;
+                    }
+
+                    return state;
+                  },
+              getPrefetchedDataCallback: (items) async {
+                return [];
+              },
+            );
+          },
+        ),
+      );
+}
+
+typedef $$PlaylistTracksTableProcessedTableManager =
+    ProcessedTableManager<
+      _$AppDatabase,
+      $PlaylistTracksTable,
+      PlaylistTrack,
+      $$PlaylistTracksTableFilterComposer,
+      $$PlaylistTracksTableOrderingComposer,
+      $$PlaylistTracksTableAnnotationComposer,
+      $$PlaylistTracksTableCreateCompanionBuilder,
+      $$PlaylistTracksTableUpdateCompanionBuilder,
+      (PlaylistTrack, $$PlaylistTracksTableReferences),
+      PlaylistTrack,
+      PrefetchHooks Function({bool playlistId, bool trackId})
     >;
 
 class $AppDatabaseManager {
@@ -5216,4 +6792,8 @@ class $AppDatabaseManager {
       $$AlbumsTableTableManager(_db, _db.albums);
   $$TracksTableTableManager get tracks =>
       $$TracksTableTableManager(_db, _db.tracks);
+  $$PlaylistTableTableManager get playlist =>
+      $$PlaylistTableTableManager(_db, _db.playlist);
+  $$PlaylistTracksTableTableManager get playlistTracks =>
+      $$PlaylistTracksTableTableManager(_db, _db.playlistTracks);
 }

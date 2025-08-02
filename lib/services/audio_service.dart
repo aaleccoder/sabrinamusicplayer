@@ -44,12 +44,13 @@ class AudioPlayerNotifier extends StateNotifier<AudioPlayerState> {
           state = state.copyWith(
             currentTrack: nextTrack,
             currentIndex: nextIndex,
-            isPlaying: true,
           );
         }
-      } else {
-        state = state.copyWith(isPlaying: _audioPlayer.playing);
       }
+    });
+
+    _audioPlayer.playingStream.listen((playing) {
+      state = state.copyWith(isPlaying: playing);
     });
   }
 
@@ -71,7 +72,7 @@ class AudioPlayerNotifier extends StateNotifier<AudioPlayerState> {
       await _audioPlayer.setFilePath(track.fileuri);
       await _audioPlayer.play();
     }
-    state = state.copyWith(currentTrack: track, isPlaying: true);
+    state = state.copyWith(currentTrack: track);
   }
 
   Future<void> next() async {
@@ -80,11 +81,7 @@ class AudioPlayerNotifier extends StateNotifier<AudioPlayerState> {
       final nextTrack = state.queue![nextIndex];
       await _audioPlayer.setFilePath(nextTrack.fileuri);
       await _audioPlayer.play();
-      state = state.copyWith(
-        currentTrack: nextTrack,
-        currentIndex: nextIndex,
-        isPlaying: true,
-      );
+      state = state.copyWith(currentTrack: nextTrack, currentIndex: nextIndex);
     }
   }
 
@@ -98,7 +95,6 @@ class AudioPlayerNotifier extends StateNotifier<AudioPlayerState> {
       state = state.copyWith(
         currentTrack: previousTrack,
         currentIndex: previousIndex,
-        isPlaying: true,
       );
     }
   }
@@ -109,11 +105,10 @@ class AudioPlayerNotifier extends StateNotifier<AudioPlayerState> {
 
   Future<void> pause() async {
     await _audioPlayer.pause();
-    state = state.copyWith(isPlaying: false);
   }
 
   Future<void> stop() async {
     await _audioPlayer.stop();
-    state = state.copyWith(isPlaying: false, queue: [], currentTrack: null);
+    state = state.copyWith(queue: [], currentTrack: null);
   }
 }

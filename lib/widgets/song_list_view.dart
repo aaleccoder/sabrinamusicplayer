@@ -4,15 +4,18 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_application_1/main.dart';
 import 'package:flutter_application_1/theme.dart';
+import 'package:flutter_application_1/widgets/playlists.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 class TrackItem {
+  final int id;
   final String title;
   final String artist;
   final String cover;
   final String fileuri;
 
   TrackItem({
+    required this.id,
     required this.title,
     required this.artist,
     required this.cover,
@@ -155,11 +158,112 @@ class _SongListViewItemState extends ConsumerState<SongListViewItem> {
                     ],
                   ),
                 ),
-                Icon(CupertinoIcons.ellipsis, color: colorScheme.onSurface),
+                PopupMenuButton(
+                  icon: Icon(
+                    CupertinoIcons.ellipsis,
+                    color: colorScheme.onSurface,
+                  ),
+                  itemBuilder: (context) => [
+                    const PopupMenuItem(
+                      value: 'add_to_playlist',
+                      child: Row(
+                        children: [
+                          Icon(Icons.playlist_add),
+                          SizedBox(width: 8),
+                          Text('Add to Playlist'),
+                        ],
+                      ),
+                    ),
+                  ],
+                  onSelected: (value) {
+                    if (value == 'add_to_playlist') {
+                      _showAddToPlaylistDialog(context, widget.track);
+                    }
+                  },
+                ),
               ],
             ),
           ),
         ),
+      ),
+    );
+  }
+
+  void _showAddToPlaylistDialog(BuildContext context, TrackItem track) {
+    showDialog(
+      context: context,
+      builder: (context) => Consumer(
+        builder: (context, ref, _) {
+          final playlistsAsync = ref.watch(playlistsProvider);
+          return playlistsAsync.when(
+            data: (playlists) => AlertDialog(
+              title: const Text('Add to Playlist'),
+              content: playlists.isEmpty
+                  ? const Text(
+                      'No playlists available. Create a playlist first.',
+                    )
+                  : SizedBox(
+                      width: double.maxFinite,
+                      child: ListView.builder(
+                        shrinkWrap: true,
+                        itemCount: playlists.length,
+                        itemBuilder: (context, index) {
+                          final playlist = playlists[index];
+                          return ListTile(
+                            leading: const Icon(Icons.queue_music),
+                            title: Text(playlist.name),
+                            subtitle: playlist.description != null
+                                ? Text(playlist.description!)
+                                : null,
+                            onTap: () async {
+                              try {
+                                await ref
+                                    .read(appDatabaseProvider)
+                                    .addTrackToPlaylist(playlist.id, track.id);
+                                Navigator.of(context).pop();
+                                ScaffoldMessenger.of(context).showSnackBar(
+                                  SnackBar(
+                                    content: Text(
+                                      'Added "${track.title}" to "${playlist.name}"',
+                                    ),
+                                  ),
+                                );
+                              } catch (e) {
+                                ScaffoldMessenger.of(context).showSnackBar(
+                                  SnackBar(
+                                    content: Text('Error: ${e.toString()}'),
+                                    backgroundColor: Colors.red,
+                                  ),
+                                );
+                              }
+                            },
+                          );
+                        },
+                      ),
+                    ),
+              actions: [
+                TextButton(
+                  onPressed: () => Navigator.of(context).pop(),
+                  child: const Text('Cancel'),
+                ),
+              ],
+            ),
+            loading: () => const AlertDialog(
+              title: Text('Add to Playlist'),
+              content: CircularProgressIndicator(),
+            ),
+            error: (err, stack) => AlertDialog(
+              title: const Text('Error'),
+              content: Text('Failed to load playlists: $err'),
+              actions: [
+                TextButton(
+                  onPressed: () => Navigator.of(context).pop(),
+                  child: const Text('OK'),
+                ),
+              ],
+            ),
+          );
+        },
       ),
     );
   }
