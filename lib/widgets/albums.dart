@@ -45,131 +45,18 @@ class _AlbumsState extends ConsumerState<AlbumsPage> {
                 return const Center(child: Text('No albums found'));
               }
               return Padding(
-                padding: const EdgeInsets.all(0.0),
+                padding: const EdgeInsets.all(8.0),
                 child: GridView.builder(
                   gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
                     crossAxisCount: 2,
                     childAspectRatio: 0.8,
+                    mainAxisSpacing: 8,
+                    crossAxisSpacing: 8,
                   ),
                   itemCount: albums.length,
                   itemBuilder: (context, index) {
                     final album = albums[index];
-                    return GestureDetector(
-                      onTap: () {
-                        Navigator.push(
-                          context,
-                          MaterialPageRoute(
-                            builder: (context) => AlbumDetailPage(album: album),
-                          ),
-                        );
-                      },
-                      child: Card(
-                        elevation: 0,
-                        shape: RoundedRectangleBorder(
-                          borderRadius: AppTheme.radiusXl,
-                        ),
-                        color: AppTheme.surface,
-                        shadowColor: Colors.transparent,
-                        child: Container(
-                          decoration: BoxDecoration(
-                            borderRadius: AppTheme.radiusXl,
-                            boxShadow: AppTheme.shadowLg,
-                            color: AppTheme.surface,
-                            border: Border.all(
-                              color: Colors.white.withOpacity(0.1),
-                              width: 1,
-                            ),
-                          ),
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.stretch,
-                            children: [
-                              Expanded(
-                                child: ClipRRect(
-                                  borderRadius: const BorderRadius.vertical(
-                                    top: Radius.circular(24),
-                                  ),
-                                  child: () {
-                                    try {
-                                      if (album.cover != null &&
-                                          album.cover!.isNotEmpty) {
-                                        final coverUri = Uri.parse(
-                                          album.cover!,
-                                        );
-                                        if (coverUri.isScheme('file')) {
-                                          final file = File.fromUri(coverUri);
-                                          if (file.existsSync()) {
-                                            return Image.file(
-                                              file,
-                                              fit: BoxFit.cover,
-                                            );
-                                          }
-                                        }
-                                      }
-                                    } catch (e) {}
-                                    return Container(
-                                      decoration: BoxDecoration(
-                                        color: AppTheme.primary.withOpacity(
-                                          0.1,
-                                        ),
-                                      ),
-                                      child: Icon(
-                                        Icons.image,
-                                        size: 48,
-                                        color: AppTheme.primary,
-                                      ),
-                                    );
-                                  }(),
-                                ),
-                              ),
-                              Padding(
-                                padding: const EdgeInsets.symmetric(
-                                  horizontal: 8,
-                                  vertical: 6,
-                                ),
-                                child: Column(
-                                  crossAxisAlignment: CrossAxisAlignment.start,
-                                  children: [
-                                    Text(
-                                      album.name ?? 'Unknown Album',
-                                      style: Theme.of(context)
-                                          .textTheme
-                                          .bodyMedium
-                                          ?.copyWith(
-                                            fontSize: AppTheme
-                                                .textTheme
-                                                .bodyMedium
-                                                ?.fontSize,
-                                            fontWeight: FontWeight.w500,
-                                            color: AppTheme.onSurface,
-                                          ),
-                                      maxLines: 2,
-                                      overflow: TextOverflow.ellipsis,
-                                    ),
-                                    const SizedBox(height: 4),
-                                    Text(
-                                      album.artistName ?? 'Unknown Artist',
-                                      style: Theme.of(context)
-                                          .textTheme
-                                          .bodySmall
-                                          ?.copyWith(
-                                            fontSize: AppTheme
-                                                .textTheme
-                                                .bodySmall
-                                                ?.fontSize,
-                                            color: AppTheme.onSurface
-                                                .withOpacity(0.7),
-                                          ),
-                                      maxLines: 1,
-                                      overflow: TextOverflow.ellipsis,
-                                    ),
-                                  ],
-                                ),
-                              ),
-                            ],
-                          ),
-                        ),
-                      ),
-                    );
+                    return AlbumGridItem(album: album);
                   },
                 ),
               );
@@ -179,6 +66,94 @@ class _AlbumsState extends ConsumerState<AlbumsPage> {
           );
         },
       ),
+    );
+  }
+}
+
+class AlbumGridItem extends StatelessWidget {
+  final AlbumItem album;
+
+  const AlbumGridItem({super.key, required this.album});
+
+  @override
+  Widget build(BuildContext context) {
+    return GestureDetector(
+      onTap: () {
+        Navigator.push(
+          context,
+          MaterialPageRoute(
+            builder: (context) => AlbumDetailPage(album: album),
+          ),
+        );
+      },
+      child: Container(
+        decoration: BoxDecoration(
+          borderRadius: AppTheme.radiusXl,
+          // boxShadow: AppTheme.shadowLg, // Removed for performance
+          color: AppTheme.surface,
+          border: Border.all(color: Colors.white.withOpacity(0.1), width: 1),
+        ),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: [
+            Expanded(child: _buildAlbumArt()),
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 6),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    album.name ?? 'Unknown Album',
+                    style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                      fontSize: AppTheme.textTheme.bodyMedium?.fontSize,
+                      fontWeight: FontWeight.w500,
+                      color: AppTheme.onSurface,
+                    ),
+                    maxLines: 2,
+                    overflow: TextOverflow.ellipsis,
+                  ),
+                  const SizedBox(height: 4),
+                  Text(
+                    album.artistName ?? 'Unknown Artist',
+                    style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                      fontSize: AppTheme.textTheme.bodySmall?.fontSize,
+                      color: AppTheme.onSurface.withOpacity(0.7),
+                    ),
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                  ),
+                ],
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildAlbumArt() {
+    if (album.cover != null && album.cover!.isNotEmpty) {
+      final coverUri = Uri.tryParse(album.cover!);
+      if (coverUri != null && coverUri.isScheme('file')) {
+        return Image.file(
+          File.fromUri(coverUri),
+          fit: BoxFit.cover,
+          errorBuilder: (context, error, stackTrace) {
+            return _buildPlaceholderAlbumArt();
+          },
+        );
+      }
+    }
+    return _buildPlaceholderAlbumArt();
+  }
+
+  Widget _buildPlaceholderAlbumArt() {
+    return Container(
+      decoration: BoxDecoration(
+        color: AppTheme.primary.withOpacity(0.1),
+        borderRadius: const BorderRadius.vertical(top: Radius.circular(24)),
+      ),
+      child: Icon(Icons.image, size: 48, color: AppTheme.primary),
     );
   }
 }

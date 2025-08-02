@@ -118,48 +118,36 @@ class _GlobalSearchPageState extends ConsumerState<GlobalSearchPage> {
       margin: const EdgeInsets.symmetric(horizontal: 8, vertical: 8),
       decoration: BoxDecoration(
         borderRadius: AppTheme.radiusXl,
-        boxShadow: AppTheme.shadowLg,
+        color: AppTheme.surface,
       ),
       child: ClipRRect(
         borderRadius: AppTheme.radiusXl,
-        child: BackdropFilter(
-          filter: ImageFilter.blur(sigmaX: 20, sigmaY: 20),
-          child: Container(
-            decoration: BoxDecoration(
-              borderRadius: AppTheme.radiusXl,
-              color: AppTheme.surface,
+        child: Container(
+          decoration: BoxDecoration(
+            borderRadius: AppTheme.radiusXl,
+            gradient: LinearGradient(
+              begin: Alignment.topCenter,
+              end: Alignment.bottomCenter,
+              colors: [
+                Colors.white.withOpacity(0.02),
+                Colors.white.withOpacity(0.01),
+              ],
             ),
-            child: Container(
-              decoration: BoxDecoration(
-                borderRadius: AppTheme.radiusXl,
-                gradient: LinearGradient(
-                  begin: Alignment.topCenter,
-                  end: Alignment.bottomCenter,
-                  colors: [
-                    Colors.white.withOpacity(0.02),
-                    Colors.white.withOpacity(0.01),
-                  ],
-                ),
-                border: Border.all(
-                  color: Colors.white.withOpacity(0.1),
-                  width: 2,
-                ),
-              ),
-              child: SingleChildScrollView(
-                padding: AppTheme.paddingMd,
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    _buildTracksSection(),
-                    const SizedBox(height: 24),
-                    _buildAlbumsSection(),
-                    const SizedBox(height: 24),
-                    _buildArtistsSection(),
-                    const SizedBox(height: 24),
-                    _buildPlaylistsSection(),
-                  ],
-                ),
-              ),
+            border: Border.all(color: Colors.white.withOpacity(0.1), width: 2),
+          ),
+          child: SingleChildScrollView(
+            padding: AppTheme.paddingMd,
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                _buildTracksSection(),
+                const SizedBox(height: 24),
+                _buildAlbumsSection(),
+                const SizedBox(height: 24),
+                _buildArtistsSection(),
+                const SizedBox(height: 24),
+                _buildPlaylistsSection(),
+              ],
             ),
           ),
         ),
@@ -306,7 +294,6 @@ class _GlobalSearchPageState extends ConsumerState<GlobalSearchPage> {
       margin: const EdgeInsets.only(bottom: 8),
       decoration: BoxDecoration(
         borderRadius: AppTheme.radiusXl,
-        boxShadow: AppTheme.shadowLg,
         color: AppTheme.surface,
       ),
       child: ListTile(
@@ -372,7 +359,6 @@ class _GlobalSearchPageState extends ConsumerState<GlobalSearchPage> {
         width: 140,
         decoration: BoxDecoration(
           borderRadius: AppTheme.radiusXl,
-          boxShadow: AppTheme.shadowLg,
           color: AppTheme.surface,
         ),
         padding: AppTheme.paddingSm,
@@ -440,7 +426,6 @@ class _GlobalSearchPageState extends ConsumerState<GlobalSearchPage> {
       margin: const EdgeInsets.only(bottom: 8),
       decoration: BoxDecoration(
         borderRadius: AppTheme.radiusXl,
-        boxShadow: AppTheme.shadowLg,
         color: AppTheme.surface,
       ),
       child: ListTile(
@@ -471,7 +456,6 @@ class _GlobalSearchPageState extends ConsumerState<GlobalSearchPage> {
       margin: const EdgeInsets.only(bottom: 8),
       decoration: BoxDecoration(
         borderRadius: AppTheme.radiusXl,
-        boxShadow: AppTheme.shadowLg,
         color: AppTheme.surface,
       ),
       child: ListTile(

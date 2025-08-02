@@ -220,7 +220,7 @@ class _PlayerScreenState extends ConsumerState<PlayerScreen>
                 key: ValueKey(currentTrack.id),
                 decoration: BoxDecoration(
                   borderRadius: AppTheme.radiusXxl,
-                  boxShadow: AppTheme.shadowXl,
+                  // Removed boxShadow and blur, keep only gradient
                 ),
                 child: ClipRRect(
                   borderRadius: AppTheme.radiusXxl,
@@ -295,7 +295,6 @@ class _PlayerScreenState extends ConsumerState<PlayerScreen>
                   end: Alignment.bottomRight,
                   colors: [AppTheme.surface, AppTheme.surfaceVariant],
                 ),
-                boxShadow: AppTheme.shadowLg,
               ),
               child: Icon(
                 Icons.music_off_rounded,
@@ -696,15 +695,7 @@ class _PlayerScreenState extends ConsumerState<PlayerScreen>
                 end: Alignment.bottomRight,
                 colors: [AppTheme.surfaceVariant, AppTheme.surface],
               ),
-        boxShadow: isPrimary
-            ? [
-                BoxShadow(
-                  color: AppTheme.primary.withOpacity(0.4),
-                  blurRadius: 16,
-                  offset: const Offset(0, 6),
-                ),
-              ]
-            : AppTheme.shadowMd,
+        // Removed boxShadow and blur for flat look
       ),
       child: Material(
         color: Colors.transparent,

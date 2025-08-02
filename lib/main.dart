@@ -1,10 +1,6 @@
-import 'dart:ui';
-import 'package:flutter/foundation.dart'; // Moved to top
-
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/scheduler.dart';
 import 'package:flutter_application_1/models/schema.dart';
-import 'package:flutter_application_1/providers/library_scanning_provider.dart';
 import 'package:flutter_application_1/routes.dart';
 import 'package:flutter_application_1/screens/settings.dart';
 import 'package:flutter_application_1/services/audio_service.dart';
@@ -17,7 +13,6 @@ import 'package:flutter_application_1/widgets/playlists.dart';
 import 'package:flutter_application_1/widgets/library.dart';
 import 'package:flutter_application_1/widgets/library_scanning_overlay.dart';
 import 'package:flutter_application_1/widgets/mini_player.dart';
-import 'package:flutter_application_1/widgets/playlists.dart';
 import 'package:flutter_application_1/widgets/song_list_view.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:permission_handler/permission_handler.dart';
@@ -107,7 +102,7 @@ final albumTrackCountProvider = FutureProvider.family<int, int>((ref, albumId) {
 });
 
 // Genre providers
-final genresProvider = FutureProvider<List<GenreItem>>((ref) {
+final genresProvider = FutureProvider.autoDispose<List<GenreItem>>((ref) {
   final db = ref.watch(appDatabaseProvider);
   return db.getAllGenres();
 });
@@ -120,7 +115,10 @@ final tracksByGenreProvider = FutureProvider.family<List<TrackItem>, int>((
   return db.getTracksByGenre(genreId);
 });
 
-final genreTrackCountProvider = FutureProvider.family<int, int>((ref, genreId) {
+final genreTrackCountProvider = FutureProvider.autoDispose.family<int, int>((
+  ref,
+  genreId,
+) {
   final db = ref.watch(appDatabaseProvider);
   return db.getTrackCountByGenre(genreId);
 });
@@ -196,7 +194,6 @@ final updateTrackProvider = FutureProvider.family<void, TrackItem>((
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
 
-  // Enable performance debugging in debug mode
   if (kDebugMode) {
     debugProfileBuildsEnabled = true;
   }
@@ -362,18 +359,7 @@ class _HomeState extends ConsumerState<Home> with TickerProviderStateMixin {
       extendBody: true,
       backgroundColor: AppTheme.background,
       body: Container(
-        decoration: BoxDecoration(
-          gradient: RadialGradient(
-            center: Alignment.topRight,
-            radius: 1.0,
-            colors: [
-              AppTheme.primary.withOpacity(0.05),
-              AppTheme.background,
-              AppTheme.background,
-            ],
-            stops: const [0.0, 0.3, 1.0],
-          ),
-        ),
+        decoration: BoxDecoration(color: AppTheme.background),
         child: Stack(
           children: [
             // Use PageStorage to preserve tab state
@@ -413,49 +399,33 @@ class _HomeState extends ConsumerState<Home> with TickerProviderStateMixin {
 
   Widget _buildModernNavigationBar() {
     return Container(
+      height: 80,
       decoration: BoxDecoration(
         borderRadius: AppTheme.radiusXl,
+        color: AppTheme.surface,
         boxShadow: AppTheme.shadowLg,
+        gradient: LinearGradient(
+          begin: Alignment.topCenter,
+          end: Alignment.bottomCenter,
+          colors: [
+            Colors.white.withOpacity(0.02),
+            Colors.white.withOpacity(0.01),
+          ],
+        ),
+        border: Border.all(color: Colors.white.withOpacity(0.1), width: 2),
       ),
       child: ClipRRect(
         borderRadius: AppTheme.radiusXl,
-        child: BackdropFilter(
-          filter: ImageFilter.blur(sigmaX: 20, sigmaY: 20),
-          child: Container(
-            decoration: BoxDecoration(
-              borderRadius: AppTheme.radiusXl,
-              color: AppTheme.surface,
-            ),
-            child: Container(
-              height: 80,
-              decoration: BoxDecoration(
-                borderRadius: AppTheme.radiusXl,
-                gradient: LinearGradient(
-                  begin: Alignment.topCenter,
-                  end: Alignment.bottomCenter,
-                  colors: [
-                    Colors.white.withOpacity(0.02),
-                    Colors.white.withOpacity(0.01),
-                  ],
-                ),
-                border: Border.all(
-                  color: Colors.white.withOpacity(0.1),
-                  width: 2,
-                ),
-              ),
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                children: [
-                  _buildNavDestination(Icons.music_note, 'Songs', 0),
-                  _buildNavDestination(Icons.album, 'Albums', 1),
-                  _buildNavDestination(Icons.person, 'Artists', 2),
-                  _buildNavDestination(Icons.category, 'Genres', 3),
-                  _buildNavDestination(Icons.library_music, 'Library', 4),
-                  _buildNavDestination(Icons.settings, 'Settings', 5),
-                ],
-              ),
-            ),
-          ),
+        child: Row(
+          mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+          children: [
+            _buildNavDestination(Icons.music_note, 'Songs', 0),
+            _buildNavDestination(Icons.album, 'Albums', 1),
+            _buildNavDestination(Icons.person, 'Artists', 2),
+            _buildNavDestination(Icons.category, 'Genres', 3),
+            _buildNavDestination(Icons.library_music, 'Library', 4),
+            _buildNavDestination(Icons.settings, 'Settings', 5),
+          ],
         ),
       ),
     );
@@ -481,13 +451,6 @@ class _HomeState extends ConsumerState<Home> with TickerProviderStateMixin {
                     ? BoxDecoration(
                         color: AppTheme.primary.withOpacity(0.3),
                         borderRadius: AppTheme.radiusSm,
-                        boxShadow: [
-                          BoxShadow(
-                            color: AppTheme.primary.withOpacity(0.4),
-                            blurRadius: 6,
-                            offset: const Offset(0, 2),
-                          ),
-                        ],
                       )
                     : null,
                 child: Icon(

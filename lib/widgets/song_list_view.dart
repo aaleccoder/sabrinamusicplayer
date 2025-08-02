@@ -427,7 +427,7 @@ class _SongListViewItemState extends ConsumerState<SongListViewItem> {
     setState(() {
       _scale = 1.0;
     });
-    final musicPlayer = ref.watch(audioPlayerNotifierProvider.notifier);
+    final musicPlayer = ref.read(audioPlayerNotifierProvider.notifier);
     final queue = widget.tracks.sublist(widget.index);
     await musicPlayer.createQueue(queue);
     await musicPlayer.play(track);
@@ -467,13 +467,6 @@ class _SongListViewItemState extends ConsumerState<SongListViewItem> {
                 color: AppTheme.primary.withOpacity(0.1),
                 width: 1,
               ),
-              boxShadow: [
-                BoxShadow(
-                  color: AppTheme.primary.withOpacity(0.05),
-                  blurRadius: 8,
-                  offset: const Offset(0, 2),
-                ),
-              ],
             ),
             child: Row(
               children: [
@@ -605,28 +598,32 @@ class _SongListViewItemState extends ConsumerState<SongListViewItem> {
   }
 
   Widget _buildAlbumArt() {
-    try {
-      if (widget.track.cover.isNotEmpty) {
-        final coverUri = Uri.parse(widget.track.cover);
-        if (coverUri.isScheme('file')) {
-          final file = File.fromUri(coverUri);
-          if (file.existsSync()) {
-            return Image.file(file, width: 56, height: 56, fit: BoxFit.cover);
-          }
-        }
+    if (widget.track.cover.isNotEmpty) {
+      final coverUri = Uri.tryParse(widget.track.cover);
+      if (coverUri != null && coverUri.isScheme('file')) {
+        return Image.file(
+          File.fromUri(coverUri),
+          width: 56,
+          height: 56,
+          fit: BoxFit.cover,
+          errorBuilder: (context, error, stackTrace) {
+            return _buildPlaceholderAlbumArt();
+          },
+        );
       }
-    } catch (e) {
-      // Fall back to placeholder
     }
+    return _buildPlaceholderAlbumArt();
+  }
 
+  Widget _buildPlaceholderAlbumArt() {
     return Container(
-      width: 34,
-      height: 34,
+      width: 56,
+      height: 56,
       decoration: BoxDecoration(
         color: AppTheme.primary.withOpacity(0.1),
         borderRadius: BorderRadius.circular(8),
       ),
-      child: Icon(Icons.music_note, color: AppTheme.primary, size: 14),
+      child: Icon(Icons.music_note, color: AppTheme.primary, size: 24),
     );
   }
 

@@ -132,34 +132,32 @@ class _MiniPlayerState extends ConsumerState<MiniPlayer>
               ),
               child: ClipRRect(
                 borderRadius: AppTheme.radiusXl,
-                child: BackdropFilter(
-                  filter: ImageFilter.blur(sigmaX: 20, sigmaY: 20),
-                  child: Container(
-                    padding: AppTheme.paddingMd,
-                    decoration: BoxDecoration(
-                      borderRadius: AppTheme.radiusXl,
-                      gradient: LinearGradient(
-                        begin: Alignment.topLeft,
-                        end: Alignment.bottomRight,
-                        colors: [
-                          Colors.white.withOpacity(0.2),
-                          Colors.white.withOpacity(0.05),
-                        ],
-                      ),
-                      border: Border.all(
-                        color: Colors.white.withOpacity(0.2),
-                        width: 1,
-                      ),
-                    ),
-                    child: Row(
-                      children: [
-                        _buildAlbumArt(currentTrack, colorScheme),
-                        const SizedBox(width: 16),
-                        Expanded(child: _buildTrackInfo(currentTrack, context)),
-                        const SizedBox(width: 12),
-                        _buildPlayButton(onPressed, audioState, colorScheme),
+                child: Container(
+                  // Removed BackdropFilter and blur
+                  padding: AppTheme.paddingMd,
+                  decoration: BoxDecoration(
+                    borderRadius: AppTheme.radiusXl,
+                    gradient: LinearGradient(
+                      begin: Alignment.topLeft,
+                      end: Alignment.bottomRight,
+                      colors: [
+                        Colors.white.withOpacity(0.2),
+                        Colors.white.withOpacity(0.05),
                       ],
                     ),
+                    border: Border.all(
+                      color: Colors.white.withOpacity(0.2),
+                      width: 1,
+                    ),
+                  ),
+                  child: Row(
+                    children: [
+                      _buildAlbumArt(currentTrack, colorScheme),
+                      const SizedBox(width: 16),
+                      Expanded(child: _buildTrackInfo(currentTrack, context)),
+                      const SizedBox(width: 12),
+                      _buildPlayButton(onPressed, audioState, colorScheme),
+                    ],
                   ),
                 ),
               ),
