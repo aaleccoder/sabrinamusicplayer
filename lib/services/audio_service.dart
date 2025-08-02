@@ -56,6 +56,8 @@ class AudioPlayerNotifier extends StateNotifier<AudioPlayerState> {
   BackgroundAudioHandler? _audioHandler;
   List<TrackItem> _originalQueue = [];
   final Completer<void> _initializationCompleter = Completer<void>();
+  int _skipRequests = 0;
+  bool _isProcessingSkips = false;
 
   final Ref _ref;
 
@@ -204,15 +206,35 @@ class AudioPlayerNotifier extends StateNotifier<AudioPlayerState> {
     await _audioHandler!.playTrack(track, currentQueue);
   }
 
-  Future<void> next() async {
-    if (_audioHandler != null) {
-      await _audioHandler!.skipToNext();
-    }
+  void next() {
+    _skipRequests++;
+    _processSkipRequests();
   }
 
-  Future<void> previous() async {
-    if (_audioHandler != null) {
-      await _audioHandler!.skipToPrevious();
+  void previous() {
+    _skipRequests--;
+    _processSkipRequests();
+  }
+
+  Future<void> _processSkipRequests() async {
+    if (_isProcessingSkips || _audioHandler == null) return;
+
+    _isProcessingSkips = true;
+
+    try {
+      while (_skipRequests != 0) {
+        if (_skipRequests > 0) {
+          await _audioHandler!.skipToNext();
+          _skipRequests--;
+        } else {
+          await _audioHandler!.skipToPrevious();
+          _skipRequests++;
+        }
+        // Add a small delay to allow the UI to update and prevent blocking
+        await Future.delayed(const Duration(milliseconds: 50));
+      }
+    } finally {
+      _isProcessingSkips = false;
     }
   }
 
