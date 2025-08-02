@@ -71,36 +71,38 @@ class _AlbumsState extends ConsumerState<AlbumsPage> {
                           crossAxisAlignment: CrossAxisAlignment.stretch,
                           children: [
                             Expanded(
-                              child:
-                                  album.cover != null && album.cover!.isNotEmpty
-                                  ? ClipRRect(
-                                      borderRadius: const BorderRadius.vertical(
-                                        top: Radius.circular(12),
-                                      ),
-                                      child: Image.file(
-                                        File(album.cover!),
-                                        fit: BoxFit.cover,
-                                        errorBuilder:
-                                            (context, error, stackTrace) =>
-                                                Container(
-                                                  color: Colors.grey[300],
-                                                  child: const Icon(
-                                                    Icons.image_not_supported,
-                                                    size: 48,
-                                                  ),
-                                                ),
-                                      ),
-                                    )
-                                  : Container(
-                                      decoration: BoxDecoration(
-                                        color: Colors.grey[300],
-                                        borderRadius:
-                                            const BorderRadius.vertical(
-                                              top: Radius.circular(12),
-                                            ),
-                                      ),
-                                      child: const Icon(Icons.image, size: 48),
+                              child: ClipRRect(
+                                borderRadius: const BorderRadius.vertical(
+                                  top: Radius.circular(12),
+                                ),
+                                child: () {
+                                  // Gracefully handle file paths and content URIs for album art
+                                  try {
+                                    if (album.cover != null &&
+                                        album.cover!.isNotEmpty) {
+                                      final coverUri = Uri.parse(album.cover!);
+                                      if (coverUri.isScheme('file')) {
+                                        final file = File.fromUri(coverUri);
+                                        if (file.existsSync()) {
+                                          return Image.file(
+                                            file,
+                                            fit: BoxFit.cover,
+                                          );
+                                        }
+                                      }
+                                    }
+                                  } catch (e) {
+                                    // Log or handle error, for now, fall back to placeholder
+                                  }
+                                  // Fallback placeholder for invalid or non-existent art
+                                  return Container(
+                                    decoration: BoxDecoration(
+                                      color: Colors.grey[300],
                                     ),
+                                    child: const Icon(Icons.image, size: 48),
+                                  );
+                                }(),
+                              ),
                             ),
                             Padding(
                               padding: const EdgeInsets.symmetric(

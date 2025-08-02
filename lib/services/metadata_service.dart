@@ -7,65 +7,58 @@ class MetadataService {
     'com.example.flutter_application_1/metadata',
   );
 
-  // Cache for recently processed files to avoid re-extraction
-  static final Map<String, Map<String, String?>> _cache = {};
-  static const int _maxCacheSize = 100;
-
-  Future<Map<String, String?>> getMetadata(String filePath) async {
-    // Check cache first
-    if (_cache.containsKey(filePath)) {
-      return _cache[filePath]!;
-    }
-
+  Future<List<Map<String, String?>>> getAllMusicFiles() async {
     try {
-      final Map<dynamic, dynamic>? metadata = await _channel
-          .invokeMethod('getMetadata', {'filePath': filePath})
-          .timeout(
-            const Duration(seconds: 10), // Add timeout to prevent hanging
-            onTimeout: () {
-              debugPrint('Metadata extraction timeout for: $filePath');
-              return <String, dynamic>{};
-            },
-          );
+      // Add a timeout to prevent the app from hanging if the native call takes too long
+      final List<dynamic>? musicFiles = await _channel
+          .invokeMethod('getAllMusicFiles')
+          .timeout(const Duration(seconds: 60));
 
-      final result = metadata?.cast<String, String?>() ?? {};
-
-      // Cache the result (with size limit)
-      if (result.isNotEmpty) {
-        _addToCache(filePath, result);
+      if (musicFiles == null) {
+        return [];
       }
 
-      return result;
+      // Efficiently cast the result to the expected type
+      return musicFiles.map((dynamic file) {
+        return (file as Map<dynamic, dynamic>).cast<String, String?>();
+      }).toList();
     } on PlatformException catch (e) {
-      // Handle platform-side errors with more detailed logging
+      // Provide more detailed error logging for platform-specific issues
       debugPrint(
-        "PlatformException getting metadata for $filePath: ${e.message} (${e.code})",
+        "PlatformException getting music files: ${e.message} (${e.code})",
       );
-      return {};
-    } on TimeoutException catch (e) {
-      debugPrint("Timeout getting metadata for $filePath: $e");
-      return {};
+      return [];
+    } on TimeoutException {
+      // Handle timeouts gracefully
+      debugPrint("Timeout getting music files from MediaStore.");
+      return [];
     } catch (e) {
-      debugPrint("Unexpected error getting metadata for $filePath: $e");
-      return {};
+      // Catch any other unexpected errors
+      debugPrint("Unexpected error getting music files: $e");
+      return [];
     }
   }
 
-  static void _addToCache(String filePath, Map<String, String?> metadata) {
-    // Manage cache size to prevent memory issues
-    if (_cache.length >= _maxCacheSize) {
-      // Remove oldest entries (simple FIFO)
-      final keysToRemove = _cache.keys.take(_maxCacheSize ~/ 2).toList();
-      for (final key in keysToRemove) {
-        _cache.remove(key);
-      }
+  /// Gets full-size album art for a specific track
+  /// Returns the URI to the cached full-size album art image
+  Future<String?> getFullSizeAlbumArt(String trackId) async {
+    try {
+      final String? albumArtUri = await _channel
+          .invokeMethod('extractFullSizeAlbumArt', {'trackId': trackId})
+          .timeout(const Duration(seconds: 30));
+
+      return albumArtUri;
+    } on PlatformException catch (e) {
+      debugPrint(
+        "PlatformException getting full-size album art: ${e.message} (${e.code})",
+      );
+      return null;
+    } on TimeoutException {
+      debugPrint("Timeout getting full-size album art.");
+      return null;
+    } catch (e) {
+      debugPrint("Unexpected error getting full-size album art: $e");
+      return null;
     }
-    _cache[filePath] = metadata;
   }
-
-  static void clearCache() {
-    _cache.clear();
-  }
-
-  static int get cacheSize => _cache.length;
 }

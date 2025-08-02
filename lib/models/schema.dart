@@ -9,17 +9,9 @@ import 'package:path_provider/path_provider.dart';
 
 part 'schema.g.dart';
 
-class MusicDirectories extends Table {
+class ExcludedDirectories extends Table {
   IntColumn get id => integer().autoIncrement()();
   TextColumn get path => text().withLength(max: 255)();
-  BoolColumn get is_enabled => boolean().withDefault(const Constant(true))();
-  IntColumn get last_scanned => integer().nullable()();
-  BoolColumn get scan_subdirectories =>
-      boolean().withDefault(const Constant(true))();
-  IntColumn get total_size => integer().withDefault(const Constant(0))();
-  IntColumn get file_count => integer().withDefault(const Constant(0))();
-  DateTimeColumn get date_added => dateTime()();
-  TextColumn get excluded_subdirectories => text().nullable()();
 }
 
 // table for genres
@@ -48,26 +40,20 @@ class PlaylistTracks extends Table {
   Set<Column> get primaryKey => {playlistId, trackId};
 }
 
-class Cover extends Table {
-  IntColumn get id => integer().autoIncrement()();
-  TextColumn get cover => text().nullable()();
-  TextColumn get hash => text().unique()();
-}
-
 // table for artists
 class Artists extends Table {
   IntColumn get id => integer().autoIncrement()();
   TextColumn get name => text().unique()();
-  IntColumn get coverId => integer().nullable().references(Cover, #id)();
 }
 
 // table for albums
 class Albums extends Table {
   IntColumn get id => integer().autoIncrement()();
   TextColumn get name => text()();
-  IntColumn get coverId => integer().nullable().references(Cover, #id)();
   IntColumn get artistId => integer().nullable().references(Artists, #id)();
   IntColumn get genreId => integer().nullable().references(Genres, #id)();
+  TextColumn get coverImage =>
+      text().nullable()(); // URI for album art thumbnails
 }
 
 // table for tracks
@@ -75,7 +61,8 @@ class Tracks extends Table {
   IntColumn get id => integer().autoIncrement()();
   TextColumn get title => text()();
   TextColumn get fileuri => text()(); // As requested
-  IntColumn get coverId => integer().nullable().references(Cover, #id)();
+  TextColumn get coverImage =>
+      text().nullable()(); // URI for album art thumbnails
   TextColumn get lyrics => text().nullable()();
   IntColumn get duration => integer().nullable()();
   TextColumn get trackNumber => text().nullable()();
@@ -90,12 +77,11 @@ class Tracks extends Table {
 
 @DriftDatabase(
   tables: [
-    MusicDirectories,
+    ExcludedDirectories,
     Genres,
     Artists,
     Albums,
     Tracks,
-    Cover,
     Playlist,
     PlaylistTracks,
   ],
@@ -134,23 +120,21 @@ class AppDatabase extends _$AppDatabase {
   }
 
   Future<List<TrackItem>> getAllTracks() async {
-    final query = select(tracks).join([
-      leftOuterJoin(artists, artists.id.equalsExp(tracks.artistId)),
-      leftOuterJoin(cover, cover.id.equalsExp(tracks.coverId)),
-    ]);
+    final query = select(
+      tracks,
+    ).join([leftOuterJoin(artists, artists.id.equalsExp(tracks.artistId))]);
 
     final rows = await query.get();
 
     return rows.map((row) {
       final track = row.readTable(tracks);
       final artist = row.readTableOrNull(artists);
-      final coverItem = row.readTableOrNull(cover);
 
       return TrackItem(
         id: track.id,
         title: track.title,
         artist: artist?.name ?? '',
-        cover: coverItem?.cover ?? '',
+        cover: track.coverImage ?? '',
         fileuri: track.fileuri,
       );
     }).toList();
@@ -158,19 +142,13 @@ class AppDatabase extends _$AppDatabase {
 
   // Lightweight methods that only fetch basic info
   Future<List<ArtistItem>> getAllArtists() async {
-    final query = select(
-      artists,
-    ).join([leftOuterJoin(cover, cover.id.equalsExp(artists.coverId))]);
-    final rows = await query.get();
+    final rows = await select(artists).get();
 
-    return rows.map((row) {
-      final artist = row.readTable(artists);
-      final coverItem = row.readTableOrNull(cover);
-
+    return rows.map((artist) {
       return ArtistItem(
         id: artist.id,
         name: artist.name,
-        cover: coverItem?.cover ?? '',
+        cover: '',
         albums: null, // Will be loaded lazily
         tracks: null, // Will be loaded lazily
       );
@@ -178,22 +156,20 @@ class AppDatabase extends _$AppDatabase {
   }
 
   Future<List<AlbumItem>> getAllAlbums() async {
-    final query = select(albums).join([
-      leftOuterJoin(artists, artists.id.equalsExp(albums.artistId)),
-      leftOuterJoin(cover, cover.id.equalsExp(albums.coverId)),
-    ]);
+    final query = select(
+      albums,
+    ).join([leftOuterJoin(artists, artists.id.equalsExp(albums.artistId))]);
 
     final rows = await query.get();
 
     return rows.map((row) {
       final album = row.readTable(albums);
       final artist = row.readTableOrNull(artists);
-      final coverItem = row.readTableOrNull(cover);
 
       return AlbumItem(
         id: album.id,
         name: album.name,
-        cover: coverItem?.cover,
+        cover: album.coverImage,
         artistName: artist?.name,
         artistId: artist?.id,
         tracks: null, // Will be loaded lazily
@@ -203,20 +179,15 @@ class AppDatabase extends _$AppDatabase {
 
   // New methods for lazy loading
   Future<List<AlbumItem>> getAlbumsByArtist(int artistId) async {
-    final query = select(albums).join([
-      leftOuterJoin(cover, cover.id.equalsExp(albums.coverId)),
-    ])..where(albums.artistId.equals(artistId));
+    final query = select(albums)..where((a) => a.artistId.equals(artistId));
 
     final rows = await query.get();
 
-    return rows.map((row) {
-      final album = row.readTable(albums);
-      final coverItem = row.readTableOrNull(cover);
-
+    return rows.map((album) {
       return AlbumItem(
         id: album.id,
         name: album.name,
-        cover: coverItem?.cover,
+        cover: album.coverImage,
         artistName: null, // Not needed when fetching by artist
         artistId: artistId,
         tracks: null, // Will be loaded lazily
@@ -227,7 +198,6 @@ class AppDatabase extends _$AppDatabase {
   Future<List<TrackItem>> getTracksByAlbum(int albumId) async {
     final query = select(tracks).join([
       leftOuterJoin(artists, artists.id.equalsExp(tracks.artistId)),
-      leftOuterJoin(cover, cover.id.equalsExp(tracks.coverId)),
     ])..where(tracks.albumId.equals(albumId));
 
     final rows = await query.get();
@@ -235,34 +205,28 @@ class AppDatabase extends _$AppDatabase {
     return rows.map((row) {
       final track = row.readTable(tracks);
       final artist = row.readTableOrNull(artists);
-      final coverItem = row.readTableOrNull(cover);
 
       return TrackItem(
         id: track.id,
         title: track.title,
         artist: artist?.name ?? '',
-        cover: coverItem?.cover ?? '',
+        cover: track.coverImage ?? '',
         fileuri: track.fileuri,
       );
     }).toList();
   }
 
   Future<List<TrackItem>> getTracksByArtist(int artistId) async {
-    final query = select(tracks).join([
-      leftOuterJoin(cover, cover.id.equalsExp(tracks.coverId)),
-    ])..where(tracks.artistId.equals(artistId));
+    final query = select(tracks)..where((t) => t.artistId.equals(artistId));
 
     final rows = await query.get();
 
-    return rows.map((row) {
-      final track = row.readTable(tracks);
-      final coverItem = row.readTableOrNull(cover);
-
+    return rows.map((track) {
       return TrackItem(
         id: track.id,
         title: track.title,
         artist: '', // Artist name not needed when fetching by artist
-        cover: coverItem?.cover ?? '',
+        cover: track.coverImage ?? '',
         fileuri: track.fileuri,
       );
     }).toList();
@@ -319,39 +283,32 @@ class AppDatabase extends _$AppDatabase {
   Future<List<TrackItem>> searchTracks(String query) async {
     final searchQuery = select(tracks).join([
       leftOuterJoin(artists, artists.id.equalsExp(tracks.artistId)),
-      leftOuterJoin(cover, cover.id.equalsExp(tracks.coverId)),
     ])..where(tracks.title.like('%$query%') | artists.name.like('%$query%'));
 
     final rows = await searchQuery.get();
     return rows.map((row) {
       final track = row.readTable(tracks);
       final artist = row.readTableOrNull(artists);
-      final coverItem = row.readTableOrNull(cover);
 
       return TrackItem(
         id: track.id,
         title: track.title,
         artist: artist?.name ?? '',
-        cover: coverItem?.cover ?? '',
+        cover: track.coverImage ?? '',
         fileuri: track.fileuri,
       );
     }).toList();
   }
 
   Future<List<ArtistItem>> searchArtists(String query) async {
-    final searchQuery = select(artists).join([
-      leftOuterJoin(cover, cover.id.equalsExp(artists.coverId)),
-    ])..where(artists.name.like('%$query%'));
+    final searchQuery = select(artists)..where((a) => a.name.like('%$query%'));
 
     final rows = await searchQuery.get();
-    return rows.map((row) {
-      final artist = row.readTable(artists);
-      final coverItem = row.readTableOrNull(cover);
-
+    return rows.map((artist) {
       return ArtistItem(
         id: artist.id,
         name: artist.name,
-        cover: coverItem?.cover ?? '',
+        cover: '',
         albums: null,
         tracks: null,
       );
@@ -361,19 +318,17 @@ class AppDatabase extends _$AppDatabase {
   Future<List<AlbumItem>> searchAlbumsByName(String query) async {
     final searchQuery = select(albums).join([
       leftOuterJoin(artists, artists.id.equalsExp(albums.artistId)),
-      leftOuterJoin(cover, cover.id.equalsExp(albums.coverId)),
     ])..where(albums.name.like('%$query%') | artists.name.like('%$query%'));
 
     final rows = await searchQuery.get();
     return rows.map((row) {
       final album = row.readTable(albums);
       final artist = row.readTableOrNull(artists);
-      final coverItem = row.readTableOrNull(cover);
 
       return AlbumItem(
         id: album.id,
         name: album.name,
-        cover: coverItem?.cover,
+        cover: album.coverImage,
         artistName: artist?.name,
         artistId: artist?.id,
         tracks: null,
@@ -394,7 +349,6 @@ class AppDatabase extends _$AppDatabase {
   Future<List<TrackItem>> getTracksByGenre(int genreId) async {
     final query = select(tracks).join([
       leftOuterJoin(artists, artists.id.equalsExp(tracks.artistId)),
-      leftOuterJoin(cover, cover.id.equalsExp(tracks.coverId)),
     ])..where(tracks.genreId.equals(genreId));
 
     final rows = await query.get();
@@ -402,13 +356,12 @@ class AppDatabase extends _$AppDatabase {
     return rows.map((row) {
       final track = row.readTable(tracks);
       final artist = row.readTableOrNull(artists);
-      final coverItem = row.readTableOrNull(cover);
 
       return TrackItem(
         id: track.id,
         title: track.title,
         artist: artist?.name ?? '',
-        cover: coverItem?.cover ?? '',
+        cover: track.coverImage ?? '',
         fileuri: track.fileuri,
       );
     }).toList();
@@ -448,7 +401,6 @@ class AppDatabase extends _$AppDatabase {
               playlistTracks.trackId.equalsExp(tracks.id),
             ),
             leftOuterJoin(artists, artists.id.equalsExp(tracks.artistId)),
-            leftOuterJoin(cover, cover.id.equalsExp(tracks.coverId)),
           ])
           ..where(playlistTracks.playlistId.equals(playlistId))
           ..orderBy([OrderingTerm.asc(playlistTracks.addedAt)]);
@@ -458,13 +410,12 @@ class AppDatabase extends _$AppDatabase {
     return rows.map((row) {
       final track = row.readTable(tracks);
       final artist = row.readTableOrNull(artists);
-      final coverItem = row.readTableOrNull(cover);
 
       return TrackItem(
         id: track.id,
         title: track.title,
         artist: artist?.name ?? '',
-        cover: coverItem?.cover ?? '',
+        cover: track.coverImage ?? '',
         fileuri: track.fileuri,
       );
     }).toList();
@@ -560,28 +511,21 @@ class AppDatabase extends _$AppDatabase {
         .go();
   }
 
-  // Pagination support for large datasets (incorrect implementation, renamed to avoid conflict)
   Future<List<ArtistItem>> getArtistsByNamePaginated({
     required String query,
     int limit = 50,
     int offset = 0,
   }) async {
-    final searchQuery =
-        select(
-            artists,
-          ).join([leftOuterJoin(cover, cover.id.equalsExp(artists.coverId))])
-          ..where(artists.name.like('%$query%'))
-          ..limit(limit, offset: offset);
+    final searchQuery = select(artists)
+      ..where((a) => a.name.like('%$query%'))
+      ..limit(limit, offset: offset);
 
     final rows = await searchQuery.get();
-    return rows.map((row) {
-      final artist = row.readTable(artists);
-      final coverItem = row.readTableOrNull(cover);
-
+    return rows.map((artist) {
       return ArtistItem(
         id: artist.id,
         name: artist.name,
-        cover: coverItem?.cover ?? '',
+        cover: '',
         albums: null,
         tracks: null,
       );
@@ -591,19 +535,17 @@ class AppDatabase extends _$AppDatabase {
   Future<List<AlbumItem>> searchAlbums(String query) async {
     final searchQuery = select(albums).join([
       leftOuterJoin(artists, artists.id.equalsExp(albums.artistId)),
-      leftOuterJoin(cover, cover.id.equalsExp(albums.coverId)),
     ])..where(albums.name.like('%$query%') | artists.name.like('%$query%'));
 
     final rows = await searchQuery.get();
     return rows.map((row) {
       final album = row.readTable(albums);
       final artist = row.readTableOrNull(artists);
-      final coverItem = row.readTableOrNull(cover);
 
       return AlbumItem(
         id: album.id,
         name: album.name,
-        cover: coverItem?.cover,
+        cover: album.coverImage,
         artistName: artist?.name,
         artistId: artist?.id,
         tracks: null,
@@ -618,20 +560,18 @@ class AppDatabase extends _$AppDatabase {
   }) async {
     final query = select(tracks).join([
       leftOuterJoin(artists, artists.id.equalsExp(tracks.artistId)),
-      leftOuterJoin(cover, cover.id.equalsExp(tracks.coverId)),
     ])..limit(limit, offset: offset);
 
     final rows = await query.get();
     return rows.map((row) {
       final track = row.readTable(tracks);
       final artist = row.readTableOrNull(artists);
-      final coverItem = row.readTableOrNull(cover);
 
       return TrackItem(
         id: track.id,
         title: track.title,
         artist: artist?.name ?? '',
-        cover: coverItem?.cover ?? '',
+        cover: track.coverImage ?? '',
         fileuri: track.fileuri,
       );
     }).toList();
@@ -641,19 +581,14 @@ class AppDatabase extends _$AppDatabase {
     int limit = 50,
     int offset = 0,
   }) async {
-    final query = select(artists).join([
-      leftOuterJoin(cover, cover.id.equalsExp(artists.coverId)),
-    ])..limit(limit, offset: offset);
+    final query = select(artists)..limit(limit, offset: offset);
 
     final rows = await query.get();
-    return rows.map((row) {
-      final artist = row.readTable(artists);
-      final coverItem = row.readTableOrNull(cover);
-
+    return rows.map((artist) {
       return ArtistItem(
         id: artist.id,
         name: artist.name,
-        cover: coverItem?.cover ?? '',
+        cover: '',
         albums: null,
         tracks: null,
       );
@@ -667,6 +602,18 @@ class AppDatabase extends _$AppDatabase {
         databaseDirectory: getApplicationSupportDirectory,
       ),
     );
+  }
+
+  Future<void> deleteTracksInDirectory(String path) async {
+    await (delete(tracks)..where((t) => t.fileuri.like('$path%'))).go();
+  }
+
+  Future<void> clearDatabase() async {
+    await transaction(() async {
+      for (final table in allTables) {
+        await delete(table).go();
+      }
+    });
   }
 }
 

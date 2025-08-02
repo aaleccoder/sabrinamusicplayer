@@ -13,68 +13,68 @@ class MetadataScreen extends StatefulWidget {
 
 class _MetadataScreenState extends State<MetadataScreen> {
   final MetadataService _metadataService = MetadataService();
-  Map<String, String?>? _metadata;
-  String? _filePath;
-  Uint8List? _albumArt;
+  List<Map<String, String?>>? _musicFiles;
+  bool _isLoading = false;
 
-  Future<void> _pickFile() async {
-    final result = await FilePicker.platform.pickFiles(type: FileType.audio);
-    if (result != null) {
-      setState(() {
-        _filePath = result.files.single.path;
-        _metadata = null;
-        _albumArt = null;
-      });
-      if (_filePath != null) {
-        final metadata = await _metadataService.getMetadata(_filePath!);
-        setState(() {
-          _metadata = metadata;
-          if (metadata.containsKey('album_art')) {
-            _albumArt = base64Decode(metadata['album_art']!);
-          }
-        });
-      }
-    }
+  Future<void> _fetchMusicFiles() async {
+    setState(() {
+      _isLoading = true;
+    });
+    final files = await _metadataService.getAllMusicFiles();
+    setState(() {
+      _musicFiles = files;
+      _isLoading = false;
+    });
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: const Text('Metadata Extractor')),
+      appBar: AppBar(title: const Text('Music Files')),
       body: Center(
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: <Widget>[
-            ElevatedButton(
-              onPressed: _pickFile,
-              child: const Text('Pick Audio File'),
-            ),
-            if (_filePath != null) ...[
-              const SizedBox(height: 20),
-              Text('File: $_filePath'),
-            ],
-            if (_albumArt != null) ...[
-              const SizedBox(height: 20),
-              Image.memory(_albumArt!, height: 200),
-            ],
-            if (_metadata != null) ...[
-              const SizedBox(height: 20),
-              Expanded(
-                child: ListView(
-                  children: _metadata!.entries
-                      .where((entry) => entry.key != 'album_art')
-                      .map((entry) {
-                        return ListTile(
-                          title: Text(entry.key),
-                          subtitle: Text(entry.value ?? 'N/A'),
-                        );
-                      })
-                      .toList(),
-                ),
+        child: _isLoading
+            ? const CircularProgressIndicator()
+            : Column(
+                children: [
+                  ElevatedButton(
+                    onPressed: _fetchMusicFiles,
+                    child: const Text('Fetch Music Files'),
+                  ),
+                  if (_musicFiles != null)
+                    Expanded(
+                      child: ListView.builder(
+                        itemCount: _musicFiles!.length,
+                        itemBuilder: (context, index) {
+                          final file = _musicFiles![index];
+                          return ListTile(
+                            title: Text(file['title'] ?? 'Unknown Title'),
+                            subtitle: Text(file['artist'] ?? 'Unknown Artist'),
+                            onTap: () {
+                              // Optional: show more details in a dialog
+                              showDialog(
+                                context: context,
+                                builder: (context) => AlertDialog(
+                                  title: Text(file['title'] ?? 'Details'),
+                                  content: SingleChildScrollView(
+                                    child: Column(
+                                      crossAxisAlignment:
+                                          CrossAxisAlignment.start,
+                                      children: file.entries
+                                          .map(
+                                            (e) => Text('${e.key}: ${e.value}'),
+                                          )
+                                          .toList(),
+                                    ),
+                                  ),
+                                ),
+                              );
+                            },
+                          );
+                        },
+                      ),
+                    ),
+                ],
               ),
-            ],
-          ],
-        ),
       ),
     );
   }

@@ -39,7 +39,7 @@ class AudioPlayerNotifier extends StateNotifier<AudioPlayerState> {
         if (state.queue != null && state.queue!.isNotEmpty) {
           final nextIndex = (state.currentIndex + 1) % state.queue!.length;
           final nextTrack = state.queue![nextIndex];
-          _audioPlayer.setFilePath(nextTrack.fileuri);
+          _audioPlayer.setAudioSource(AudioSource.uri(Uri.parse(nextTrack.fileuri)));
           _audioPlayer.play();
           state = state.copyWith(
             currentTrack: nextTrack,
@@ -56,7 +56,7 @@ class AudioPlayerNotifier extends StateNotifier<AudioPlayerState> {
 
   Future<void> createQueue(List<TrackItem> tracks) async {
     if (tracks.isNotEmpty) {
-      await _audioPlayer.setFilePath(tracks[0].fileuri);
+      await _audioPlayer.setAudioSource(AudioSource.uri(Uri.parse(tracks[0].fileuri)));
       state = state.copyWith(
         queue: tracks,
         currentTrack: tracks[0],
@@ -69,7 +69,7 @@ class AudioPlayerNotifier extends StateNotifier<AudioPlayerState> {
     if (state.currentTrack?.fileuri == track.fileuri) {
       await _audioPlayer.play();
     } else {
-      await _audioPlayer.setFilePath(track.fileuri);
+      await _audioPlayer.setAudioSource(AudioSource.uri(Uri.parse(track.fileuri)));
       await _audioPlayer.play();
     }
     state = state.copyWith(currentTrack: track);
@@ -79,7 +79,7 @@ class AudioPlayerNotifier extends StateNotifier<AudioPlayerState> {
     if (state.queue != null && state.queue!.isNotEmpty) {
       final nextIndex = (state.currentIndex + 1) % state.queue!.length;
       final nextTrack = state.queue![nextIndex];
-      await _audioPlayer.setFilePath(nextTrack.fileuri);
+      await _audioPlayer.setAudioSource(AudioSource.uri(Uri.parse(nextTrack.fileuri)));
       await _audioPlayer.play();
       state = state.copyWith(currentTrack: nextTrack, currentIndex: nextIndex);
     }
@@ -90,7 +90,7 @@ class AudioPlayerNotifier extends StateNotifier<AudioPlayerState> {
       final previousIndex =
           (state.currentIndex - 1 + state.queue!.length) % state.queue!.length;
       final previousTrack = state.queue![previousIndex];
-      await _audioPlayer.setFilePath(previousTrack.fileuri);
+      await _audioPlayer.setAudioSource(AudioSource.uri(Uri.parse(previousTrack.fileuri)));
       await _audioPlayer.play();
       state = state.copyWith(
         currentTrack: previousTrack,

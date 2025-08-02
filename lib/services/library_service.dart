@@ -5,6 +5,7 @@ import 'dart:typed_data';
 import 'package:crypto/crypto.dart';
 import 'package:drift/drift.dart';
 import 'package:flutter/foundation.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_application_1/main.dart';
 import 'package:flutter_application_1/models/schema.dart';
 import 'package:flutter_application_1/providers/library_scanning_provider.dart';
@@ -16,367 +17,172 @@ import 'package:shared_preferences/shared_preferences.dart';
 import 'package:uuid/uuid.dart';
 
 class LibraryService {
-  final Set<String> audioExtensions = {
-    '.mp3',
-    '.wav',
-    '.flac',
-    '.aac',
-    '.ogg',
-    '.m4a',
-  };
-
-  Future<void> scanIfChange(ProviderContainer ref) async {
-    final prefs = await SharedPreferences.getInstance();
-    final lastScanTimestamp = prefs.getInt('lastScanTimestamp') ?? 0;
-
-    final database = ref.read(appDatabaseProvider);
-    final paths = await database.select(database.musicDirectories).get();
-    bool needsScan = false;
-
-    if (paths.isEmpty) {
-      debugPrint('No music directories found. Skipping scan.');
-      return;
-    }
-
-    for (var directory in paths) {
-      final dir = Directory(directory.path);
-      if (!await dir.exists()) continue;
-
-      await for (final entity in dir.list(recursive: true)) {
-        if (entity is File) {
-          final stat = await entity.stat();
-          if (stat.modified.millisecondsSinceEpoch > lastScanTimestamp) {
-            needsScan = true;
-            break;
-          }
-        }
-      }
-      if (needsScan) break;
-    }
-    if (needsScan) {
-      debugPrint('Changes detected. Scanning library...');
-      await scanLibrary(ref);
-    } else {
-      debugPrint('No changes detected. Skipping scan.');
-    }
-  }
-
-  Future<void> scanLibrary(ProviderContainer ref) async {
+  Future<void> scanLibrary(WidgetRef ref) async {
     final progressNotifier = ref.read(libraryScanningProvider.notifier);
+    final database = ref.read(appDatabaseProvider);
+    final metadataService = MetadataService();
 
     try {
-      final database = ref.read(appDatabaseProvider);
-      final musicDirs = await database.select(database.musicDirectories).get();
+      progressNotifier.startScanning(totalFiles: 0);
+      progressNotifier.updateProgress(
+        processedFiles: 0,
+        currentFile: 'Fetching music from your device...',
+      );
 
-      if (musicDirs.isEmpty) {
-        debugPrint('No music directories configured for scanning.');
+      // Fetch all music files from the MediaStore
+      final allMusicFiles = await metadataService.getAllMusicFiles();
+      if (allMusicFiles.isEmpty) {
+        debugPrint('No music files found on the device.');
+        progressNotifier.finishScanning();
+        ref.invalidate(tracksProvider);
+        ref.invalidate(albumsProvider);
+        ref.invalidate(artistsProvider);
+        ref.invalidate(genresProvider);
         return;
       }
 
-      // First pass: count all audio files
-      final allAudioFiles = <File>[];
-      for (var directory in musicDirs) {
-        final dir = Directory(directory.path);
-        if (await dir.exists()) {
-          await for (final entity in dir.list(recursive: true)) {
-            if (entity is File &&
-                audioExtensions.contains(
-                  p.extension(entity.path).toLowerCase(),
-                )) {
-              allAudioFiles.add(entity);
-            }
-          }
-        }
-      }
+      progressNotifier.startScanning(totalFiles: allMusicFiles.length);
+      debugPrint('Found ${allMusicFiles.length} music files.');
 
+      // Get existing tracks to avoid duplicates
       final existingTracks = await database.select(database.tracks).get();
       final existingFilePaths = existingTracks.map((t) => t.fileuri).toSet();
-      final newAudioFiles = allAudioFiles
-          .where((f) => !existingFilePaths.contains(f.path))
-          .toList();
 
-      // Start scanning progress
-      progressNotifier.startScanning(totalFiles: newAudioFiles.length);
-      debugPrint('Found ${newAudioFiles.length} new files to process.');
+      // Get excluded directories
+      final excludedDirs = await database
+          .select(database.excludedDirectories)
+          .get();
+      final excludedPaths = excludedDirs.map((d) => d.path).toSet();
 
-      if (newAudioFiles.isEmpty) {
-        debugPrint('No new audio files to process.');
-        // Show brief scanning message even when no new files
-        progressNotifier.updateProgress(
-          processedFiles: 0,
-          currentFile: 'Library up to date',
-        );
-        await Future.delayed(
-          const Duration(milliseconds: 1500),
-        ); // Show for 1.5 seconds
+      // Filter out already existing files and files in excluded directories
+      final newFilesToProcess = allMusicFiles.where((f) {
+        if (existingFilePaths.contains(f['path'])) {
+          return false;
+        }
+        for (final excludedPath in excludedPaths) {
+          if (f['path']!.startsWith(excludedPath)) {
+            return false;
+          }
+        }
+        return true;
+      }).toList();
+
+      if (newFilesToProcess.isEmpty) {
+        debugPrint('No new music files to process.');
         progressNotifier.finishScanning();
-        final prefs = await SharedPreferences.getInstance();
-        await prefs.setInt(
-          'lastScanTimestamp',
-          DateTime.now().millisecondsSinceEpoch,
-        );
+        ref.invalidate(tracksProvider);
+        ref.invalidate(albumsProvider);
+        ref.invalidate(artistsProvider);
+        ref.invalidate(genresProvider);
         return;
       }
 
-      // Process and add to database every 100 songs to avoid memory issues
-      const batchSize =
-          8; // Process 8 files simultaneously for optimal performance
-      const dbCommitSize = 100; // Commit to database every 100 songs
-      final metadataService = MetadataService();
+      debugPrint('Processing ${newFilesToProcess.length} new music files.');
 
-      // Global maps to track all processed items across batches
-      final globalArtistIdMap = <String, int>{};
-      final globalGenreIdMap = <String, int>{};
-      final globalCoverIdMap = <String, int>{};
-      final globalAlbumIdMap = <String, int>{};
+      // Process files in batches to avoid overwhelming the database
+      const dbCommitSize = 100;
+      for (int i = 0; i < newFilesToProcess.length; i += dbCommitSize) {
+        final batchEnd = (i + dbCommitSize).clamp(0, newFilesToProcess.length);
+        final batch = newFilesToProcess.sublist(i, batchEnd);
 
-      for (int i = 0; i < newAudioFiles.length; i += dbCommitSize) {
-        final dbBatchEnd = (i + dbCommitSize).clamp(0, newAudioFiles.length);
-        final dbBatch = newAudioFiles.sublist(i, dbBatchEnd);
-
-        debugPrint(
-          'Processing database batch ${(i ~/ dbCommitSize) + 1}: ${dbBatch.length} files',
+        progressNotifier.updateProgress(
+          processedFiles: i,
+          currentFile: 'Processing batch ${i ~/ dbCommitSize + 1}...',
         );
 
-        // Local collections for this database batch
-        final metadataCache = <String, Map<String, dynamic>>{};
+        // Prepare data for batch insertion
         final artistNames = <String>{};
         final genreNames = <String>{};
         final albumArtistMap = <String, String>{};
-        final coverArtMap = <String, Uint8List>{};
+        final albumArtUriMap = <String, String>{};
 
-        // Process metadata in smaller parallel batches within this database batch
-        for (int j = 0; j < dbBatch.length; j += batchSize) {
-          final batchEnd = (j + batchSize).clamp(0, dbBatch.length);
-          final batch = dbBatch.sublist(j, batchEnd);
-          final globalOffset = i + j;
+        for (final metadata in batch) {
+          final artist = metadata['artist'] ?? 'Unknown Artist';
+          final album = metadata['album'] ?? 'Unknown Album';
+          final genre = metadata['genre'] ?? 'Unknown Genre';
 
-          progressNotifier.updateProgress(
-            processedFiles: globalOffset,
-            currentFile:
-                'Processing batch ${(globalOffset ~/ batchSize) + 1}...',
-          );
+          artistNames.add(artist);
+          genreNames.add(genre);
+          albumArtistMap.putIfAbsent(album, () => artist);
 
-          // Process batch in parallel
-          final futures = batch.asMap().entries.map((entry) async {
-            final index = entry.key;
-            final file = entry.value;
-            final globalIndex = globalOffset + index;
-
-            try {
-              final stopwatch = Stopwatch()..start();
-              final metadata = await metadataService.getMetadata(file.path);
-              final elapsed = stopwatch.elapsedMilliseconds;
-
-              debugPrint(
-                'Processed file ${globalIndex + 1}/${newAudioFiles.length}: ${p.basename(file.path)} (${elapsed}ms)',
-              );
-
-              return {'file': file, 'metadata': metadata, 'index': globalIndex};
-            } catch (e, s) {
-              debugPrint(
-                'Failed to get metadata for file: ${file.path}, Error: $e',
-              );
-              return {
-                'file': file,
-                'metadata': <String, String?>{},
-                'index': globalIndex,
-              };
-            }
-          }).toList();
-
-          // Wait for batch to complete
-          final results = await Future.wait(futures, eagerError: false);
-
-          // Process results
-          for (final result in results) {
-            final file = result['file'] as File;
-            final metadata = result['metadata'] as Map<String, String?>;
-            final index = result['index'] as int;
-
-            if (metadata.isEmpty) continue;
-
-            metadataCache[file.path] = metadata;
-
-            final artist = metadata['artist'] ?? 'Unknown Artist';
-            final album = metadata['album'] ?? 'Unknown Album';
-
-            artistNames.add(artist);
-            genreNames.add(metadata['genre'] ?? 'Unknown Genre');
-            albumArtistMap.putIfAbsent(album, () => artist);
-
-            // Process album art efficiently
-            if (metadata.containsKey('album_art') &&
-                metadata['album_art']!.isNotEmpty) {
-              try {
-                final imageBytes = base64Decode(metadata['album_art']!);
-                if (imageBytes.isNotEmpty) {
-                  final hash = await compute(_generateBytesHash, imageBytes);
-                  coverArtMap.putIfAbsent(hash, () => imageBytes);
-                }
-              } catch (e) {
-                debugPrint('Failed to process album art for ${file.path}: $e');
-              }
-            }
-
-            // Update progress
-            progressNotifier.updateProgress(
-              processedFiles: index + 1,
-              currentFile: p.basename(file.path),
+          // Store album art URI for later use
+          if (metadata.containsKey('album_art_uri') &&
+              metadata['album_art_uri'] != null) {
+            final albumKey = '$album|$artist';
+            albumArtUriMap.putIfAbsent(
+              albumKey,
+              () => metadata['album_art_uri']!,
             );
           }
         }
 
-        // Process database operations for this batch
-        progressNotifier.updateProgress(
-          processedFiles: i + dbBatch.length,
-          currentFile: 'Saving batch to database...',
-        );
+        // Batch process artists and genres
+        final artistIdMap = await _batchProcessArtists(database, artistNames);
+        final genreIdMap = await _batchProcessGenres(database, genreNames);
 
-        // Process artists, genres, and covers for this batch
-        final batchArtistIdMap = await _batchProcessArtists(
-          database,
-          artistNames,
-        );
-        final batchGenreIdMap = await _batchProcessGenres(database, genreNames);
-        final batchCoverIdMap = await _batchProcessCovers(
-          database,
-          coverArtMap,
-        );
-
-        // Merge with global maps to avoid duplicates
-        globalArtistIdMap.addAll(batchArtistIdMap);
-        globalGenreIdMap.addAll(batchGenreIdMap);
-        globalCoverIdMap.addAll(batchCoverIdMap);
-
-        final batchAlbumIdMap = await _batchProcessAlbums(
+        // Batch process albums with URI-based cover handling
+        final albumIdMap = await _batchProcessAlbums(
           database,
           albumArtistMap,
-          globalArtistIdMap,
-          globalGenreIdMap,
-          globalCoverIdMap,
-          metadataCache,
+          artistIdMap,
+          genreIdMap,
+          albumArtUriMap,
+          {for (var m in batch) m['path']!: m},
         );
 
-        // Merge album IDs
-        globalAlbumIdMap.addAll(batchAlbumIdMap);
-
-        // Create and insert tracks for this batch
+        // Prepare tracks for insertion
         final trackCompanions = <TracksCompanion>[];
-        for (final file in dbBatch) {
-          final metadata = metadataCache[file.path];
-          if (metadata == null) continue;
+        for (int j = 0; j < batch.length; j++) {
+          final metadata = batch[j];
+          final filePath = metadata['path'];
+          if (filePath == null) continue;
 
           final artistName = metadata['artist'] ?? 'Unknown Artist';
           final albumName = metadata['album'] ?? 'Unknown Album';
           final genreName = metadata['genre'] ?? 'Unknown Genre';
-          final albumKey = '$albumName|${albumArtistMap[albumName]}';
+          final albumKey = '$albumName|$artistName';
 
-          int? coverId;
-          if (metadata.containsKey('album_art')) {
-            final imageBytes = base64Decode(metadata['album_art']!);
-            if (imageBytes.isNotEmpty) {
-              final hash = await compute(_generateBytesHash, imageBytes);
-              coverId = globalCoverIdMap[hash];
-            }
-          }
+          // Store the album art URI directly in the cover path
+          final albumArtUri = metadata['album_art_uri'];
 
           trackCompanions.add(
             TracksCompanion.insert(
-              title: metadata['title'] ?? p.basenameWithoutExtension(file.path),
-              fileuri: file.path,
-              coverId: coverId != null ? Value(coverId) : const Value.absent(),
+              title: metadata['title'] ?? p.basenameWithoutExtension(filePath),
+              fileuri: filePath,
               trackNumber: Value(metadata['track_number']),
               year: Value(metadata['year']),
-              albumId: Value(globalAlbumIdMap[albumKey]),
-              artistId: Value(globalArtistIdMap[artistName]),
-              genreId: Value(globalGenreIdMap[genreName]),
+              albumId: Value(albumIdMap[albumKey]),
+              artistId: Value(artistIdMap[artistName]),
+              genreId: Value(genreIdMap[genreName]),
+              coverImage: albumArtUri != null
+                  ? Value(albumArtUri)
+                  : const Value.absent(),
             ),
           );
+          progressNotifier.updateProgress(
+            processedFiles: i + j + 1,
+            currentFile: p.basename(filePath),
+          );
         }
-
-        // Insert tracks for this batch
+        // Insert tracks in a batch
         if (trackCompanions.isNotEmpty) {
           await database.batch((batch) {
             batch.insertAll(database.tracks, trackCompanions);
           });
-          debugPrint(
-            'Added ${trackCompanions.length} tracks to database (batch ${(i ~/ dbCommitSize) + 1})',
-          );
         }
-
-        // Clear memory for this batch
-        metadataCache.clear();
       }
 
-      final prefs = await SharedPreferences.getInstance();
-      await prefs.setInt(
-        'lastScanTimestamp',
-        DateTime.now().millisecondsSinceEpoch,
-      );
-      debugPrint(
-        'Library scan completed. Processed ${newAudioFiles.length} new files.',
-      );
-
-      // Finish scanning
+      debugPrint('Library scan completed successfully.');
       progressNotifier.finishScanning();
+      ref.invalidate(tracksProvider);
+      ref.invalidate(albumsProvider);
+      ref.invalidate(artistsProvider);
+      ref.invalidate(genresProvider);
     } catch (e, s) {
       debugPrint('A critical error occurred during library scan: $e');
       debugPrint('Stack trace: $s');
       progressNotifier.setError('Scan failed: $e');
     }
-  }
-
-  String _generateBytesHash(Uint8List bytes) {
-    return md5.convert(bytes).toString();
-  }
-
-  Future<String> _createCoverPath(Uint8List cover) async {
-    final directory = await getApplicationDocumentsDirectory();
-
-    final filePath = p.join(directory.path, '${const Uuid().v4()}.jpg');
-    final file = File(filePath);
-    await file.writeAsBytes(cover);
-    return filePath;
-  }
-
-  Future<Map<String, int>> _batchProcessCovers(
-    AppDatabase database,
-    Map<String, Uint8List> coverArtMap,
-  ) async {
-    if (coverArtMap.isEmpty) return {};
-
-    final existing = await (database.select(
-      database.cover,
-    )..where((c) => c.hash.isIn(coverArtMap.keys))).get();
-
-    final idMap = {for (var e in existing) e.hash: e.id};
-
-    final newHashes = coverArtMap.keys.where(
-      (hash) => !idMap.containsKey(hash),
-    );
-
-    if (newHashes.isNotEmpty) {
-      final companions = <CoverCompanion>[];
-      for (final hash in newHashes) {
-        final path = await _createCoverPath(coverArtMap[hash]!);
-        companions.add(CoverCompanion.insert(cover: Value(path), hash: hash));
-      }
-
-      await database.batch(
-        (batch) => batch.insertAll(database.cover, companions),
-      );
-
-      final inserted = await (database.select(
-        database.cover,
-      )..where((c) => c.hash.isIn(newHashes))).get();
-
-      for (var e in inserted) {
-        idMap[e.hash] = e.id;
-      }
-    }
-
-    return idMap;
   }
 
   Future<Map<String, int>> _batchProcessGenres(
@@ -446,7 +252,7 @@ class LibraryService {
     Map<String, String> albumArtistMap,
     Map<String, int> artistIdMap,
     Map<String, int> genreIdMap,
-    Map<String, int> coverIdMap,
+    Map<String, String> albumArtUriMap,
     Map<String, Map<String, dynamic>> metadataCache,
   ) async {
     final existingAlbums = await db.select(db.albums).join([
@@ -478,21 +284,17 @@ class LibraryService {
         if (metadata.isEmpty) continue;
 
         final genreName = metadata['genre'] ?? 'Unknown Genre';
-        int? coverId;
-        if (metadata.containsKey('album_art')) {
-          final imageBytes = base64Decode(metadata['album_art']!);
-          if (imageBytes.isNotEmpty) {
-            final hash = await compute(_generateBytesHash, imageBytes);
-            coverId = coverIdMap[hash];
-          }
-        }
+
+        final coverArtUri = albumArtUriMap[uniqueKey];
 
         newAlbumCompanions.add(
           AlbumsCompanion.insert(
             name: albumName,
             artistId: Value(artistIdMap[artistName]),
             genreId: Value(genreIdMap[genreName]),
-            coverId: coverId != null ? Value(coverId) : const Value.absent(),
+            coverImage: coverArtUri != null
+                ? Value(coverArtUri)
+                : const Value.absent(),
           ),
         );
         newAlbumKeys.add(uniqueKey);

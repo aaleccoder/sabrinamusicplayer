@@ -16,55 +16,59 @@ class SettingsPage extends ConsumerStatefulWidget {
 }
 
 class _SettingsPageState extends ConsumerState<SettingsPage> {
-  List<String> _libraryFolders = [];
+  List<String> _excludedFolders = [];
 
   @override
   void initState() {
     super.initState();
-    _loadFolders();
+    _loadExcludedFolders();
   }
 
-  Future<void> _loadFolders() async {
+  Future<void> _loadExcludedFolders() async {
     final database = ref.read(appDatabaseProvider);
-    final directories = await database.select(database.musicDirectories).get();
+    final directories = await database
+        .select(database.excludedDirectories)
+        .get();
     setState(() {
-      _libraryFolders = directories.map((d) => d.path).toList();
+      _excludedFolders = directories.map((d) => d.path).toList();
     });
   }
 
-  Future<void> _addFolder() async {
+  Future<void> _addExcludedFolder() async {
     final database = ref.read(appDatabaseProvider);
     String? selectedDirectory = await FilePicker.platform.getDirectoryPath();
     if (selectedDirectory != null) {
       final exists = await (database.select(
-        database.musicDirectories,
+        database.excludedDirectories,
       )..where((u) => u.path.equals(selectedDirectory))).get();
       if (exists.isEmpty) {
         await database
-            .into(database.musicDirectories)
+            .into(database.excludedDirectories)
             .insert(
-              MusicDirectoriesCompanion(
-                path: Value(selectedDirectory),
-                date_added: Value(DateTime.now()),
-                is_enabled: const Value(true),
-              ),
+              ExcludedDirectoriesCompanion(path: Value(selectedDirectory)),
             );
-        await _loadFolders();
+        await _loadExcludedFolders();
       }
     }
   }
 
-  Future<void> _removeFolder(String path) async {
+  Future<void> _removeExcludedFolder(String path) async {
     final database = ref.read(appDatabaseProvider);
     await (database.delete(
-      database.musicDirectories,
+      database.excludedDirectories,
     )..where((tbl) => tbl.path.equals(path))).go();
-    await _loadFolders();
+    await database.deleteTracksInDirectory(path);
+    await _loadExcludedFolders();
   }
 
   Future<void> _scanLibrary() async {
-    final container = ProviderContainer();
-    await LibraryService().scanLibrary(container);
+    await LibraryService().scanLibrary(ref);
+  }
+
+  Future<void> _clearAndRescan() async {
+    final database = ref.read(appDatabaseProvider);
+    await database.clearDatabase();
+    await _scanLibrary();
   }
 
   @override
@@ -86,7 +90,7 @@ class _SettingsPageState extends ConsumerState<SettingsPage> {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Text(
-              'Library Folders',
+              'Excluded Folders',
               style: AppTheme.textTheme.titleLarge?.copyWith(
                 color: AppTheme.onBackground,
               ),
@@ -104,14 +108,14 @@ class _SettingsPageState extends ConsumerState<SettingsPage> {
                   ListView.separated(
                     shrinkWrap: true,
                     physics: const NeverScrollableScrollPhysics(),
-                    itemCount: _libraryFolders.length,
+                    itemCount: _excludedFolders.length,
                     separatorBuilder: (_, __) =>
                         const Divider(color: AppTheme.secondary, height: 1),
                     itemBuilder: (context, index) {
                       return ListTile(
                         contentPadding: EdgeInsets.zero,
                         title: Text(
-                          _libraryFolders[index],
+                          _excludedFolders[index],
                           style: AppTheme.textTheme.bodyMedium?.copyWith(
                             color: AppTheme.onSurface,
                           ),
@@ -120,7 +124,7 @@ class _SettingsPageState extends ConsumerState<SettingsPage> {
                         trailing: IconButton(
                           icon: const Icon(Icons.delete, color: AppTheme.error),
                           onPressed: () =>
-                              _removeFolder(_libraryFolders[index]),
+                              _removeExcludedFolder(_excludedFolders[index]),
                           tooltip: 'Remove',
                         ),
                       );
@@ -139,11 +143,29 @@ class _SettingsPageState extends ConsumerState<SettingsPage> {
                         padding: AppTheme.paddingMd,
                       ),
                       icon: const Icon(Icons.folder_open),
-                      label: const Text('Add Folder'),
-                      onPressed: _addFolder,
+                      label: const Text('Exclude Folder'),
+                      onPressed: _addExcludedFolder,
                     ),
                   ),
-                  const SizedBox(height: 16),
+                ],
+              ),
+            ),
+            const SizedBox(height: 24),
+            Text(
+              'Library Management',
+              style: AppTheme.textTheme.titleLarge?.copyWith(
+                color: AppTheme.onBackground,
+              ),
+            ),
+            const SizedBox(height: 12),
+            Container(
+              decoration: BoxDecoration(
+                color: AppTheme.surface,
+                borderRadius: AppTheme.radiusMd,
+              ),
+              padding: AppTheme.paddingMd,
+              child: Column(
+                children: [
                   SizedBox(
                     width: double.infinity,
                     child: ElevatedButton.icon(
@@ -160,10 +182,26 @@ class _SettingsPageState extends ConsumerState<SettingsPage> {
                       onPressed: _scanLibrary,
                     ),
                   ),
+                  const SizedBox(height: 16),
+                  SizedBox(
+                    width: double.infinity,
+                    child: ElevatedButton.icon(
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: AppTheme.error,
+                        foregroundColor: AppTheme.onError,
+                        shape: RoundedRectangleBorder(
+                          borderRadius: AppTheme.radiusSm,
+                        ),
+                        padding: AppTheme.paddingMd,
+                      ),
+                      icon: const Icon(Icons.delete_forever),
+                      label: const Text('Clear and Rescan Library'),
+                      onPressed: _clearAndRescan,
+                    ),
+                  ),
                 ],
               ),
             ),
-            // ... Add more settings sections here ...
           ],
         ),
       ),

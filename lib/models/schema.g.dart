@@ -3,12 +3,12 @@
 part of 'schema.dart';
 
 // ignore_for_file: type=lint
-class $MusicDirectoriesTable extends MusicDirectories
-    with TableInfo<$MusicDirectoriesTable, MusicDirectory> {
+class $ExcludedDirectoriesTable extends ExcludedDirectories
+    with TableInfo<$ExcludedDirectoriesTable, ExcludedDirectory> {
   @override
   final GeneratedDatabase attachedDatabase;
   final String? _alias;
-  $MusicDirectoriesTable(this.attachedDatabase, [this._alias]);
+  $ExcludedDirectoriesTable(this.attachedDatabase, [this._alias]);
   static const VerificationMeta _idMeta = const VerificationMeta('id');
   @override
   late final GeneratedColumn<int> id = GeneratedColumn<int>(
@@ -32,112 +32,16 @@ class $MusicDirectoriesTable extends MusicDirectories
     type: DriftSqlType.string,
     requiredDuringInsert: true,
   );
-  static const VerificationMeta _is_enabledMeta = const VerificationMeta(
-    'is_enabled',
-  );
   @override
-  late final GeneratedColumn<bool> is_enabled = GeneratedColumn<bool>(
-    'is_enabled',
-    aliasedName,
-    false,
-    type: DriftSqlType.bool,
-    requiredDuringInsert: false,
-    defaultConstraints: GeneratedColumn.constraintIsAlways(
-      'CHECK ("is_enabled" IN (0, 1))',
-    ),
-    defaultValue: const Constant(true),
-  );
-  static const VerificationMeta _last_scannedMeta = const VerificationMeta(
-    'last_scanned',
-  );
-  @override
-  late final GeneratedColumn<int> last_scanned = GeneratedColumn<int>(
-    'last_scanned',
-    aliasedName,
-    true,
-    type: DriftSqlType.int,
-    requiredDuringInsert: false,
-  );
-  static const VerificationMeta _scan_subdirectoriesMeta =
-      const VerificationMeta('scan_subdirectories');
-  @override
-  late final GeneratedColumn<bool> scan_subdirectories = GeneratedColumn<bool>(
-    'scan_subdirectories',
-    aliasedName,
-    false,
-    type: DriftSqlType.bool,
-    requiredDuringInsert: false,
-    defaultConstraints: GeneratedColumn.constraintIsAlways(
-      'CHECK ("scan_subdirectories" IN (0, 1))',
-    ),
-    defaultValue: const Constant(true),
-  );
-  static const VerificationMeta _total_sizeMeta = const VerificationMeta(
-    'total_size',
-  );
-  @override
-  late final GeneratedColumn<int> total_size = GeneratedColumn<int>(
-    'total_size',
-    aliasedName,
-    false,
-    type: DriftSqlType.int,
-    requiredDuringInsert: false,
-    defaultValue: const Constant(0),
-  );
-  static const VerificationMeta _file_countMeta = const VerificationMeta(
-    'file_count',
-  );
-  @override
-  late final GeneratedColumn<int> file_count = GeneratedColumn<int>(
-    'file_count',
-    aliasedName,
-    false,
-    type: DriftSqlType.int,
-    requiredDuringInsert: false,
-    defaultValue: const Constant(0),
-  );
-  static const VerificationMeta _date_addedMeta = const VerificationMeta(
-    'date_added',
-  );
-  @override
-  late final GeneratedColumn<DateTime> date_added = GeneratedColumn<DateTime>(
-    'date_added',
-    aliasedName,
-    false,
-    type: DriftSqlType.dateTime,
-    requiredDuringInsert: true,
-  );
-  static const VerificationMeta _excluded_subdirectoriesMeta =
-      const VerificationMeta('excluded_subdirectories');
-  @override
-  late final GeneratedColumn<String> excluded_subdirectories =
-      GeneratedColumn<String>(
-        'excluded_subdirectories',
-        aliasedName,
-        true,
-        type: DriftSqlType.string,
-        requiredDuringInsert: false,
-      );
-  @override
-  List<GeneratedColumn> get $columns => [
-    id,
-    path,
-    is_enabled,
-    last_scanned,
-    scan_subdirectories,
-    total_size,
-    file_count,
-    date_added,
-    excluded_subdirectories,
-  ];
+  List<GeneratedColumn> get $columns => [id, path];
   @override
   String get aliasedName => _alias ?? actualTableName;
   @override
   String get actualTableName => $name;
-  static const String $name = 'music_directories';
+  static const String $name = 'excluded_directories';
   @override
   VerificationContext validateIntegrity(
-    Insertable<MusicDirectory> instance, {
+    Insertable<ExcludedDirectory> instance, {
     bool isInserting = false,
   }) {
     final context = VerificationContext();
@@ -153,68 +57,15 @@ class $MusicDirectoriesTable extends MusicDirectories
     } else if (isInserting) {
       context.missing(_pathMeta);
     }
-    if (data.containsKey('is_enabled')) {
-      context.handle(
-        _is_enabledMeta,
-        is_enabled.isAcceptableOrUnknown(data['is_enabled']!, _is_enabledMeta),
-      );
-    }
-    if (data.containsKey('last_scanned')) {
-      context.handle(
-        _last_scannedMeta,
-        last_scanned.isAcceptableOrUnknown(
-          data['last_scanned']!,
-          _last_scannedMeta,
-        ),
-      );
-    }
-    if (data.containsKey('scan_subdirectories')) {
-      context.handle(
-        _scan_subdirectoriesMeta,
-        scan_subdirectories.isAcceptableOrUnknown(
-          data['scan_subdirectories']!,
-          _scan_subdirectoriesMeta,
-        ),
-      );
-    }
-    if (data.containsKey('total_size')) {
-      context.handle(
-        _total_sizeMeta,
-        total_size.isAcceptableOrUnknown(data['total_size']!, _total_sizeMeta),
-      );
-    }
-    if (data.containsKey('file_count')) {
-      context.handle(
-        _file_countMeta,
-        file_count.isAcceptableOrUnknown(data['file_count']!, _file_countMeta),
-      );
-    }
-    if (data.containsKey('date_added')) {
-      context.handle(
-        _date_addedMeta,
-        date_added.isAcceptableOrUnknown(data['date_added']!, _date_addedMeta),
-      );
-    } else if (isInserting) {
-      context.missing(_date_addedMeta);
-    }
-    if (data.containsKey('excluded_subdirectories')) {
-      context.handle(
-        _excluded_subdirectoriesMeta,
-        excluded_subdirectories.isAcceptableOrUnknown(
-          data['excluded_subdirectories']!,
-          _excluded_subdirectoriesMeta,
-        ),
-      );
-    }
     return context;
   }
 
   @override
   Set<GeneratedColumn> get $primaryKey => {id};
   @override
-  MusicDirectory map(Map<String, dynamic> data, {String? tablePrefix}) {
+  ExcludedDirectory map(Map<String, dynamic> data, {String? tablePrefix}) {
     final effectivePrefix = tablePrefix != null ? '$tablePrefix.' : '';
-    return MusicDirectory(
+    return ExcludedDirectory(
       id: attachedDatabase.typeMapping.read(
         DriftSqlType.int,
         data['${effectivePrefix}id'],
@@ -223,122 +74,40 @@ class $MusicDirectoriesTable extends MusicDirectories
         DriftSqlType.string,
         data['${effectivePrefix}path'],
       )!,
-      is_enabled: attachedDatabase.typeMapping.read(
-        DriftSqlType.bool,
-        data['${effectivePrefix}is_enabled'],
-      )!,
-      last_scanned: attachedDatabase.typeMapping.read(
-        DriftSqlType.int,
-        data['${effectivePrefix}last_scanned'],
-      ),
-      scan_subdirectories: attachedDatabase.typeMapping.read(
-        DriftSqlType.bool,
-        data['${effectivePrefix}scan_subdirectories'],
-      )!,
-      total_size: attachedDatabase.typeMapping.read(
-        DriftSqlType.int,
-        data['${effectivePrefix}total_size'],
-      )!,
-      file_count: attachedDatabase.typeMapping.read(
-        DriftSqlType.int,
-        data['${effectivePrefix}file_count'],
-      )!,
-      date_added: attachedDatabase.typeMapping.read(
-        DriftSqlType.dateTime,
-        data['${effectivePrefix}date_added'],
-      )!,
-      excluded_subdirectories: attachedDatabase.typeMapping.read(
-        DriftSqlType.string,
-        data['${effectivePrefix}excluded_subdirectories'],
-      ),
     );
   }
 
   @override
-  $MusicDirectoriesTable createAlias(String alias) {
-    return $MusicDirectoriesTable(attachedDatabase, alias);
+  $ExcludedDirectoriesTable createAlias(String alias) {
+    return $ExcludedDirectoriesTable(attachedDatabase, alias);
   }
 }
 
-class MusicDirectory extends DataClass implements Insertable<MusicDirectory> {
+class ExcludedDirectory extends DataClass
+    implements Insertable<ExcludedDirectory> {
   final int id;
   final String path;
-  final bool is_enabled;
-  final int? last_scanned;
-  final bool scan_subdirectories;
-  final int total_size;
-  final int file_count;
-  final DateTime date_added;
-  final String? excluded_subdirectories;
-  const MusicDirectory({
-    required this.id,
-    required this.path,
-    required this.is_enabled,
-    this.last_scanned,
-    required this.scan_subdirectories,
-    required this.total_size,
-    required this.file_count,
-    required this.date_added,
-    this.excluded_subdirectories,
-  });
+  const ExcludedDirectory({required this.id, required this.path});
   @override
   Map<String, Expression> toColumns(bool nullToAbsent) {
     final map = <String, Expression>{};
     map['id'] = Variable<int>(id);
     map['path'] = Variable<String>(path);
-    map['is_enabled'] = Variable<bool>(is_enabled);
-    if (!nullToAbsent || last_scanned != null) {
-      map['last_scanned'] = Variable<int>(last_scanned);
-    }
-    map['scan_subdirectories'] = Variable<bool>(scan_subdirectories);
-    map['total_size'] = Variable<int>(total_size);
-    map['file_count'] = Variable<int>(file_count);
-    map['date_added'] = Variable<DateTime>(date_added);
-    if (!nullToAbsent || excluded_subdirectories != null) {
-      map['excluded_subdirectories'] = Variable<String>(
-        excluded_subdirectories,
-      );
-    }
     return map;
   }
 
-  MusicDirectoriesCompanion toCompanion(bool nullToAbsent) {
-    return MusicDirectoriesCompanion(
-      id: Value(id),
-      path: Value(path),
-      is_enabled: Value(is_enabled),
-      last_scanned: last_scanned == null && nullToAbsent
-          ? const Value.absent()
-          : Value(last_scanned),
-      scan_subdirectories: Value(scan_subdirectories),
-      total_size: Value(total_size),
-      file_count: Value(file_count),
-      date_added: Value(date_added),
-      excluded_subdirectories: excluded_subdirectories == null && nullToAbsent
-          ? const Value.absent()
-          : Value(excluded_subdirectories),
-    );
+  ExcludedDirectoriesCompanion toCompanion(bool nullToAbsent) {
+    return ExcludedDirectoriesCompanion(id: Value(id), path: Value(path));
   }
 
-  factory MusicDirectory.fromJson(
+  factory ExcludedDirectory.fromJson(
     Map<String, dynamic> json, {
     ValueSerializer? serializer,
   }) {
     serializer ??= driftRuntimeOptions.defaultSerializer;
-    return MusicDirectory(
+    return ExcludedDirectory(
       id: serializer.fromJson<int>(json['id']),
       path: serializer.fromJson<String>(json['path']),
-      is_enabled: serializer.fromJson<bool>(json['is_enabled']),
-      last_scanned: serializer.fromJson<int?>(json['last_scanned']),
-      scan_subdirectories: serializer.fromJson<bool>(
-        json['scan_subdirectories'],
-      ),
-      total_size: serializer.fromJson<int>(json['total_size']),
-      file_count: serializer.fromJson<int>(json['file_count']),
-      date_added: serializer.fromJson<DateTime>(json['date_added']),
-      excluded_subdirectories: serializer.fromJson<String?>(
-        json['excluded_subdirectories'],
-      ),
     );
   }
   @override
@@ -347,193 +116,62 @@ class MusicDirectory extends DataClass implements Insertable<MusicDirectory> {
     return <String, dynamic>{
       'id': serializer.toJson<int>(id),
       'path': serializer.toJson<String>(path),
-      'is_enabled': serializer.toJson<bool>(is_enabled),
-      'last_scanned': serializer.toJson<int?>(last_scanned),
-      'scan_subdirectories': serializer.toJson<bool>(scan_subdirectories),
-      'total_size': serializer.toJson<int>(total_size),
-      'file_count': serializer.toJson<int>(file_count),
-      'date_added': serializer.toJson<DateTime>(date_added),
-      'excluded_subdirectories': serializer.toJson<String?>(
-        excluded_subdirectories,
-      ),
     };
   }
 
-  MusicDirectory copyWith({
-    int? id,
-    String? path,
-    bool? is_enabled,
-    Value<int?> last_scanned = const Value.absent(),
-    bool? scan_subdirectories,
-    int? total_size,
-    int? file_count,
-    DateTime? date_added,
-    Value<String?> excluded_subdirectories = const Value.absent(),
-  }) => MusicDirectory(
-    id: id ?? this.id,
-    path: path ?? this.path,
-    is_enabled: is_enabled ?? this.is_enabled,
-    last_scanned: last_scanned.present ? last_scanned.value : this.last_scanned,
-    scan_subdirectories: scan_subdirectories ?? this.scan_subdirectories,
-    total_size: total_size ?? this.total_size,
-    file_count: file_count ?? this.file_count,
-    date_added: date_added ?? this.date_added,
-    excluded_subdirectories: excluded_subdirectories.present
-        ? excluded_subdirectories.value
-        : this.excluded_subdirectories,
-  );
-  MusicDirectory copyWithCompanion(MusicDirectoriesCompanion data) {
-    return MusicDirectory(
+  ExcludedDirectory copyWith({int? id, String? path}) =>
+      ExcludedDirectory(id: id ?? this.id, path: path ?? this.path);
+  ExcludedDirectory copyWithCompanion(ExcludedDirectoriesCompanion data) {
+    return ExcludedDirectory(
       id: data.id.present ? data.id.value : this.id,
       path: data.path.present ? data.path.value : this.path,
-      is_enabled: data.is_enabled.present
-          ? data.is_enabled.value
-          : this.is_enabled,
-      last_scanned: data.last_scanned.present
-          ? data.last_scanned.value
-          : this.last_scanned,
-      scan_subdirectories: data.scan_subdirectories.present
-          ? data.scan_subdirectories.value
-          : this.scan_subdirectories,
-      total_size: data.total_size.present
-          ? data.total_size.value
-          : this.total_size,
-      file_count: data.file_count.present
-          ? data.file_count.value
-          : this.file_count,
-      date_added: data.date_added.present
-          ? data.date_added.value
-          : this.date_added,
-      excluded_subdirectories: data.excluded_subdirectories.present
-          ? data.excluded_subdirectories.value
-          : this.excluded_subdirectories,
     );
   }
 
   @override
   String toString() {
-    return (StringBuffer('MusicDirectory(')
+    return (StringBuffer('ExcludedDirectory(')
           ..write('id: $id, ')
-          ..write('path: $path, ')
-          ..write('is_enabled: $is_enabled, ')
-          ..write('last_scanned: $last_scanned, ')
-          ..write('scan_subdirectories: $scan_subdirectories, ')
-          ..write('total_size: $total_size, ')
-          ..write('file_count: $file_count, ')
-          ..write('date_added: $date_added, ')
-          ..write('excluded_subdirectories: $excluded_subdirectories')
+          ..write('path: $path')
           ..write(')'))
         .toString();
   }
 
   @override
-  int get hashCode => Object.hash(
-    id,
-    path,
-    is_enabled,
-    last_scanned,
-    scan_subdirectories,
-    total_size,
-    file_count,
-    date_added,
-    excluded_subdirectories,
-  );
+  int get hashCode => Object.hash(id, path);
   @override
   bool operator ==(Object other) =>
       identical(this, other) ||
-      (other is MusicDirectory &&
+      (other is ExcludedDirectory &&
           other.id == this.id &&
-          other.path == this.path &&
-          other.is_enabled == this.is_enabled &&
-          other.last_scanned == this.last_scanned &&
-          other.scan_subdirectories == this.scan_subdirectories &&
-          other.total_size == this.total_size &&
-          other.file_count == this.file_count &&
-          other.date_added == this.date_added &&
-          other.excluded_subdirectories == this.excluded_subdirectories);
+          other.path == this.path);
 }
 
-class MusicDirectoriesCompanion extends UpdateCompanion<MusicDirectory> {
+class ExcludedDirectoriesCompanion extends UpdateCompanion<ExcludedDirectory> {
   final Value<int> id;
   final Value<String> path;
-  final Value<bool> is_enabled;
-  final Value<int?> last_scanned;
-  final Value<bool> scan_subdirectories;
-  final Value<int> total_size;
-  final Value<int> file_count;
-  final Value<DateTime> date_added;
-  final Value<String?> excluded_subdirectories;
-  const MusicDirectoriesCompanion({
+  const ExcludedDirectoriesCompanion({
     this.id = const Value.absent(),
     this.path = const Value.absent(),
-    this.is_enabled = const Value.absent(),
-    this.last_scanned = const Value.absent(),
-    this.scan_subdirectories = const Value.absent(),
-    this.total_size = const Value.absent(),
-    this.file_count = const Value.absent(),
-    this.date_added = const Value.absent(),
-    this.excluded_subdirectories = const Value.absent(),
   });
-  MusicDirectoriesCompanion.insert({
+  ExcludedDirectoriesCompanion.insert({
     this.id = const Value.absent(),
     required String path,
-    this.is_enabled = const Value.absent(),
-    this.last_scanned = const Value.absent(),
-    this.scan_subdirectories = const Value.absent(),
-    this.total_size = const Value.absent(),
-    this.file_count = const Value.absent(),
-    required DateTime date_added,
-    this.excluded_subdirectories = const Value.absent(),
-  }) : path = Value(path),
-       date_added = Value(date_added);
-  static Insertable<MusicDirectory> custom({
+  }) : path = Value(path);
+  static Insertable<ExcludedDirectory> custom({
     Expression<int>? id,
     Expression<String>? path,
-    Expression<bool>? is_enabled,
-    Expression<int>? last_scanned,
-    Expression<bool>? scan_subdirectories,
-    Expression<int>? total_size,
-    Expression<int>? file_count,
-    Expression<DateTime>? date_added,
-    Expression<String>? excluded_subdirectories,
   }) {
     return RawValuesInsertable({
       if (id != null) 'id': id,
       if (path != null) 'path': path,
-      if (is_enabled != null) 'is_enabled': is_enabled,
-      if (last_scanned != null) 'last_scanned': last_scanned,
-      if (scan_subdirectories != null)
-        'scan_subdirectories': scan_subdirectories,
-      if (total_size != null) 'total_size': total_size,
-      if (file_count != null) 'file_count': file_count,
-      if (date_added != null) 'date_added': date_added,
-      if (excluded_subdirectories != null)
-        'excluded_subdirectories': excluded_subdirectories,
     });
   }
 
-  MusicDirectoriesCompanion copyWith({
-    Value<int>? id,
-    Value<String>? path,
-    Value<bool>? is_enabled,
-    Value<int?>? last_scanned,
-    Value<bool>? scan_subdirectories,
-    Value<int>? total_size,
-    Value<int>? file_count,
-    Value<DateTime>? date_added,
-    Value<String?>? excluded_subdirectories,
-  }) {
-    return MusicDirectoriesCompanion(
+  ExcludedDirectoriesCompanion copyWith({Value<int>? id, Value<String>? path}) {
+    return ExcludedDirectoriesCompanion(
       id: id ?? this.id,
       path: path ?? this.path,
-      is_enabled: is_enabled ?? this.is_enabled,
-      last_scanned: last_scanned ?? this.last_scanned,
-      scan_subdirectories: scan_subdirectories ?? this.scan_subdirectories,
-      total_size: total_size ?? this.total_size,
-      file_count: file_count ?? this.file_count,
-      date_added: date_added ?? this.date_added,
-      excluded_subdirectories:
-          excluded_subdirectories ?? this.excluded_subdirectories,
     );
   }
 
@@ -546,44 +184,14 @@ class MusicDirectoriesCompanion extends UpdateCompanion<MusicDirectory> {
     if (path.present) {
       map['path'] = Variable<String>(path.value);
     }
-    if (is_enabled.present) {
-      map['is_enabled'] = Variable<bool>(is_enabled.value);
-    }
-    if (last_scanned.present) {
-      map['last_scanned'] = Variable<int>(last_scanned.value);
-    }
-    if (scan_subdirectories.present) {
-      map['scan_subdirectories'] = Variable<bool>(scan_subdirectories.value);
-    }
-    if (total_size.present) {
-      map['total_size'] = Variable<int>(total_size.value);
-    }
-    if (file_count.present) {
-      map['file_count'] = Variable<int>(file_count.value);
-    }
-    if (date_added.present) {
-      map['date_added'] = Variable<DateTime>(date_added.value);
-    }
-    if (excluded_subdirectories.present) {
-      map['excluded_subdirectories'] = Variable<String>(
-        excluded_subdirectories.value,
-      );
-    }
     return map;
   }
 
   @override
   String toString() {
-    return (StringBuffer('MusicDirectoriesCompanion(')
+    return (StringBuffer('ExcludedDirectoriesCompanion(')
           ..write('id: $id, ')
-          ..write('path: $path, ')
-          ..write('is_enabled: $is_enabled, ')
-          ..write('last_scanned: $last_scanned, ')
-          ..write('scan_subdirectories: $scan_subdirectories, ')
-          ..write('total_size: $total_size, ')
-          ..write('file_count: $file_count, ')
-          ..write('date_added: $date_added, ')
-          ..write('excluded_subdirectories: $excluded_subdirectories')
+          ..write('path: $path')
           ..write(')'))
         .toString();
   }
@@ -774,253 +382,6 @@ class GenresCompanion extends UpdateCompanion<Genre> {
   }
 }
 
-class $CoverTable extends Cover with TableInfo<$CoverTable, CoverData> {
-  @override
-  final GeneratedDatabase attachedDatabase;
-  final String? _alias;
-  $CoverTable(this.attachedDatabase, [this._alias]);
-  static const VerificationMeta _idMeta = const VerificationMeta('id');
-  @override
-  late final GeneratedColumn<int> id = GeneratedColumn<int>(
-    'id',
-    aliasedName,
-    false,
-    hasAutoIncrement: true,
-    type: DriftSqlType.int,
-    requiredDuringInsert: false,
-    defaultConstraints: GeneratedColumn.constraintIsAlways(
-      'PRIMARY KEY AUTOINCREMENT',
-    ),
-  );
-  static const VerificationMeta _coverMeta = const VerificationMeta('cover');
-  @override
-  late final GeneratedColumn<String> cover = GeneratedColumn<String>(
-    'cover',
-    aliasedName,
-    true,
-    type: DriftSqlType.string,
-    requiredDuringInsert: false,
-  );
-  static const VerificationMeta _hashMeta = const VerificationMeta('hash');
-  @override
-  late final GeneratedColumn<String> hash = GeneratedColumn<String>(
-    'hash',
-    aliasedName,
-    false,
-    type: DriftSqlType.string,
-    requiredDuringInsert: true,
-    defaultConstraints: GeneratedColumn.constraintIsAlways('UNIQUE'),
-  );
-  @override
-  List<GeneratedColumn> get $columns => [id, cover, hash];
-  @override
-  String get aliasedName => _alias ?? actualTableName;
-  @override
-  String get actualTableName => $name;
-  static const String $name = 'cover';
-  @override
-  VerificationContext validateIntegrity(
-    Insertable<CoverData> instance, {
-    bool isInserting = false,
-  }) {
-    final context = VerificationContext();
-    final data = instance.toColumns(true);
-    if (data.containsKey('id')) {
-      context.handle(_idMeta, id.isAcceptableOrUnknown(data['id']!, _idMeta));
-    }
-    if (data.containsKey('cover')) {
-      context.handle(
-        _coverMeta,
-        cover.isAcceptableOrUnknown(data['cover']!, _coverMeta),
-      );
-    }
-    if (data.containsKey('hash')) {
-      context.handle(
-        _hashMeta,
-        hash.isAcceptableOrUnknown(data['hash']!, _hashMeta),
-      );
-    } else if (isInserting) {
-      context.missing(_hashMeta);
-    }
-    return context;
-  }
-
-  @override
-  Set<GeneratedColumn> get $primaryKey => {id};
-  @override
-  CoverData map(Map<String, dynamic> data, {String? tablePrefix}) {
-    final effectivePrefix = tablePrefix != null ? '$tablePrefix.' : '';
-    return CoverData(
-      id: attachedDatabase.typeMapping.read(
-        DriftSqlType.int,
-        data['${effectivePrefix}id'],
-      )!,
-      cover: attachedDatabase.typeMapping.read(
-        DriftSqlType.string,
-        data['${effectivePrefix}cover'],
-      ),
-      hash: attachedDatabase.typeMapping.read(
-        DriftSqlType.string,
-        data['${effectivePrefix}hash'],
-      )!,
-    );
-  }
-
-  @override
-  $CoverTable createAlias(String alias) {
-    return $CoverTable(attachedDatabase, alias);
-  }
-}
-
-class CoverData extends DataClass implements Insertable<CoverData> {
-  final int id;
-  final String? cover;
-  final String hash;
-  const CoverData({required this.id, this.cover, required this.hash});
-  @override
-  Map<String, Expression> toColumns(bool nullToAbsent) {
-    final map = <String, Expression>{};
-    map['id'] = Variable<int>(id);
-    if (!nullToAbsent || cover != null) {
-      map['cover'] = Variable<String>(cover);
-    }
-    map['hash'] = Variable<String>(hash);
-    return map;
-  }
-
-  CoverCompanion toCompanion(bool nullToAbsent) {
-    return CoverCompanion(
-      id: Value(id),
-      cover: cover == null && nullToAbsent
-          ? const Value.absent()
-          : Value(cover),
-      hash: Value(hash),
-    );
-  }
-
-  factory CoverData.fromJson(
-    Map<String, dynamic> json, {
-    ValueSerializer? serializer,
-  }) {
-    serializer ??= driftRuntimeOptions.defaultSerializer;
-    return CoverData(
-      id: serializer.fromJson<int>(json['id']),
-      cover: serializer.fromJson<String?>(json['cover']),
-      hash: serializer.fromJson<String>(json['hash']),
-    );
-  }
-  @override
-  Map<String, dynamic> toJson({ValueSerializer? serializer}) {
-    serializer ??= driftRuntimeOptions.defaultSerializer;
-    return <String, dynamic>{
-      'id': serializer.toJson<int>(id),
-      'cover': serializer.toJson<String?>(cover),
-      'hash': serializer.toJson<String>(hash),
-    };
-  }
-
-  CoverData copyWith({
-    int? id,
-    Value<String?> cover = const Value.absent(),
-    String? hash,
-  }) => CoverData(
-    id: id ?? this.id,
-    cover: cover.present ? cover.value : this.cover,
-    hash: hash ?? this.hash,
-  );
-  CoverData copyWithCompanion(CoverCompanion data) {
-    return CoverData(
-      id: data.id.present ? data.id.value : this.id,
-      cover: data.cover.present ? data.cover.value : this.cover,
-      hash: data.hash.present ? data.hash.value : this.hash,
-    );
-  }
-
-  @override
-  String toString() {
-    return (StringBuffer('CoverData(')
-          ..write('id: $id, ')
-          ..write('cover: $cover, ')
-          ..write('hash: $hash')
-          ..write(')'))
-        .toString();
-  }
-
-  @override
-  int get hashCode => Object.hash(id, cover, hash);
-  @override
-  bool operator ==(Object other) =>
-      identical(this, other) ||
-      (other is CoverData &&
-          other.id == this.id &&
-          other.cover == this.cover &&
-          other.hash == this.hash);
-}
-
-class CoverCompanion extends UpdateCompanion<CoverData> {
-  final Value<int> id;
-  final Value<String?> cover;
-  final Value<String> hash;
-  const CoverCompanion({
-    this.id = const Value.absent(),
-    this.cover = const Value.absent(),
-    this.hash = const Value.absent(),
-  });
-  CoverCompanion.insert({
-    this.id = const Value.absent(),
-    this.cover = const Value.absent(),
-    required String hash,
-  }) : hash = Value(hash);
-  static Insertable<CoverData> custom({
-    Expression<int>? id,
-    Expression<String>? cover,
-    Expression<String>? hash,
-  }) {
-    return RawValuesInsertable({
-      if (id != null) 'id': id,
-      if (cover != null) 'cover': cover,
-      if (hash != null) 'hash': hash,
-    });
-  }
-
-  CoverCompanion copyWith({
-    Value<int>? id,
-    Value<String?>? cover,
-    Value<String>? hash,
-  }) {
-    return CoverCompanion(
-      id: id ?? this.id,
-      cover: cover ?? this.cover,
-      hash: hash ?? this.hash,
-    );
-  }
-
-  @override
-  Map<String, Expression> toColumns(bool nullToAbsent) {
-    final map = <String, Expression>{};
-    if (id.present) {
-      map['id'] = Variable<int>(id.value);
-    }
-    if (cover.present) {
-      map['cover'] = Variable<String>(cover.value);
-    }
-    if (hash.present) {
-      map['hash'] = Variable<String>(hash.value);
-    }
-    return map;
-  }
-
-  @override
-  String toString() {
-    return (StringBuffer('CoverCompanion(')
-          ..write('id: $id, ')
-          ..write('cover: $cover, ')
-          ..write('hash: $hash')
-          ..write(')'))
-        .toString();
-  }
-}
-
 class $ArtistsTable extends Artists with TableInfo<$ArtistsTable, Artist> {
   @override
   final GeneratedDatabase attachedDatabase;
@@ -1049,22 +410,8 @@ class $ArtistsTable extends Artists with TableInfo<$ArtistsTable, Artist> {
     requiredDuringInsert: true,
     defaultConstraints: GeneratedColumn.constraintIsAlways('UNIQUE'),
   );
-  static const VerificationMeta _coverIdMeta = const VerificationMeta(
-    'coverId',
-  );
   @override
-  late final GeneratedColumn<int> coverId = GeneratedColumn<int>(
-    'cover_id',
-    aliasedName,
-    true,
-    type: DriftSqlType.int,
-    requiredDuringInsert: false,
-    defaultConstraints: GeneratedColumn.constraintIsAlways(
-      'REFERENCES cover (id)',
-    ),
-  );
-  @override
-  List<GeneratedColumn> get $columns => [id, name, coverId];
+  List<GeneratedColumn> get $columns => [id, name];
   @override
   String get aliasedName => _alias ?? actualTableName;
   @override
@@ -1088,12 +435,6 @@ class $ArtistsTable extends Artists with TableInfo<$ArtistsTable, Artist> {
     } else if (isInserting) {
       context.missing(_nameMeta);
     }
-    if (data.containsKey('cover_id')) {
-      context.handle(
-        _coverIdMeta,
-        coverId.isAcceptableOrUnknown(data['cover_id']!, _coverIdMeta),
-      );
-    }
     return context;
   }
 
@@ -1111,10 +452,6 @@ class $ArtistsTable extends Artists with TableInfo<$ArtistsTable, Artist> {
         DriftSqlType.string,
         data['${effectivePrefix}name'],
       )!,
-      coverId: attachedDatabase.typeMapping.read(
-        DriftSqlType.int,
-        data['${effectivePrefix}cover_id'],
-      ),
     );
   }
 
@@ -1127,27 +464,17 @@ class $ArtistsTable extends Artists with TableInfo<$ArtistsTable, Artist> {
 class Artist extends DataClass implements Insertable<Artist> {
   final int id;
   final String name;
-  final int? coverId;
-  const Artist({required this.id, required this.name, this.coverId});
+  const Artist({required this.id, required this.name});
   @override
   Map<String, Expression> toColumns(bool nullToAbsent) {
     final map = <String, Expression>{};
     map['id'] = Variable<int>(id);
     map['name'] = Variable<String>(name);
-    if (!nullToAbsent || coverId != null) {
-      map['cover_id'] = Variable<int>(coverId);
-    }
     return map;
   }
 
   ArtistsCompanion toCompanion(bool nullToAbsent) {
-    return ArtistsCompanion(
-      id: Value(id),
-      name: Value(name),
-      coverId: coverId == null && nullToAbsent
-          ? const Value.absent()
-          : Value(coverId),
-    );
+    return ArtistsCompanion(id: Value(id), name: Value(name));
   }
 
   factory Artist.fromJson(
@@ -1158,7 +485,6 @@ class Artist extends DataClass implements Insertable<Artist> {
     return Artist(
       id: serializer.fromJson<int>(json['id']),
       name: serializer.fromJson<String>(json['name']),
-      coverId: serializer.fromJson<int?>(json['coverId']),
     );
   }
   @override
@@ -1167,24 +493,15 @@ class Artist extends DataClass implements Insertable<Artist> {
     return <String, dynamic>{
       'id': serializer.toJson<int>(id),
       'name': serializer.toJson<String>(name),
-      'coverId': serializer.toJson<int?>(coverId),
     };
   }
 
-  Artist copyWith({
-    int? id,
-    String? name,
-    Value<int?> coverId = const Value.absent(),
-  }) => Artist(
-    id: id ?? this.id,
-    name: name ?? this.name,
-    coverId: coverId.present ? coverId.value : this.coverId,
-  );
+  Artist copyWith({int? id, String? name}) =>
+      Artist(id: id ?? this.id, name: name ?? this.name);
   Artist copyWithCompanion(ArtistsCompanion data) {
     return Artist(
       id: data.id.present ? data.id.value : this.id,
       name: data.name.present ? data.name.value : this.name,
-      coverId: data.coverId.present ? data.coverId.value : this.coverId,
     );
   }
 
@@ -1192,59 +509,42 @@ class Artist extends DataClass implements Insertable<Artist> {
   String toString() {
     return (StringBuffer('Artist(')
           ..write('id: $id, ')
-          ..write('name: $name, ')
-          ..write('coverId: $coverId')
+          ..write('name: $name')
           ..write(')'))
         .toString();
   }
 
   @override
-  int get hashCode => Object.hash(id, name, coverId);
+  int get hashCode => Object.hash(id, name);
   @override
   bool operator ==(Object other) =>
       identical(this, other) ||
-      (other is Artist &&
-          other.id == this.id &&
-          other.name == this.name &&
-          other.coverId == this.coverId);
+      (other is Artist && other.id == this.id && other.name == this.name);
 }
 
 class ArtistsCompanion extends UpdateCompanion<Artist> {
   final Value<int> id;
   final Value<String> name;
-  final Value<int?> coverId;
   const ArtistsCompanion({
     this.id = const Value.absent(),
     this.name = const Value.absent(),
-    this.coverId = const Value.absent(),
   });
   ArtistsCompanion.insert({
     this.id = const Value.absent(),
     required String name,
-    this.coverId = const Value.absent(),
   }) : name = Value(name);
   static Insertable<Artist> custom({
     Expression<int>? id,
     Expression<String>? name,
-    Expression<int>? coverId,
   }) {
     return RawValuesInsertable({
       if (id != null) 'id': id,
       if (name != null) 'name': name,
-      if (coverId != null) 'cover_id': coverId,
     });
   }
 
-  ArtistsCompanion copyWith({
-    Value<int>? id,
-    Value<String>? name,
-    Value<int?>? coverId,
-  }) {
-    return ArtistsCompanion(
-      id: id ?? this.id,
-      name: name ?? this.name,
-      coverId: coverId ?? this.coverId,
-    );
+  ArtistsCompanion copyWith({Value<int>? id, Value<String>? name}) {
+    return ArtistsCompanion(id: id ?? this.id, name: name ?? this.name);
   }
 
   @override
@@ -1256,9 +556,6 @@ class ArtistsCompanion extends UpdateCompanion<Artist> {
     if (name.present) {
       map['name'] = Variable<String>(name.value);
     }
-    if (coverId.present) {
-      map['cover_id'] = Variable<int>(coverId.value);
-    }
     return map;
   }
 
@@ -1266,8 +563,7 @@ class ArtistsCompanion extends UpdateCompanion<Artist> {
   String toString() {
     return (StringBuffer('ArtistsCompanion(')
           ..write('id: $id, ')
-          ..write('name: $name, ')
-          ..write('coverId: $coverId')
+          ..write('name: $name')
           ..write(')'))
         .toString();
   }
@@ -1300,20 +596,6 @@ class $AlbumsTable extends Albums with TableInfo<$AlbumsTable, Album> {
     type: DriftSqlType.string,
     requiredDuringInsert: true,
   );
-  static const VerificationMeta _coverIdMeta = const VerificationMeta(
-    'coverId',
-  );
-  @override
-  late final GeneratedColumn<int> coverId = GeneratedColumn<int>(
-    'cover_id',
-    aliasedName,
-    true,
-    type: DriftSqlType.int,
-    requiredDuringInsert: false,
-    defaultConstraints: GeneratedColumn.constraintIsAlways(
-      'REFERENCES cover (id)',
-    ),
-  );
   static const VerificationMeta _artistIdMeta = const VerificationMeta(
     'artistId',
   );
@@ -1342,8 +624,25 @@ class $AlbumsTable extends Albums with TableInfo<$AlbumsTable, Album> {
       'REFERENCES genres (id)',
     ),
   );
+  static const VerificationMeta _coverImageMeta = const VerificationMeta(
+    'coverImage',
+  );
   @override
-  List<GeneratedColumn> get $columns => [id, name, coverId, artistId, genreId];
+  late final GeneratedColumn<String> coverImage = GeneratedColumn<String>(
+    'cover_image',
+    aliasedName,
+    true,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+  );
+  @override
+  List<GeneratedColumn> get $columns => [
+    id,
+    name,
+    artistId,
+    genreId,
+    coverImage,
+  ];
   @override
   String get aliasedName => _alias ?? actualTableName;
   @override
@@ -1367,12 +666,6 @@ class $AlbumsTable extends Albums with TableInfo<$AlbumsTable, Album> {
     } else if (isInserting) {
       context.missing(_nameMeta);
     }
-    if (data.containsKey('cover_id')) {
-      context.handle(
-        _coverIdMeta,
-        coverId.isAcceptableOrUnknown(data['cover_id']!, _coverIdMeta),
-      );
-    }
     if (data.containsKey('artist_id')) {
       context.handle(
         _artistIdMeta,
@@ -1383,6 +676,12 @@ class $AlbumsTable extends Albums with TableInfo<$AlbumsTable, Album> {
       context.handle(
         _genreIdMeta,
         genreId.isAcceptableOrUnknown(data['genre_id']!, _genreIdMeta),
+      );
+    }
+    if (data.containsKey('cover_image')) {
+      context.handle(
+        _coverImageMeta,
+        coverImage.isAcceptableOrUnknown(data['cover_image']!, _coverImageMeta),
       );
     }
     return context;
@@ -1402,10 +701,6 @@ class $AlbumsTable extends Albums with TableInfo<$AlbumsTable, Album> {
         DriftSqlType.string,
         data['${effectivePrefix}name'],
       )!,
-      coverId: attachedDatabase.typeMapping.read(
-        DriftSqlType.int,
-        data['${effectivePrefix}cover_id'],
-      ),
       artistId: attachedDatabase.typeMapping.read(
         DriftSqlType.int,
         data['${effectivePrefix}artist_id'],
@@ -1413,6 +708,10 @@ class $AlbumsTable extends Albums with TableInfo<$AlbumsTable, Album> {
       genreId: attachedDatabase.typeMapping.read(
         DriftSqlType.int,
         data['${effectivePrefix}genre_id'],
+      ),
+      coverImage: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}cover_image'],
       ),
     );
   }
@@ -1426,29 +725,29 @@ class $AlbumsTable extends Albums with TableInfo<$AlbumsTable, Album> {
 class Album extends DataClass implements Insertable<Album> {
   final int id;
   final String name;
-  final int? coverId;
   final int? artistId;
   final int? genreId;
+  final String? coverImage;
   const Album({
     required this.id,
     required this.name,
-    this.coverId,
     this.artistId,
     this.genreId,
+    this.coverImage,
   });
   @override
   Map<String, Expression> toColumns(bool nullToAbsent) {
     final map = <String, Expression>{};
     map['id'] = Variable<int>(id);
     map['name'] = Variable<String>(name);
-    if (!nullToAbsent || coverId != null) {
-      map['cover_id'] = Variable<int>(coverId);
-    }
     if (!nullToAbsent || artistId != null) {
       map['artist_id'] = Variable<int>(artistId);
     }
     if (!nullToAbsent || genreId != null) {
       map['genre_id'] = Variable<int>(genreId);
+    }
+    if (!nullToAbsent || coverImage != null) {
+      map['cover_image'] = Variable<String>(coverImage);
     }
     return map;
   }
@@ -1457,15 +756,15 @@ class Album extends DataClass implements Insertable<Album> {
     return AlbumsCompanion(
       id: Value(id),
       name: Value(name),
-      coverId: coverId == null && nullToAbsent
-          ? const Value.absent()
-          : Value(coverId),
       artistId: artistId == null && nullToAbsent
           ? const Value.absent()
           : Value(artistId),
       genreId: genreId == null && nullToAbsent
           ? const Value.absent()
           : Value(genreId),
+      coverImage: coverImage == null && nullToAbsent
+          ? const Value.absent()
+          : Value(coverImage),
     );
   }
 
@@ -1477,9 +776,9 @@ class Album extends DataClass implements Insertable<Album> {
     return Album(
       id: serializer.fromJson<int>(json['id']),
       name: serializer.fromJson<String>(json['name']),
-      coverId: serializer.fromJson<int?>(json['coverId']),
       artistId: serializer.fromJson<int?>(json['artistId']),
       genreId: serializer.fromJson<int?>(json['genreId']),
+      coverImage: serializer.fromJson<String?>(json['coverImage']),
     );
   }
   @override
@@ -1488,32 +787,34 @@ class Album extends DataClass implements Insertable<Album> {
     return <String, dynamic>{
       'id': serializer.toJson<int>(id),
       'name': serializer.toJson<String>(name),
-      'coverId': serializer.toJson<int?>(coverId),
       'artistId': serializer.toJson<int?>(artistId),
       'genreId': serializer.toJson<int?>(genreId),
+      'coverImage': serializer.toJson<String?>(coverImage),
     };
   }
 
   Album copyWith({
     int? id,
     String? name,
-    Value<int?> coverId = const Value.absent(),
     Value<int?> artistId = const Value.absent(),
     Value<int?> genreId = const Value.absent(),
+    Value<String?> coverImage = const Value.absent(),
   }) => Album(
     id: id ?? this.id,
     name: name ?? this.name,
-    coverId: coverId.present ? coverId.value : this.coverId,
     artistId: artistId.present ? artistId.value : this.artistId,
     genreId: genreId.present ? genreId.value : this.genreId,
+    coverImage: coverImage.present ? coverImage.value : this.coverImage,
   );
   Album copyWithCompanion(AlbumsCompanion data) {
     return Album(
       id: data.id.present ? data.id.value : this.id,
       name: data.name.present ? data.name.value : this.name,
-      coverId: data.coverId.present ? data.coverId.value : this.coverId,
       artistId: data.artistId.present ? data.artistId.value : this.artistId,
       genreId: data.genreId.present ? data.genreId.value : this.genreId,
+      coverImage: data.coverImage.present
+          ? data.coverImage.value
+          : this.coverImage,
     );
   }
 
@@ -1522,75 +823,75 @@ class Album extends DataClass implements Insertable<Album> {
     return (StringBuffer('Album(')
           ..write('id: $id, ')
           ..write('name: $name, ')
-          ..write('coverId: $coverId, ')
           ..write('artistId: $artistId, ')
-          ..write('genreId: $genreId')
+          ..write('genreId: $genreId, ')
+          ..write('coverImage: $coverImage')
           ..write(')'))
         .toString();
   }
 
   @override
-  int get hashCode => Object.hash(id, name, coverId, artistId, genreId);
+  int get hashCode => Object.hash(id, name, artistId, genreId, coverImage);
   @override
   bool operator ==(Object other) =>
       identical(this, other) ||
       (other is Album &&
           other.id == this.id &&
           other.name == this.name &&
-          other.coverId == this.coverId &&
           other.artistId == this.artistId &&
-          other.genreId == this.genreId);
+          other.genreId == this.genreId &&
+          other.coverImage == this.coverImage);
 }
 
 class AlbumsCompanion extends UpdateCompanion<Album> {
   final Value<int> id;
   final Value<String> name;
-  final Value<int?> coverId;
   final Value<int?> artistId;
   final Value<int?> genreId;
+  final Value<String?> coverImage;
   const AlbumsCompanion({
     this.id = const Value.absent(),
     this.name = const Value.absent(),
-    this.coverId = const Value.absent(),
     this.artistId = const Value.absent(),
     this.genreId = const Value.absent(),
+    this.coverImage = const Value.absent(),
   });
   AlbumsCompanion.insert({
     this.id = const Value.absent(),
     required String name,
-    this.coverId = const Value.absent(),
     this.artistId = const Value.absent(),
     this.genreId = const Value.absent(),
+    this.coverImage = const Value.absent(),
   }) : name = Value(name);
   static Insertable<Album> custom({
     Expression<int>? id,
     Expression<String>? name,
-    Expression<int>? coverId,
     Expression<int>? artistId,
     Expression<int>? genreId,
+    Expression<String>? coverImage,
   }) {
     return RawValuesInsertable({
       if (id != null) 'id': id,
       if (name != null) 'name': name,
-      if (coverId != null) 'cover_id': coverId,
       if (artistId != null) 'artist_id': artistId,
       if (genreId != null) 'genre_id': genreId,
+      if (coverImage != null) 'cover_image': coverImage,
     });
   }
 
   AlbumsCompanion copyWith({
     Value<int>? id,
     Value<String>? name,
-    Value<int?>? coverId,
     Value<int?>? artistId,
     Value<int?>? genreId,
+    Value<String?>? coverImage,
   }) {
     return AlbumsCompanion(
       id: id ?? this.id,
       name: name ?? this.name,
-      coverId: coverId ?? this.coverId,
       artistId: artistId ?? this.artistId,
       genreId: genreId ?? this.genreId,
+      coverImage: coverImage ?? this.coverImage,
     );
   }
 
@@ -1603,14 +904,14 @@ class AlbumsCompanion extends UpdateCompanion<Album> {
     if (name.present) {
       map['name'] = Variable<String>(name.value);
     }
-    if (coverId.present) {
-      map['cover_id'] = Variable<int>(coverId.value);
-    }
     if (artistId.present) {
       map['artist_id'] = Variable<int>(artistId.value);
     }
     if (genreId.present) {
       map['genre_id'] = Variable<int>(genreId.value);
+    }
+    if (coverImage.present) {
+      map['cover_image'] = Variable<String>(coverImage.value);
     }
     return map;
   }
@@ -1620,9 +921,9 @@ class AlbumsCompanion extends UpdateCompanion<Album> {
     return (StringBuffer('AlbumsCompanion(')
           ..write('id: $id, ')
           ..write('name: $name, ')
-          ..write('coverId: $coverId, ')
           ..write('artistId: $artistId, ')
-          ..write('genreId: $genreId')
+          ..write('genreId: $genreId, ')
+          ..write('coverImage: $coverImage')
           ..write(')'))
         .toString();
   }
@@ -1666,19 +967,16 @@ class $TracksTable extends Tracks with TableInfo<$TracksTable, Track> {
     type: DriftSqlType.string,
     requiredDuringInsert: true,
   );
-  static const VerificationMeta _coverIdMeta = const VerificationMeta(
-    'coverId',
+  static const VerificationMeta _coverImageMeta = const VerificationMeta(
+    'coverImage',
   );
   @override
-  late final GeneratedColumn<int> coverId = GeneratedColumn<int>(
-    'cover_id',
+  late final GeneratedColumn<String> coverImage = GeneratedColumn<String>(
+    'cover_image',
     aliasedName,
     true,
-    type: DriftSqlType.int,
+    type: DriftSqlType.string,
     requiredDuringInsert: false,
-    defaultConstraints: GeneratedColumn.constraintIsAlways(
-      'REFERENCES cover (id)',
-    ),
   );
   static const VerificationMeta _lyricsMeta = const VerificationMeta('lyrics');
   @override
@@ -1790,7 +1088,7 @@ class $TracksTable extends Tracks with TableInfo<$TracksTable, Track> {
     id,
     title,
     fileuri,
-    coverId,
+    coverImage,
     lyrics,
     duration,
     trackNumber,
@@ -1832,10 +1130,10 @@ class $TracksTable extends Tracks with TableInfo<$TracksTable, Track> {
     } else if (isInserting) {
       context.missing(_fileuriMeta);
     }
-    if (data.containsKey('cover_id')) {
+    if (data.containsKey('cover_image')) {
       context.handle(
-        _coverIdMeta,
-        coverId.isAcceptableOrUnknown(data['cover_id']!, _coverIdMeta),
+        _coverImageMeta,
+        coverImage.isAcceptableOrUnknown(data['cover_image']!, _coverImageMeta),
       );
     }
     if (data.containsKey('lyrics')) {
@@ -1916,9 +1214,9 @@ class $TracksTable extends Tracks with TableInfo<$TracksTable, Track> {
         DriftSqlType.string,
         data['${effectivePrefix}fileuri'],
       )!,
-      coverId: attachedDatabase.typeMapping.read(
-        DriftSqlType.int,
-        data['${effectivePrefix}cover_id'],
+      coverImage: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}cover_image'],
       ),
       lyrics: attachedDatabase.typeMapping.read(
         DriftSqlType.string,
@@ -1969,7 +1267,7 @@ class Track extends DataClass implements Insertable<Track> {
   final int id;
   final String title;
   final String fileuri;
-  final int? coverId;
+  final String? coverImage;
   final String? lyrics;
   final int? duration;
   final String? trackNumber;
@@ -1983,7 +1281,7 @@ class Track extends DataClass implements Insertable<Track> {
     required this.id,
     required this.title,
     required this.fileuri,
-    this.coverId,
+    this.coverImage,
     this.lyrics,
     this.duration,
     this.trackNumber,
@@ -2000,8 +1298,8 @@ class Track extends DataClass implements Insertable<Track> {
     map['id'] = Variable<int>(id);
     map['title'] = Variable<String>(title);
     map['fileuri'] = Variable<String>(fileuri);
-    if (!nullToAbsent || coverId != null) {
-      map['cover_id'] = Variable<int>(coverId);
+    if (!nullToAbsent || coverImage != null) {
+      map['cover_image'] = Variable<String>(coverImage);
     }
     if (!nullToAbsent || lyrics != null) {
       map['lyrics'] = Variable<String>(lyrics);
@@ -2036,9 +1334,9 @@ class Track extends DataClass implements Insertable<Track> {
       id: Value(id),
       title: Value(title),
       fileuri: Value(fileuri),
-      coverId: coverId == null && nullToAbsent
+      coverImage: coverImage == null && nullToAbsent
           ? const Value.absent()
-          : Value(coverId),
+          : Value(coverImage),
       lyrics: lyrics == null && nullToAbsent
           ? const Value.absent()
           : Value(lyrics),
@@ -2074,7 +1372,7 @@ class Track extends DataClass implements Insertable<Track> {
       id: serializer.fromJson<int>(json['id']),
       title: serializer.fromJson<String>(json['title']),
       fileuri: serializer.fromJson<String>(json['fileuri']),
-      coverId: serializer.fromJson<int?>(json['coverId']),
+      coverImage: serializer.fromJson<String?>(json['coverImage']),
       lyrics: serializer.fromJson<String?>(json['lyrics']),
       duration: serializer.fromJson<int?>(json['duration']),
       trackNumber: serializer.fromJson<String?>(json['trackNumber']),
@@ -2093,7 +1391,7 @@ class Track extends DataClass implements Insertable<Track> {
       'id': serializer.toJson<int>(id),
       'title': serializer.toJson<String>(title),
       'fileuri': serializer.toJson<String>(fileuri),
-      'coverId': serializer.toJson<int?>(coverId),
+      'coverImage': serializer.toJson<String?>(coverImage),
       'lyrics': serializer.toJson<String?>(lyrics),
       'duration': serializer.toJson<int?>(duration),
       'trackNumber': serializer.toJson<String?>(trackNumber),
@@ -2110,7 +1408,7 @@ class Track extends DataClass implements Insertable<Track> {
     int? id,
     String? title,
     String? fileuri,
-    Value<int?> coverId = const Value.absent(),
+    Value<String?> coverImage = const Value.absent(),
     Value<String?> lyrics = const Value.absent(),
     Value<int?> duration = const Value.absent(),
     Value<String?> trackNumber = const Value.absent(),
@@ -2124,7 +1422,7 @@ class Track extends DataClass implements Insertable<Track> {
     id: id ?? this.id,
     title: title ?? this.title,
     fileuri: fileuri ?? this.fileuri,
-    coverId: coverId.present ? coverId.value : this.coverId,
+    coverImage: coverImage.present ? coverImage.value : this.coverImage,
     lyrics: lyrics.present ? lyrics.value : this.lyrics,
     duration: duration.present ? duration.value : this.duration,
     trackNumber: trackNumber.present ? trackNumber.value : this.trackNumber,
@@ -2140,7 +1438,9 @@ class Track extends DataClass implements Insertable<Track> {
       id: data.id.present ? data.id.value : this.id,
       title: data.title.present ? data.title.value : this.title,
       fileuri: data.fileuri.present ? data.fileuri.value : this.fileuri,
-      coverId: data.coverId.present ? data.coverId.value : this.coverId,
+      coverImage: data.coverImage.present
+          ? data.coverImage.value
+          : this.coverImage,
       lyrics: data.lyrics.present ? data.lyrics.value : this.lyrics,
       duration: data.duration.present ? data.duration.value : this.duration,
       trackNumber: data.trackNumber.present
@@ -2161,7 +1461,7 @@ class Track extends DataClass implements Insertable<Track> {
           ..write('id: $id, ')
           ..write('title: $title, ')
           ..write('fileuri: $fileuri, ')
-          ..write('coverId: $coverId, ')
+          ..write('coverImage: $coverImage, ')
           ..write('lyrics: $lyrics, ')
           ..write('duration: $duration, ')
           ..write('trackNumber: $trackNumber, ')
@@ -2180,7 +1480,7 @@ class Track extends DataClass implements Insertable<Track> {
     id,
     title,
     fileuri,
-    coverId,
+    coverImage,
     lyrics,
     duration,
     trackNumber,
@@ -2198,7 +1498,7 @@ class Track extends DataClass implements Insertable<Track> {
           other.id == this.id &&
           other.title == this.title &&
           other.fileuri == this.fileuri &&
-          other.coverId == this.coverId &&
+          other.coverImage == this.coverImage &&
           other.lyrics == this.lyrics &&
           other.duration == this.duration &&
           other.trackNumber == this.trackNumber &&
@@ -2214,7 +1514,7 @@ class TracksCompanion extends UpdateCompanion<Track> {
   final Value<int> id;
   final Value<String> title;
   final Value<String> fileuri;
-  final Value<int?> coverId;
+  final Value<String?> coverImage;
   final Value<String?> lyrics;
   final Value<int?> duration;
   final Value<String?> trackNumber;
@@ -2228,7 +1528,7 @@ class TracksCompanion extends UpdateCompanion<Track> {
     this.id = const Value.absent(),
     this.title = const Value.absent(),
     this.fileuri = const Value.absent(),
-    this.coverId = const Value.absent(),
+    this.coverImage = const Value.absent(),
     this.lyrics = const Value.absent(),
     this.duration = const Value.absent(),
     this.trackNumber = const Value.absent(),
@@ -2243,7 +1543,7 @@ class TracksCompanion extends UpdateCompanion<Track> {
     this.id = const Value.absent(),
     required String title,
     required String fileuri,
-    this.coverId = const Value.absent(),
+    this.coverImage = const Value.absent(),
     this.lyrics = const Value.absent(),
     this.duration = const Value.absent(),
     this.trackNumber = const Value.absent(),
@@ -2259,7 +1559,7 @@ class TracksCompanion extends UpdateCompanion<Track> {
     Expression<int>? id,
     Expression<String>? title,
     Expression<String>? fileuri,
-    Expression<int>? coverId,
+    Expression<String>? coverImage,
     Expression<String>? lyrics,
     Expression<int>? duration,
     Expression<String>? trackNumber,
@@ -2274,7 +1574,7 @@ class TracksCompanion extends UpdateCompanion<Track> {
       if (id != null) 'id': id,
       if (title != null) 'title': title,
       if (fileuri != null) 'fileuri': fileuri,
-      if (coverId != null) 'cover_id': coverId,
+      if (coverImage != null) 'cover_image': coverImage,
       if (lyrics != null) 'lyrics': lyrics,
       if (duration != null) 'duration': duration,
       if (trackNumber != null) 'track_number': trackNumber,
@@ -2291,7 +1591,7 @@ class TracksCompanion extends UpdateCompanion<Track> {
     Value<int>? id,
     Value<String>? title,
     Value<String>? fileuri,
-    Value<int?>? coverId,
+    Value<String?>? coverImage,
     Value<String?>? lyrics,
     Value<int?>? duration,
     Value<String?>? trackNumber,
@@ -2306,7 +1606,7 @@ class TracksCompanion extends UpdateCompanion<Track> {
       id: id ?? this.id,
       title: title ?? this.title,
       fileuri: fileuri ?? this.fileuri,
-      coverId: coverId ?? this.coverId,
+      coverImage: coverImage ?? this.coverImage,
       lyrics: lyrics ?? this.lyrics,
       duration: duration ?? this.duration,
       trackNumber: trackNumber ?? this.trackNumber,
@@ -2331,8 +1631,8 @@ class TracksCompanion extends UpdateCompanion<Track> {
     if (fileuri.present) {
       map['fileuri'] = Variable<String>(fileuri.value);
     }
-    if (coverId.present) {
-      map['cover_id'] = Variable<int>(coverId.value);
+    if (coverImage.present) {
+      map['cover_image'] = Variable<String>(coverImage.value);
     }
     if (lyrics.present) {
       map['lyrics'] = Variable<String>(lyrics.value);
@@ -2370,7 +1670,7 @@ class TracksCompanion extends UpdateCompanion<Track> {
           ..write('id: $id, ')
           ..write('title: $title, ')
           ..write('fileuri: $fileuri, ')
-          ..write('coverId: $coverId, ')
+          ..write('coverImage: $coverImage, ')
           ..write('lyrics: $lyrics, ')
           ..write('duration: $duration, ')
           ..write('trackNumber: $trackNumber, ')
@@ -3118,11 +2418,9 @@ class PlaylistTracksCompanion extends UpdateCompanion<PlaylistTrack> {
 abstract class _$AppDatabase extends GeneratedDatabase {
   _$AppDatabase(QueryExecutor e) : super(e);
   $AppDatabaseManager get managers => $AppDatabaseManager(this);
-  late final $MusicDirectoriesTable musicDirectories = $MusicDirectoriesTable(
-    this,
-  );
+  late final $ExcludedDirectoriesTable excludedDirectories =
+      $ExcludedDirectoriesTable(this);
   late final $GenresTable genres = $GenresTable(this);
-  late final $CoverTable cover = $CoverTable(this);
   late final $ArtistsTable artists = $ArtistsTable(this);
   late final $AlbumsTable albums = $AlbumsTable(this);
   late final $TracksTable tracks = $TracksTable(this);
@@ -3133,9 +2431,8 @@ abstract class _$AppDatabase extends GeneratedDatabase {
       allSchemaEntities.whereType<TableInfo<Table, Object?>>();
   @override
   List<DatabaseSchemaEntity> get allSchemaEntities => [
-    musicDirectories,
+    excludedDirectories,
     genres,
-    cover,
     artists,
     albums,
     tracks,
@@ -3144,34 +2441,17 @@ abstract class _$AppDatabase extends GeneratedDatabase {
   ];
 }
 
-typedef $$MusicDirectoriesTableCreateCompanionBuilder =
-    MusicDirectoriesCompanion Function({
+typedef $$ExcludedDirectoriesTableCreateCompanionBuilder =
+    ExcludedDirectoriesCompanion Function({
       Value<int> id,
       required String path,
-      Value<bool> is_enabled,
-      Value<int?> last_scanned,
-      Value<bool> scan_subdirectories,
-      Value<int> total_size,
-      Value<int> file_count,
-      required DateTime date_added,
-      Value<String?> excluded_subdirectories,
     });
-typedef $$MusicDirectoriesTableUpdateCompanionBuilder =
-    MusicDirectoriesCompanion Function({
-      Value<int> id,
-      Value<String> path,
-      Value<bool> is_enabled,
-      Value<int?> last_scanned,
-      Value<bool> scan_subdirectories,
-      Value<int> total_size,
-      Value<int> file_count,
-      Value<DateTime> date_added,
-      Value<String?> excluded_subdirectories,
-    });
+typedef $$ExcludedDirectoriesTableUpdateCompanionBuilder =
+    ExcludedDirectoriesCompanion Function({Value<int> id, Value<String> path});
 
-class $$MusicDirectoriesTableFilterComposer
-    extends Composer<_$AppDatabase, $MusicDirectoriesTable> {
-  $$MusicDirectoriesTableFilterComposer({
+class $$ExcludedDirectoriesTableFilterComposer
+    extends Composer<_$AppDatabase, $ExcludedDirectoriesTable> {
+  $$ExcludedDirectoriesTableFilterComposer({
     required super.$db,
     required super.$table,
     super.joinBuilder,
@@ -3187,46 +2467,11 @@ class $$MusicDirectoriesTableFilterComposer
     column: $table.path,
     builder: (column) => ColumnFilters(column),
   );
-
-  ColumnFilters<bool> get is_enabled => $composableBuilder(
-    column: $table.is_enabled,
-    builder: (column) => ColumnFilters(column),
-  );
-
-  ColumnFilters<int> get last_scanned => $composableBuilder(
-    column: $table.last_scanned,
-    builder: (column) => ColumnFilters(column),
-  );
-
-  ColumnFilters<bool> get scan_subdirectories => $composableBuilder(
-    column: $table.scan_subdirectories,
-    builder: (column) => ColumnFilters(column),
-  );
-
-  ColumnFilters<int> get total_size => $composableBuilder(
-    column: $table.total_size,
-    builder: (column) => ColumnFilters(column),
-  );
-
-  ColumnFilters<int> get file_count => $composableBuilder(
-    column: $table.file_count,
-    builder: (column) => ColumnFilters(column),
-  );
-
-  ColumnFilters<DateTime> get date_added => $composableBuilder(
-    column: $table.date_added,
-    builder: (column) => ColumnFilters(column),
-  );
-
-  ColumnFilters<String> get excluded_subdirectories => $composableBuilder(
-    column: $table.excluded_subdirectories,
-    builder: (column) => ColumnFilters(column),
-  );
 }
 
-class $$MusicDirectoriesTableOrderingComposer
-    extends Composer<_$AppDatabase, $MusicDirectoriesTable> {
-  $$MusicDirectoriesTableOrderingComposer({
+class $$ExcludedDirectoriesTableOrderingComposer
+    extends Composer<_$AppDatabase, $ExcludedDirectoriesTable> {
+  $$ExcludedDirectoriesTableOrderingComposer({
     required super.$db,
     required super.$table,
     super.joinBuilder,
@@ -3242,46 +2487,11 @@ class $$MusicDirectoriesTableOrderingComposer
     column: $table.path,
     builder: (column) => ColumnOrderings(column),
   );
-
-  ColumnOrderings<bool> get is_enabled => $composableBuilder(
-    column: $table.is_enabled,
-    builder: (column) => ColumnOrderings(column),
-  );
-
-  ColumnOrderings<int> get last_scanned => $composableBuilder(
-    column: $table.last_scanned,
-    builder: (column) => ColumnOrderings(column),
-  );
-
-  ColumnOrderings<bool> get scan_subdirectories => $composableBuilder(
-    column: $table.scan_subdirectories,
-    builder: (column) => ColumnOrderings(column),
-  );
-
-  ColumnOrderings<int> get total_size => $composableBuilder(
-    column: $table.total_size,
-    builder: (column) => ColumnOrderings(column),
-  );
-
-  ColumnOrderings<int> get file_count => $composableBuilder(
-    column: $table.file_count,
-    builder: (column) => ColumnOrderings(column),
-  );
-
-  ColumnOrderings<DateTime> get date_added => $composableBuilder(
-    column: $table.date_added,
-    builder: (column) => ColumnOrderings(column),
-  );
-
-  ColumnOrderings<String> get excluded_subdirectories => $composableBuilder(
-    column: $table.excluded_subdirectories,
-    builder: (column) => ColumnOrderings(column),
-  );
 }
 
-class $$MusicDirectoriesTableAnnotationComposer
-    extends Composer<_$AppDatabase, $MusicDirectoriesTable> {
-  $$MusicDirectoriesTableAnnotationComposer({
+class $$ExcludedDirectoriesTableAnnotationComposer
+    extends Composer<_$AppDatabase, $ExcludedDirectoriesTable> {
+  $$ExcludedDirectoriesTableAnnotationComposer({
     required super.$db,
     required super.$table,
     super.joinBuilder,
@@ -3293,122 +2503,57 @@ class $$MusicDirectoriesTableAnnotationComposer
 
   GeneratedColumn<String> get path =>
       $composableBuilder(column: $table.path, builder: (column) => column);
-
-  GeneratedColumn<bool> get is_enabled => $composableBuilder(
-    column: $table.is_enabled,
-    builder: (column) => column,
-  );
-
-  GeneratedColumn<int> get last_scanned => $composableBuilder(
-    column: $table.last_scanned,
-    builder: (column) => column,
-  );
-
-  GeneratedColumn<bool> get scan_subdirectories => $composableBuilder(
-    column: $table.scan_subdirectories,
-    builder: (column) => column,
-  );
-
-  GeneratedColumn<int> get total_size => $composableBuilder(
-    column: $table.total_size,
-    builder: (column) => column,
-  );
-
-  GeneratedColumn<int> get file_count => $composableBuilder(
-    column: $table.file_count,
-    builder: (column) => column,
-  );
-
-  GeneratedColumn<DateTime> get date_added => $composableBuilder(
-    column: $table.date_added,
-    builder: (column) => column,
-  );
-
-  GeneratedColumn<String> get excluded_subdirectories => $composableBuilder(
-    column: $table.excluded_subdirectories,
-    builder: (column) => column,
-  );
 }
 
-class $$MusicDirectoriesTableTableManager
+class $$ExcludedDirectoriesTableTableManager
     extends
         RootTableManager<
           _$AppDatabase,
-          $MusicDirectoriesTable,
-          MusicDirectory,
-          $$MusicDirectoriesTableFilterComposer,
-          $$MusicDirectoriesTableOrderingComposer,
-          $$MusicDirectoriesTableAnnotationComposer,
-          $$MusicDirectoriesTableCreateCompanionBuilder,
-          $$MusicDirectoriesTableUpdateCompanionBuilder,
+          $ExcludedDirectoriesTable,
+          ExcludedDirectory,
+          $$ExcludedDirectoriesTableFilterComposer,
+          $$ExcludedDirectoriesTableOrderingComposer,
+          $$ExcludedDirectoriesTableAnnotationComposer,
+          $$ExcludedDirectoriesTableCreateCompanionBuilder,
+          $$ExcludedDirectoriesTableUpdateCompanionBuilder,
           (
-            MusicDirectory,
+            ExcludedDirectory,
             BaseReferences<
               _$AppDatabase,
-              $MusicDirectoriesTable,
-              MusicDirectory
+              $ExcludedDirectoriesTable,
+              ExcludedDirectory
             >,
           ),
-          MusicDirectory,
+          ExcludedDirectory,
           PrefetchHooks Function()
         > {
-  $$MusicDirectoriesTableTableManager(
+  $$ExcludedDirectoriesTableTableManager(
     _$AppDatabase db,
-    $MusicDirectoriesTable table,
+    $ExcludedDirectoriesTable table,
   ) : super(
         TableManagerState(
           db: db,
           table: table,
           createFilteringComposer: () =>
-              $$MusicDirectoriesTableFilterComposer($db: db, $table: table),
+              $$ExcludedDirectoriesTableFilterComposer($db: db, $table: table),
           createOrderingComposer: () =>
-              $$MusicDirectoriesTableOrderingComposer($db: db, $table: table),
+              $$ExcludedDirectoriesTableOrderingComposer(
+                $db: db,
+                $table: table,
+              ),
           createComputedFieldComposer: () =>
-              $$MusicDirectoriesTableAnnotationComposer($db: db, $table: table),
+              $$ExcludedDirectoriesTableAnnotationComposer(
+                $db: db,
+                $table: table,
+              ),
           updateCompanionCallback:
               ({
                 Value<int> id = const Value.absent(),
                 Value<String> path = const Value.absent(),
-                Value<bool> is_enabled = const Value.absent(),
-                Value<int?> last_scanned = const Value.absent(),
-                Value<bool> scan_subdirectories = const Value.absent(),
-                Value<int> total_size = const Value.absent(),
-                Value<int> file_count = const Value.absent(),
-                Value<DateTime> date_added = const Value.absent(),
-                Value<String?> excluded_subdirectories = const Value.absent(),
-              }) => MusicDirectoriesCompanion(
-                id: id,
-                path: path,
-                is_enabled: is_enabled,
-                last_scanned: last_scanned,
-                scan_subdirectories: scan_subdirectories,
-                total_size: total_size,
-                file_count: file_count,
-                date_added: date_added,
-                excluded_subdirectories: excluded_subdirectories,
-              ),
+              }) => ExcludedDirectoriesCompanion(id: id, path: path),
           createCompanionCallback:
-              ({
-                Value<int> id = const Value.absent(),
-                required String path,
-                Value<bool> is_enabled = const Value.absent(),
-                Value<int?> last_scanned = const Value.absent(),
-                Value<bool> scan_subdirectories = const Value.absent(),
-                Value<int> total_size = const Value.absent(),
-                Value<int> file_count = const Value.absent(),
-                required DateTime date_added,
-                Value<String?> excluded_subdirectories = const Value.absent(),
-              }) => MusicDirectoriesCompanion.insert(
-                id: id,
-                path: path,
-                is_enabled: is_enabled,
-                last_scanned: last_scanned,
-                scan_subdirectories: scan_subdirectories,
-                total_size: total_size,
-                file_count: file_count,
-                date_added: date_added,
-                excluded_subdirectories: excluded_subdirectories,
-              ),
+              ({Value<int> id = const Value.absent(), required String path}) =>
+                  ExcludedDirectoriesCompanion.insert(id: id, path: path),
           withReferenceMapper: (p0) => p0
               .map((e) => (e.readTable(table), BaseReferences(db, table, e)))
               .toList(),
@@ -3417,21 +2562,25 @@ class $$MusicDirectoriesTableTableManager
       );
 }
 
-typedef $$MusicDirectoriesTableProcessedTableManager =
+typedef $$ExcludedDirectoriesTableProcessedTableManager =
     ProcessedTableManager<
       _$AppDatabase,
-      $MusicDirectoriesTable,
-      MusicDirectory,
-      $$MusicDirectoriesTableFilterComposer,
-      $$MusicDirectoriesTableOrderingComposer,
-      $$MusicDirectoriesTableAnnotationComposer,
-      $$MusicDirectoriesTableCreateCompanionBuilder,
-      $$MusicDirectoriesTableUpdateCompanionBuilder,
+      $ExcludedDirectoriesTable,
+      ExcludedDirectory,
+      $$ExcludedDirectoriesTableFilterComposer,
+      $$ExcludedDirectoriesTableOrderingComposer,
+      $$ExcludedDirectoriesTableAnnotationComposer,
+      $$ExcludedDirectoriesTableCreateCompanionBuilder,
+      $$ExcludedDirectoriesTableUpdateCompanionBuilder,
       (
-        MusicDirectory,
-        BaseReferences<_$AppDatabase, $MusicDirectoriesTable, MusicDirectory>,
+        ExcludedDirectory,
+        BaseReferences<
+          _$AppDatabase,
+          $ExcludedDirectoriesTable,
+          ExcludedDirectory
+        >,
       ),
-      MusicDirectory,
+      ExcludedDirectory,
       PrefetchHooks Function()
     >;
 typedef $$GenresTableCreateCompanionBuilder =
@@ -3734,470 +2883,14 @@ typedef $$GenresTableProcessedTableManager =
       Genre,
       PrefetchHooks Function({bool albumsRefs, bool tracksRefs})
     >;
-typedef $$CoverTableCreateCompanionBuilder =
-    CoverCompanion Function({
-      Value<int> id,
-      Value<String?> cover,
-      required String hash,
-    });
-typedef $$CoverTableUpdateCompanionBuilder =
-    CoverCompanion Function({
-      Value<int> id,
-      Value<String?> cover,
-      Value<String> hash,
-    });
-
-final class $$CoverTableReferences
-    extends BaseReferences<_$AppDatabase, $CoverTable, CoverData> {
-  $$CoverTableReferences(super.$_db, super.$_table, super.$_typedResult);
-
-  static MultiTypedResultKey<$ArtistsTable, List<Artist>> _artistsRefsTable(
-    _$AppDatabase db,
-  ) => MultiTypedResultKey.fromTable(
-    db.artists,
-    aliasName: $_aliasNameGenerator(db.cover.id, db.artists.coverId),
-  );
-
-  $$ArtistsTableProcessedTableManager get artistsRefs {
-    final manager = $$ArtistsTableTableManager(
-      $_db,
-      $_db.artists,
-    ).filter((f) => f.coverId.id.sqlEquals($_itemColumn<int>('id')!));
-
-    final cache = $_typedResult.readTableOrNull(_artistsRefsTable($_db));
-    return ProcessedTableManager(
-      manager.$state.copyWith(prefetchedData: cache),
-    );
-  }
-
-  static MultiTypedResultKey<$AlbumsTable, List<Album>> _albumsRefsTable(
-    _$AppDatabase db,
-  ) => MultiTypedResultKey.fromTable(
-    db.albums,
-    aliasName: $_aliasNameGenerator(db.cover.id, db.albums.coverId),
-  );
-
-  $$AlbumsTableProcessedTableManager get albumsRefs {
-    final manager = $$AlbumsTableTableManager(
-      $_db,
-      $_db.albums,
-    ).filter((f) => f.coverId.id.sqlEquals($_itemColumn<int>('id')!));
-
-    final cache = $_typedResult.readTableOrNull(_albumsRefsTable($_db));
-    return ProcessedTableManager(
-      manager.$state.copyWith(prefetchedData: cache),
-    );
-  }
-
-  static MultiTypedResultKey<$TracksTable, List<Track>> _tracksRefsTable(
-    _$AppDatabase db,
-  ) => MultiTypedResultKey.fromTable(
-    db.tracks,
-    aliasName: $_aliasNameGenerator(db.cover.id, db.tracks.coverId),
-  );
-
-  $$TracksTableProcessedTableManager get tracksRefs {
-    final manager = $$TracksTableTableManager(
-      $_db,
-      $_db.tracks,
-    ).filter((f) => f.coverId.id.sqlEquals($_itemColumn<int>('id')!));
-
-    final cache = $_typedResult.readTableOrNull(_tracksRefsTable($_db));
-    return ProcessedTableManager(
-      manager.$state.copyWith(prefetchedData: cache),
-    );
-  }
-}
-
-class $$CoverTableFilterComposer extends Composer<_$AppDatabase, $CoverTable> {
-  $$CoverTableFilterComposer({
-    required super.$db,
-    required super.$table,
-    super.joinBuilder,
-    super.$addJoinBuilderToRootComposer,
-    super.$removeJoinBuilderFromRootComposer,
-  });
-  ColumnFilters<int> get id => $composableBuilder(
-    column: $table.id,
-    builder: (column) => ColumnFilters(column),
-  );
-
-  ColumnFilters<String> get cover => $composableBuilder(
-    column: $table.cover,
-    builder: (column) => ColumnFilters(column),
-  );
-
-  ColumnFilters<String> get hash => $composableBuilder(
-    column: $table.hash,
-    builder: (column) => ColumnFilters(column),
-  );
-
-  Expression<bool> artistsRefs(
-    Expression<bool> Function($$ArtistsTableFilterComposer f) f,
-  ) {
-    final $$ArtistsTableFilterComposer composer = $composerBuilder(
-      composer: this,
-      getCurrentColumn: (t) => t.id,
-      referencedTable: $db.artists,
-      getReferencedColumn: (t) => t.coverId,
-      builder:
-          (
-            joinBuilder, {
-            $addJoinBuilderToRootComposer,
-            $removeJoinBuilderFromRootComposer,
-          }) => $$ArtistsTableFilterComposer(
-            $db: $db,
-            $table: $db.artists,
-            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
-            joinBuilder: joinBuilder,
-            $removeJoinBuilderFromRootComposer:
-                $removeJoinBuilderFromRootComposer,
-          ),
-    );
-    return f(composer);
-  }
-
-  Expression<bool> albumsRefs(
-    Expression<bool> Function($$AlbumsTableFilterComposer f) f,
-  ) {
-    final $$AlbumsTableFilterComposer composer = $composerBuilder(
-      composer: this,
-      getCurrentColumn: (t) => t.id,
-      referencedTable: $db.albums,
-      getReferencedColumn: (t) => t.coverId,
-      builder:
-          (
-            joinBuilder, {
-            $addJoinBuilderToRootComposer,
-            $removeJoinBuilderFromRootComposer,
-          }) => $$AlbumsTableFilterComposer(
-            $db: $db,
-            $table: $db.albums,
-            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
-            joinBuilder: joinBuilder,
-            $removeJoinBuilderFromRootComposer:
-                $removeJoinBuilderFromRootComposer,
-          ),
-    );
-    return f(composer);
-  }
-
-  Expression<bool> tracksRefs(
-    Expression<bool> Function($$TracksTableFilterComposer f) f,
-  ) {
-    final $$TracksTableFilterComposer composer = $composerBuilder(
-      composer: this,
-      getCurrentColumn: (t) => t.id,
-      referencedTable: $db.tracks,
-      getReferencedColumn: (t) => t.coverId,
-      builder:
-          (
-            joinBuilder, {
-            $addJoinBuilderToRootComposer,
-            $removeJoinBuilderFromRootComposer,
-          }) => $$TracksTableFilterComposer(
-            $db: $db,
-            $table: $db.tracks,
-            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
-            joinBuilder: joinBuilder,
-            $removeJoinBuilderFromRootComposer:
-                $removeJoinBuilderFromRootComposer,
-          ),
-    );
-    return f(composer);
-  }
-}
-
-class $$CoverTableOrderingComposer
-    extends Composer<_$AppDatabase, $CoverTable> {
-  $$CoverTableOrderingComposer({
-    required super.$db,
-    required super.$table,
-    super.joinBuilder,
-    super.$addJoinBuilderToRootComposer,
-    super.$removeJoinBuilderFromRootComposer,
-  });
-  ColumnOrderings<int> get id => $composableBuilder(
-    column: $table.id,
-    builder: (column) => ColumnOrderings(column),
-  );
-
-  ColumnOrderings<String> get cover => $composableBuilder(
-    column: $table.cover,
-    builder: (column) => ColumnOrderings(column),
-  );
-
-  ColumnOrderings<String> get hash => $composableBuilder(
-    column: $table.hash,
-    builder: (column) => ColumnOrderings(column),
-  );
-}
-
-class $$CoverTableAnnotationComposer
-    extends Composer<_$AppDatabase, $CoverTable> {
-  $$CoverTableAnnotationComposer({
-    required super.$db,
-    required super.$table,
-    super.joinBuilder,
-    super.$addJoinBuilderToRootComposer,
-    super.$removeJoinBuilderFromRootComposer,
-  });
-  GeneratedColumn<int> get id =>
-      $composableBuilder(column: $table.id, builder: (column) => column);
-
-  GeneratedColumn<String> get cover =>
-      $composableBuilder(column: $table.cover, builder: (column) => column);
-
-  GeneratedColumn<String> get hash =>
-      $composableBuilder(column: $table.hash, builder: (column) => column);
-
-  Expression<T> artistsRefs<T extends Object>(
-    Expression<T> Function($$ArtistsTableAnnotationComposer a) f,
-  ) {
-    final $$ArtistsTableAnnotationComposer composer = $composerBuilder(
-      composer: this,
-      getCurrentColumn: (t) => t.id,
-      referencedTable: $db.artists,
-      getReferencedColumn: (t) => t.coverId,
-      builder:
-          (
-            joinBuilder, {
-            $addJoinBuilderToRootComposer,
-            $removeJoinBuilderFromRootComposer,
-          }) => $$ArtistsTableAnnotationComposer(
-            $db: $db,
-            $table: $db.artists,
-            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
-            joinBuilder: joinBuilder,
-            $removeJoinBuilderFromRootComposer:
-                $removeJoinBuilderFromRootComposer,
-          ),
-    );
-    return f(composer);
-  }
-
-  Expression<T> albumsRefs<T extends Object>(
-    Expression<T> Function($$AlbumsTableAnnotationComposer a) f,
-  ) {
-    final $$AlbumsTableAnnotationComposer composer = $composerBuilder(
-      composer: this,
-      getCurrentColumn: (t) => t.id,
-      referencedTable: $db.albums,
-      getReferencedColumn: (t) => t.coverId,
-      builder:
-          (
-            joinBuilder, {
-            $addJoinBuilderToRootComposer,
-            $removeJoinBuilderFromRootComposer,
-          }) => $$AlbumsTableAnnotationComposer(
-            $db: $db,
-            $table: $db.albums,
-            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
-            joinBuilder: joinBuilder,
-            $removeJoinBuilderFromRootComposer:
-                $removeJoinBuilderFromRootComposer,
-          ),
-    );
-    return f(composer);
-  }
-
-  Expression<T> tracksRefs<T extends Object>(
-    Expression<T> Function($$TracksTableAnnotationComposer a) f,
-  ) {
-    final $$TracksTableAnnotationComposer composer = $composerBuilder(
-      composer: this,
-      getCurrentColumn: (t) => t.id,
-      referencedTable: $db.tracks,
-      getReferencedColumn: (t) => t.coverId,
-      builder:
-          (
-            joinBuilder, {
-            $addJoinBuilderToRootComposer,
-            $removeJoinBuilderFromRootComposer,
-          }) => $$TracksTableAnnotationComposer(
-            $db: $db,
-            $table: $db.tracks,
-            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
-            joinBuilder: joinBuilder,
-            $removeJoinBuilderFromRootComposer:
-                $removeJoinBuilderFromRootComposer,
-          ),
-    );
-    return f(composer);
-  }
-}
-
-class $$CoverTableTableManager
-    extends
-        RootTableManager<
-          _$AppDatabase,
-          $CoverTable,
-          CoverData,
-          $$CoverTableFilterComposer,
-          $$CoverTableOrderingComposer,
-          $$CoverTableAnnotationComposer,
-          $$CoverTableCreateCompanionBuilder,
-          $$CoverTableUpdateCompanionBuilder,
-          (CoverData, $$CoverTableReferences),
-          CoverData,
-          PrefetchHooks Function({
-            bool artistsRefs,
-            bool albumsRefs,
-            bool tracksRefs,
-          })
-        > {
-  $$CoverTableTableManager(_$AppDatabase db, $CoverTable table)
-    : super(
-        TableManagerState(
-          db: db,
-          table: table,
-          createFilteringComposer: () =>
-              $$CoverTableFilterComposer($db: db, $table: table),
-          createOrderingComposer: () =>
-              $$CoverTableOrderingComposer($db: db, $table: table),
-          createComputedFieldComposer: () =>
-              $$CoverTableAnnotationComposer($db: db, $table: table),
-          updateCompanionCallback:
-              ({
-                Value<int> id = const Value.absent(),
-                Value<String?> cover = const Value.absent(),
-                Value<String> hash = const Value.absent(),
-              }) => CoverCompanion(id: id, cover: cover, hash: hash),
-          createCompanionCallback:
-              ({
-                Value<int> id = const Value.absent(),
-                Value<String?> cover = const Value.absent(),
-                required String hash,
-              }) => CoverCompanion.insert(id: id, cover: cover, hash: hash),
-          withReferenceMapper: (p0) => p0
-              .map(
-                (e) =>
-                    (e.readTable(table), $$CoverTableReferences(db, table, e)),
-              )
-              .toList(),
-          prefetchHooksCallback:
-              ({artistsRefs = false, albumsRefs = false, tracksRefs = false}) {
-                return PrefetchHooks(
-                  db: db,
-                  explicitlyWatchedTables: [
-                    if (artistsRefs) db.artists,
-                    if (albumsRefs) db.albums,
-                    if (tracksRefs) db.tracks,
-                  ],
-                  addJoins: null,
-                  getPrefetchedDataCallback: (items) async {
-                    return [
-                      if (artistsRefs)
-                        await $_getPrefetchedData<
-                          CoverData,
-                          $CoverTable,
-                          Artist
-                        >(
-                          currentTable: table,
-                          referencedTable: $$CoverTableReferences
-                              ._artistsRefsTable(db),
-                          managerFromTypedResult: (p0) =>
-                              $$CoverTableReferences(db, table, p0).artistsRefs,
-                          referencedItemsForCurrentItem:
-                              (item, referencedItems) => referencedItems.where(
-                                (e) => e.coverId == item.id,
-                              ),
-                          typedResults: items,
-                        ),
-                      if (albumsRefs)
-                        await $_getPrefetchedData<
-                          CoverData,
-                          $CoverTable,
-                          Album
-                        >(
-                          currentTable: table,
-                          referencedTable: $$CoverTableReferences
-                              ._albumsRefsTable(db),
-                          managerFromTypedResult: (p0) =>
-                              $$CoverTableReferences(db, table, p0).albumsRefs,
-                          referencedItemsForCurrentItem:
-                              (item, referencedItems) => referencedItems.where(
-                                (e) => e.coverId == item.id,
-                              ),
-                          typedResults: items,
-                        ),
-                      if (tracksRefs)
-                        await $_getPrefetchedData<
-                          CoverData,
-                          $CoverTable,
-                          Track
-                        >(
-                          currentTable: table,
-                          referencedTable: $$CoverTableReferences
-                              ._tracksRefsTable(db),
-                          managerFromTypedResult: (p0) =>
-                              $$CoverTableReferences(db, table, p0).tracksRefs,
-                          referencedItemsForCurrentItem:
-                              (item, referencedItems) => referencedItems.where(
-                                (e) => e.coverId == item.id,
-                              ),
-                          typedResults: items,
-                        ),
-                    ];
-                  },
-                );
-              },
-        ),
-      );
-}
-
-typedef $$CoverTableProcessedTableManager =
-    ProcessedTableManager<
-      _$AppDatabase,
-      $CoverTable,
-      CoverData,
-      $$CoverTableFilterComposer,
-      $$CoverTableOrderingComposer,
-      $$CoverTableAnnotationComposer,
-      $$CoverTableCreateCompanionBuilder,
-      $$CoverTableUpdateCompanionBuilder,
-      (CoverData, $$CoverTableReferences),
-      CoverData,
-      PrefetchHooks Function({
-        bool artistsRefs,
-        bool albumsRefs,
-        bool tracksRefs,
-      })
-    >;
 typedef $$ArtistsTableCreateCompanionBuilder =
-    ArtistsCompanion Function({
-      Value<int> id,
-      required String name,
-      Value<int?> coverId,
-    });
+    ArtistsCompanion Function({Value<int> id, required String name});
 typedef $$ArtistsTableUpdateCompanionBuilder =
-    ArtistsCompanion Function({
-      Value<int> id,
-      Value<String> name,
-      Value<int?> coverId,
-    });
+    ArtistsCompanion Function({Value<int> id, Value<String> name});
 
 final class $$ArtistsTableReferences
     extends BaseReferences<_$AppDatabase, $ArtistsTable, Artist> {
   $$ArtistsTableReferences(super.$_db, super.$_table, super.$_typedResult);
-
-  static $CoverTable _coverIdTable(_$AppDatabase db) => db.cover.createAlias(
-    $_aliasNameGenerator(db.artists.coverId, db.cover.id),
-  );
-
-  $$CoverTableProcessedTableManager? get coverId {
-    final $_column = $_itemColumn<int>('cover_id');
-    if ($_column == null) return null;
-    final manager = $$CoverTableTableManager(
-      $_db,
-      $_db.cover,
-    ).filter((f) => f.id.sqlEquals($_column));
-    final item = $_typedResult.readTableOrNull(_coverIdTable($_db));
-    if (item == null) return manager;
-    return ProcessedTableManager(
-      manager.$state.copyWith(prefetchedData: [item]),
-    );
-  }
 
   static MultiTypedResultKey<$AlbumsTable, List<Album>> _albumsRefsTable(
     _$AppDatabase db,
@@ -4256,29 +2949,6 @@ class $$ArtistsTableFilterComposer
     column: $table.name,
     builder: (column) => ColumnFilters(column),
   );
-
-  $$CoverTableFilterComposer get coverId {
-    final $$CoverTableFilterComposer composer = $composerBuilder(
-      composer: this,
-      getCurrentColumn: (t) => t.coverId,
-      referencedTable: $db.cover,
-      getReferencedColumn: (t) => t.id,
-      builder:
-          (
-            joinBuilder, {
-            $addJoinBuilderToRootComposer,
-            $removeJoinBuilderFromRootComposer,
-          }) => $$CoverTableFilterComposer(
-            $db: $db,
-            $table: $db.cover,
-            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
-            joinBuilder: joinBuilder,
-            $removeJoinBuilderFromRootComposer:
-                $removeJoinBuilderFromRootComposer,
-          ),
-    );
-    return composer;
-  }
 
   Expression<bool> albumsRefs(
     Expression<bool> Function($$AlbumsTableFilterComposer f) f,
@@ -4349,29 +3019,6 @@ class $$ArtistsTableOrderingComposer
     column: $table.name,
     builder: (column) => ColumnOrderings(column),
   );
-
-  $$CoverTableOrderingComposer get coverId {
-    final $$CoverTableOrderingComposer composer = $composerBuilder(
-      composer: this,
-      getCurrentColumn: (t) => t.coverId,
-      referencedTable: $db.cover,
-      getReferencedColumn: (t) => t.id,
-      builder:
-          (
-            joinBuilder, {
-            $addJoinBuilderToRootComposer,
-            $removeJoinBuilderFromRootComposer,
-          }) => $$CoverTableOrderingComposer(
-            $db: $db,
-            $table: $db.cover,
-            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
-            joinBuilder: joinBuilder,
-            $removeJoinBuilderFromRootComposer:
-                $removeJoinBuilderFromRootComposer,
-          ),
-    );
-    return composer;
-  }
 }
 
 class $$ArtistsTableAnnotationComposer
@@ -4388,29 +3035,6 @@ class $$ArtistsTableAnnotationComposer
 
   GeneratedColumn<String> get name =>
       $composableBuilder(column: $table.name, builder: (column) => column);
-
-  $$CoverTableAnnotationComposer get coverId {
-    final $$CoverTableAnnotationComposer composer = $composerBuilder(
-      composer: this,
-      getCurrentColumn: (t) => t.coverId,
-      referencedTable: $db.cover,
-      getReferencedColumn: (t) => t.id,
-      builder:
-          (
-            joinBuilder, {
-            $addJoinBuilderToRootComposer,
-            $removeJoinBuilderFromRootComposer,
-          }) => $$CoverTableAnnotationComposer(
-            $db: $db,
-            $table: $db.cover,
-            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
-            joinBuilder: joinBuilder,
-            $removeJoinBuilderFromRootComposer:
-                $removeJoinBuilderFromRootComposer,
-          ),
-    );
-    return composer;
-  }
 
   Expression<T> albumsRefs<T extends Object>(
     Expression<T> Function($$AlbumsTableAnnotationComposer a) f,
@@ -4476,11 +3100,7 @@ class $$ArtistsTableTableManager
           $$ArtistsTableUpdateCompanionBuilder,
           (Artist, $$ArtistsTableReferences),
           Artist,
-          PrefetchHooks Function({
-            bool coverId,
-            bool albumsRefs,
-            bool tracksRefs,
-          })
+          PrefetchHooks Function({bool albumsRefs, bool tracksRefs})
         > {
   $$ArtistsTableTableManager(_$AppDatabase db, $ArtistsTable table)
     : super(
@@ -4497,15 +3117,10 @@ class $$ArtistsTableTableManager
               ({
                 Value<int> id = const Value.absent(),
                 Value<String> name = const Value.absent(),
-                Value<int?> coverId = const Value.absent(),
-              }) => ArtistsCompanion(id: id, name: name, coverId: coverId),
+              }) => ArtistsCompanion(id: id, name: name),
           createCompanionCallback:
-              ({
-                Value<int> id = const Value.absent(),
-                required String name,
-                Value<int?> coverId = const Value.absent(),
-              }) =>
-                  ArtistsCompanion.insert(id: id, name: name, coverId: coverId),
+              ({Value<int> id = const Value.absent(), required String name}) =>
+                  ArtistsCompanion.insert(id: id, name: name),
           withReferenceMapper: (p0) => p0
               .map(
                 (e) => (
@@ -4514,86 +3129,42 @@ class $$ArtistsTableTableManager
                 ),
               )
               .toList(),
-          prefetchHooksCallback:
-              ({coverId = false, albumsRefs = false, tracksRefs = false}) {
-                return PrefetchHooks(
-                  db: db,
-                  explicitlyWatchedTables: [
-                    if (albumsRefs) db.albums,
-                    if (tracksRefs) db.tracks,
-                  ],
-                  addJoins:
-                      <
-                        T extends TableManagerState<
-                          dynamic,
-                          dynamic,
-                          dynamic,
-                          dynamic,
-                          dynamic,
-                          dynamic,
-                          dynamic,
-                          dynamic,
-                          dynamic,
-                          dynamic,
-                          dynamic
-                        >
-                      >(state) {
-                        if (coverId) {
-                          state =
-                              state.withJoin(
-                                    currentTable: table,
-                                    currentColumn: table.coverId,
-                                    referencedTable: $$ArtistsTableReferences
-                                        ._coverIdTable(db),
-                                    referencedColumn: $$ArtistsTableReferences
-                                        ._coverIdTable(db)
-                                        .id,
-                                  )
-                                  as T;
-                        }
-
-                        return state;
-                      },
-                  getPrefetchedDataCallback: (items) async {
-                    return [
-                      if (albumsRefs)
-                        await $_getPrefetchedData<Artist, $ArtistsTable, Album>(
-                          currentTable: table,
-                          referencedTable: $$ArtistsTableReferences
-                              ._albumsRefsTable(db),
-                          managerFromTypedResult: (p0) =>
-                              $$ArtistsTableReferences(
-                                db,
-                                table,
-                                p0,
-                              ).albumsRefs,
-                          referencedItemsForCurrentItem:
-                              (item, referencedItems) => referencedItems.where(
-                                (e) => e.artistId == item.id,
-                              ),
-                          typedResults: items,
-                        ),
-                      if (tracksRefs)
-                        await $_getPrefetchedData<Artist, $ArtistsTable, Track>(
-                          currentTable: table,
-                          referencedTable: $$ArtistsTableReferences
-                              ._tracksRefsTable(db),
-                          managerFromTypedResult: (p0) =>
-                              $$ArtistsTableReferences(
-                                db,
-                                table,
-                                p0,
-                              ).tracksRefs,
-                          referencedItemsForCurrentItem:
-                              (item, referencedItems) => referencedItems.where(
-                                (e) => e.artistId == item.id,
-                              ),
-                          typedResults: items,
-                        ),
-                    ];
-                  },
-                );
+          prefetchHooksCallback: ({albumsRefs = false, tracksRefs = false}) {
+            return PrefetchHooks(
+              db: db,
+              explicitlyWatchedTables: [
+                if (albumsRefs) db.albums,
+                if (tracksRefs) db.tracks,
+              ],
+              addJoins: null,
+              getPrefetchedDataCallback: (items) async {
+                return [
+                  if (albumsRefs)
+                    await $_getPrefetchedData<Artist, $ArtistsTable, Album>(
+                      currentTable: table,
+                      referencedTable: $$ArtistsTableReferences
+                          ._albumsRefsTable(db),
+                      managerFromTypedResult: (p0) =>
+                          $$ArtistsTableReferences(db, table, p0).albumsRefs,
+                      referencedItemsForCurrentItem: (item, referencedItems) =>
+                          referencedItems.where((e) => e.artistId == item.id),
+                      typedResults: items,
+                    ),
+                  if (tracksRefs)
+                    await $_getPrefetchedData<Artist, $ArtistsTable, Track>(
+                      currentTable: table,
+                      referencedTable: $$ArtistsTableReferences
+                          ._tracksRefsTable(db),
+                      managerFromTypedResult: (p0) =>
+                          $$ArtistsTableReferences(db, table, p0).tracksRefs,
+                      referencedItemsForCurrentItem: (item, referencedItems) =>
+                          referencedItems.where((e) => e.artistId == item.id),
+                      typedResults: items,
+                    ),
+                ];
               },
+            );
+          },
         ),
       );
 }
@@ -4610,46 +3181,28 @@ typedef $$ArtistsTableProcessedTableManager =
       $$ArtistsTableUpdateCompanionBuilder,
       (Artist, $$ArtistsTableReferences),
       Artist,
-      PrefetchHooks Function({bool coverId, bool albumsRefs, bool tracksRefs})
+      PrefetchHooks Function({bool albumsRefs, bool tracksRefs})
     >;
 typedef $$AlbumsTableCreateCompanionBuilder =
     AlbumsCompanion Function({
       Value<int> id,
       required String name,
-      Value<int?> coverId,
       Value<int?> artistId,
       Value<int?> genreId,
+      Value<String?> coverImage,
     });
 typedef $$AlbumsTableUpdateCompanionBuilder =
     AlbumsCompanion Function({
       Value<int> id,
       Value<String> name,
-      Value<int?> coverId,
       Value<int?> artistId,
       Value<int?> genreId,
+      Value<String?> coverImage,
     });
 
 final class $$AlbumsTableReferences
     extends BaseReferences<_$AppDatabase, $AlbumsTable, Album> {
   $$AlbumsTableReferences(super.$_db, super.$_table, super.$_typedResult);
-
-  static $CoverTable _coverIdTable(_$AppDatabase db) => db.cover.createAlias(
-    $_aliasNameGenerator(db.albums.coverId, db.cover.id),
-  );
-
-  $$CoverTableProcessedTableManager? get coverId {
-    final $_column = $_itemColumn<int>('cover_id');
-    if ($_column == null) return null;
-    final manager = $$CoverTableTableManager(
-      $_db,
-      $_db.cover,
-    ).filter((f) => f.id.sqlEquals($_column));
-    final item = $_typedResult.readTableOrNull(_coverIdTable($_db));
-    if (item == null) return manager;
-    return ProcessedTableManager(
-      manager.$state.copyWith(prefetchedData: [item]),
-    );
-  }
 
   static $ArtistsTable _artistIdTable(_$AppDatabase db) => db.artists
       .createAlias($_aliasNameGenerator(db.albums.artistId, db.artists.id));
@@ -4725,28 +3278,10 @@ class $$AlbumsTableFilterComposer
     builder: (column) => ColumnFilters(column),
   );
 
-  $$CoverTableFilterComposer get coverId {
-    final $$CoverTableFilterComposer composer = $composerBuilder(
-      composer: this,
-      getCurrentColumn: (t) => t.coverId,
-      referencedTable: $db.cover,
-      getReferencedColumn: (t) => t.id,
-      builder:
-          (
-            joinBuilder, {
-            $addJoinBuilderToRootComposer,
-            $removeJoinBuilderFromRootComposer,
-          }) => $$CoverTableFilterComposer(
-            $db: $db,
-            $table: $db.cover,
-            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
-            joinBuilder: joinBuilder,
-            $removeJoinBuilderFromRootComposer:
-                $removeJoinBuilderFromRootComposer,
-          ),
-    );
-    return composer;
-  }
+  ColumnFilters<String> get coverImage => $composableBuilder(
+    column: $table.coverImage,
+    builder: (column) => ColumnFilters(column),
+  );
 
   $$ArtistsTableFilterComposer get artistId {
     final $$ArtistsTableFilterComposer composer = $composerBuilder(
@@ -4839,28 +3374,10 @@ class $$AlbumsTableOrderingComposer
     builder: (column) => ColumnOrderings(column),
   );
 
-  $$CoverTableOrderingComposer get coverId {
-    final $$CoverTableOrderingComposer composer = $composerBuilder(
-      composer: this,
-      getCurrentColumn: (t) => t.coverId,
-      referencedTable: $db.cover,
-      getReferencedColumn: (t) => t.id,
-      builder:
-          (
-            joinBuilder, {
-            $addJoinBuilderToRootComposer,
-            $removeJoinBuilderFromRootComposer,
-          }) => $$CoverTableOrderingComposer(
-            $db: $db,
-            $table: $db.cover,
-            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
-            joinBuilder: joinBuilder,
-            $removeJoinBuilderFromRootComposer:
-                $removeJoinBuilderFromRootComposer,
-          ),
-    );
-    return composer;
-  }
+  ColumnOrderings<String> get coverImage => $composableBuilder(
+    column: $table.coverImage,
+    builder: (column) => ColumnOrderings(column),
+  );
 
   $$ArtistsTableOrderingComposer get artistId {
     final $$ArtistsTableOrderingComposer composer = $composerBuilder(
@@ -4924,28 +3441,10 @@ class $$AlbumsTableAnnotationComposer
   GeneratedColumn<String> get name =>
       $composableBuilder(column: $table.name, builder: (column) => column);
 
-  $$CoverTableAnnotationComposer get coverId {
-    final $$CoverTableAnnotationComposer composer = $composerBuilder(
-      composer: this,
-      getCurrentColumn: (t) => t.coverId,
-      referencedTable: $db.cover,
-      getReferencedColumn: (t) => t.id,
-      builder:
-          (
-            joinBuilder, {
-            $addJoinBuilderToRootComposer,
-            $removeJoinBuilderFromRootComposer,
-          }) => $$CoverTableAnnotationComposer(
-            $db: $db,
-            $table: $db.cover,
-            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
-            joinBuilder: joinBuilder,
-            $removeJoinBuilderFromRootComposer:
-                $removeJoinBuilderFromRootComposer,
-          ),
-    );
-    return composer;
-  }
+  GeneratedColumn<String> get coverImage => $composableBuilder(
+    column: $table.coverImage,
+    builder: (column) => column,
+  );
 
   $$ArtistsTableAnnotationComposer get artistId {
     final $$ArtistsTableAnnotationComposer composer = $composerBuilder(
@@ -5032,12 +3531,7 @@ class $$AlbumsTableTableManager
           $$AlbumsTableUpdateCompanionBuilder,
           (Album, $$AlbumsTableReferences),
           Album,
-          PrefetchHooks Function({
-            bool coverId,
-            bool artistId,
-            bool genreId,
-            bool tracksRefs,
-          })
+          PrefetchHooks Function({bool artistId, bool genreId, bool tracksRefs})
         > {
   $$AlbumsTableTableManager(_$AppDatabase db, $AlbumsTable table)
     : super(
@@ -5054,29 +3548,29 @@ class $$AlbumsTableTableManager
               ({
                 Value<int> id = const Value.absent(),
                 Value<String> name = const Value.absent(),
-                Value<int?> coverId = const Value.absent(),
                 Value<int?> artistId = const Value.absent(),
                 Value<int?> genreId = const Value.absent(),
+                Value<String?> coverImage = const Value.absent(),
               }) => AlbumsCompanion(
                 id: id,
                 name: name,
-                coverId: coverId,
                 artistId: artistId,
                 genreId: genreId,
+                coverImage: coverImage,
               ),
           createCompanionCallback:
               ({
                 Value<int> id = const Value.absent(),
                 required String name,
-                Value<int?> coverId = const Value.absent(),
                 Value<int?> artistId = const Value.absent(),
                 Value<int?> genreId = const Value.absent(),
+                Value<String?> coverImage = const Value.absent(),
               }) => AlbumsCompanion.insert(
                 id: id,
                 name: name,
-                coverId: coverId,
                 artistId: artistId,
                 genreId: genreId,
+                coverImage: coverImage,
               ),
           withReferenceMapper: (p0) => p0
               .map(
@@ -5085,12 +3579,7 @@ class $$AlbumsTableTableManager
               )
               .toList(),
           prefetchHooksCallback:
-              ({
-                coverId = false,
-                artistId = false,
-                genreId = false,
-                tracksRefs = false,
-              }) {
+              ({artistId = false, genreId = false, tracksRefs = false}) {
                 return PrefetchHooks(
                   db: db,
                   explicitlyWatchedTables: [if (tracksRefs) db.tracks],
@@ -5110,19 +3599,6 @@ class $$AlbumsTableTableManager
                           dynamic
                         >
                       >(state) {
-                        if (coverId) {
-                          state =
-                              state.withJoin(
-                                    currentTable: table,
-                                    currentColumn: table.coverId,
-                                    referencedTable: $$AlbumsTableReferences
-                                        ._coverIdTable(db),
-                                    referencedColumn: $$AlbumsTableReferences
-                                        ._coverIdTable(db)
-                                        .id,
-                                  )
-                                  as T;
-                        }
                         if (artistId) {
                           state =
                               state.withJoin(
@@ -5187,19 +3663,14 @@ typedef $$AlbumsTableProcessedTableManager =
       $$AlbumsTableUpdateCompanionBuilder,
       (Album, $$AlbumsTableReferences),
       Album,
-      PrefetchHooks Function({
-        bool coverId,
-        bool artistId,
-        bool genreId,
-        bool tracksRefs,
-      })
+      PrefetchHooks Function({bool artistId, bool genreId, bool tracksRefs})
     >;
 typedef $$TracksTableCreateCompanionBuilder =
     TracksCompanion Function({
       Value<int> id,
       required String title,
       required String fileuri,
-      Value<int?> coverId,
+      Value<String?> coverImage,
       Value<String?> lyrics,
       Value<int?> duration,
       Value<String?> trackNumber,
@@ -5215,7 +3686,7 @@ typedef $$TracksTableUpdateCompanionBuilder =
       Value<int> id,
       Value<String> title,
       Value<String> fileuri,
-      Value<int?> coverId,
+      Value<String?> coverImage,
       Value<String?> lyrics,
       Value<int?> duration,
       Value<String?> trackNumber,
@@ -5230,24 +3701,6 @@ typedef $$TracksTableUpdateCompanionBuilder =
 final class $$TracksTableReferences
     extends BaseReferences<_$AppDatabase, $TracksTable, Track> {
   $$TracksTableReferences(super.$_db, super.$_table, super.$_typedResult);
-
-  static $CoverTable _coverIdTable(_$AppDatabase db) => db.cover.createAlias(
-    $_aliasNameGenerator(db.tracks.coverId, db.cover.id),
-  );
-
-  $$CoverTableProcessedTableManager? get coverId {
-    final $_column = $_itemColumn<int>('cover_id');
-    if ($_column == null) return null;
-    final manager = $$CoverTableTableManager(
-      $_db,
-      $_db.cover,
-    ).filter((f) => f.id.sqlEquals($_column));
-    final item = $_typedResult.readTableOrNull(_coverIdTable($_db));
-    if (item == null) return manager;
-    return ProcessedTableManager(
-      manager.$state.copyWith(prefetchedData: [item]),
-    );
-  }
 
   static $AlbumsTable _albumIdTable(_$AppDatabase db) => db.albums.createAlias(
     $_aliasNameGenerator(db.tracks.albumId, db.albums.id),
@@ -5345,6 +3798,11 @@ class $$TracksTableFilterComposer
     builder: (column) => ColumnFilters(column),
   );
 
+  ColumnFilters<String> get coverImage => $composableBuilder(
+    column: $table.coverImage,
+    builder: (column) => ColumnFilters(column),
+  );
+
   ColumnFilters<String> get lyrics => $composableBuilder(
     column: $table.lyrics,
     builder: (column) => ColumnFilters(column),
@@ -5374,29 +3832,6 @@ class $$TracksTableFilterComposer
     column: $table.updatedAt,
     builder: (column) => ColumnFilters(column),
   );
-
-  $$CoverTableFilterComposer get coverId {
-    final $$CoverTableFilterComposer composer = $composerBuilder(
-      composer: this,
-      getCurrentColumn: (t) => t.coverId,
-      referencedTable: $db.cover,
-      getReferencedColumn: (t) => t.id,
-      builder:
-          (
-            joinBuilder, {
-            $addJoinBuilderToRootComposer,
-            $removeJoinBuilderFromRootComposer,
-          }) => $$CoverTableFilterComposer(
-            $db: $db,
-            $table: $db.cover,
-            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
-            joinBuilder: joinBuilder,
-            $removeJoinBuilderFromRootComposer:
-                $removeJoinBuilderFromRootComposer,
-          ),
-    );
-    return composer;
-  }
 
   $$AlbumsTableFilterComposer get albumId {
     final $$AlbumsTableFilterComposer composer = $composerBuilder(
@@ -5517,6 +3952,11 @@ class $$TracksTableOrderingComposer
     builder: (column) => ColumnOrderings(column),
   );
 
+  ColumnOrderings<String> get coverImage => $composableBuilder(
+    column: $table.coverImage,
+    builder: (column) => ColumnOrderings(column),
+  );
+
   ColumnOrderings<String> get lyrics => $composableBuilder(
     column: $table.lyrics,
     builder: (column) => ColumnOrderings(column),
@@ -5546,29 +3986,6 @@ class $$TracksTableOrderingComposer
     column: $table.updatedAt,
     builder: (column) => ColumnOrderings(column),
   );
-
-  $$CoverTableOrderingComposer get coverId {
-    final $$CoverTableOrderingComposer composer = $composerBuilder(
-      composer: this,
-      getCurrentColumn: (t) => t.coverId,
-      referencedTable: $db.cover,
-      getReferencedColumn: (t) => t.id,
-      builder:
-          (
-            joinBuilder, {
-            $addJoinBuilderToRootComposer,
-            $removeJoinBuilderFromRootComposer,
-          }) => $$CoverTableOrderingComposer(
-            $db: $db,
-            $table: $db.cover,
-            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
-            joinBuilder: joinBuilder,
-            $removeJoinBuilderFromRootComposer:
-                $removeJoinBuilderFromRootComposer,
-          ),
-    );
-    return composer;
-  }
 
   $$AlbumsTableOrderingComposer get albumId {
     final $$AlbumsTableOrderingComposer composer = $composerBuilder(
@@ -5658,6 +4075,11 @@ class $$TracksTableAnnotationComposer
   GeneratedColumn<String> get fileuri =>
       $composableBuilder(column: $table.fileuri, builder: (column) => column);
 
+  GeneratedColumn<String> get coverImage => $composableBuilder(
+    column: $table.coverImage,
+    builder: (column) => column,
+  );
+
   GeneratedColumn<String> get lyrics =>
       $composableBuilder(column: $table.lyrics, builder: (column) => column);
 
@@ -5677,29 +4099,6 @@ class $$TracksTableAnnotationComposer
 
   GeneratedColumn<DateTime> get updatedAt =>
       $composableBuilder(column: $table.updatedAt, builder: (column) => column);
-
-  $$CoverTableAnnotationComposer get coverId {
-    final $$CoverTableAnnotationComposer composer = $composerBuilder(
-      composer: this,
-      getCurrentColumn: (t) => t.coverId,
-      referencedTable: $db.cover,
-      getReferencedColumn: (t) => t.id,
-      builder:
-          (
-            joinBuilder, {
-            $addJoinBuilderToRootComposer,
-            $removeJoinBuilderFromRootComposer,
-          }) => $$CoverTableAnnotationComposer(
-            $db: $db,
-            $table: $db.cover,
-            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
-            joinBuilder: joinBuilder,
-            $removeJoinBuilderFromRootComposer:
-                $removeJoinBuilderFromRootComposer,
-          ),
-    );
-    return composer;
-  }
 
   $$AlbumsTableAnnotationComposer get albumId {
     final $$AlbumsTableAnnotationComposer composer = $composerBuilder(
@@ -5810,7 +4209,6 @@ class $$TracksTableTableManager
           (Track, $$TracksTableReferences),
           Track,
           PrefetchHooks Function({
-            bool coverId,
             bool albumId,
             bool artistId,
             bool genreId,
@@ -5833,7 +4231,7 @@ class $$TracksTableTableManager
                 Value<int> id = const Value.absent(),
                 Value<String> title = const Value.absent(),
                 Value<String> fileuri = const Value.absent(),
-                Value<int?> coverId = const Value.absent(),
+                Value<String?> coverImage = const Value.absent(),
                 Value<String?> lyrics = const Value.absent(),
                 Value<int?> duration = const Value.absent(),
                 Value<String?> trackNumber = const Value.absent(),
@@ -5847,7 +4245,7 @@ class $$TracksTableTableManager
                 id: id,
                 title: title,
                 fileuri: fileuri,
-                coverId: coverId,
+                coverImage: coverImage,
                 lyrics: lyrics,
                 duration: duration,
                 trackNumber: trackNumber,
@@ -5863,7 +4261,7 @@ class $$TracksTableTableManager
                 Value<int> id = const Value.absent(),
                 required String title,
                 required String fileuri,
-                Value<int?> coverId = const Value.absent(),
+                Value<String?> coverImage = const Value.absent(),
                 Value<String?> lyrics = const Value.absent(),
                 Value<int?> duration = const Value.absent(),
                 Value<String?> trackNumber = const Value.absent(),
@@ -5877,7 +4275,7 @@ class $$TracksTableTableManager
                 id: id,
                 title: title,
                 fileuri: fileuri,
-                coverId: coverId,
+                coverImage: coverImage,
                 lyrics: lyrics,
                 duration: duration,
                 trackNumber: trackNumber,
@@ -5896,7 +4294,6 @@ class $$TracksTableTableManager
               .toList(),
           prefetchHooksCallback:
               ({
-                coverId = false,
                 albumId = false,
                 artistId = false,
                 genreId = false,
@@ -5923,19 +4320,6 @@ class $$TracksTableTableManager
                           dynamic
                         >
                       >(state) {
-                        if (coverId) {
-                          state =
-                              state.withJoin(
-                                    currentTable: table,
-                                    currentColumn: table.coverId,
-                                    referencedTable: $$TracksTableReferences
-                                        ._coverIdTable(db),
-                                    referencedColumn: $$TracksTableReferences
-                                        ._coverIdTable(db)
-                                        .id,
-                                  )
-                                  as T;
-                        }
                         if (albumId) {
                           state =
                               state.withJoin(
@@ -6022,7 +4406,6 @@ typedef $$TracksTableProcessedTableManager =
       (Track, $$TracksTableReferences),
       Track,
       PrefetchHooks Function({
-        bool coverId,
         bool albumId,
         bool artistId,
         bool genreId,
@@ -6750,12 +5133,10 @@ typedef $$PlaylistTracksTableProcessedTableManager =
 class $AppDatabaseManager {
   final _$AppDatabase _db;
   $AppDatabaseManager(this._db);
-  $$MusicDirectoriesTableTableManager get musicDirectories =>
-      $$MusicDirectoriesTableTableManager(_db, _db.musicDirectories);
+  $$ExcludedDirectoriesTableTableManager get excludedDirectories =>
+      $$ExcludedDirectoriesTableTableManager(_db, _db.excludedDirectories);
   $$GenresTableTableManager get genres =>
       $$GenresTableTableManager(_db, _db.genres);
-  $$CoverTableTableManager get cover =>
-      $$CoverTableTableManager(_db, _db.cover);
   $$ArtistsTableTableManager get artists =>
       $$ArtistsTableTableManager(_db, _db.artists);
   $$AlbumsTableTableManager get albums =>
