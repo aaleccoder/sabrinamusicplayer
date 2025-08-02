@@ -1,6 +1,7 @@
 import 'dart:io';
 
 import 'package:flutter/material.dart';
+import 'package:flutter_application_1/theme.dart';
 import 'package:flutter_application_1/main.dart';
 import 'package:flutter_application_1/widgets/song_list_view.dart';
 import 'package:flutter_application_1/widgets/albums.dart';
@@ -63,122 +64,188 @@ class _ArtistsState extends ConsumerState<ArtistsPage> {
                         );
                       },
                       child: Card(
-                        elevation: 3,
+                        elevation: 0,
                         shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(12),
+                          borderRadius: AppTheme.radiusXl,
                         ),
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.stretch,
-                          children: [
-                            Expanded(
-                              child: artist.cover.isNotEmpty
-                                  ? ClipRRect(
-                                      borderRadius: const BorderRadius.vertical(
-                                        top: Radius.circular(12),
-                                      ),
-                                      child: Image.file(
-                                        File(artist.cover),
-                                        fit: BoxFit.cover,
-                                        errorBuilder:
-                                            (context, error, stackTrace) =>
-                                                Container(
-                                                  color: Colors.grey[300],
-                                                  child: const Icon(
-                                                    Icons.person,
-                                                    size: 48,
-                                                  ),
-                                                ),
-                                      ),
-                                    )
-                                  : Container(
-                                      decoration: BoxDecoration(
-                                        color: Colors.grey[300],
+                        color: AppTheme.surface,
+                        shadowColor: Colors.transparent,
+                        child: Container(
+                          decoration: BoxDecoration(
+                            borderRadius: AppTheme.radiusXl,
+                            boxShadow: AppTheme.shadowLg,
+                            color: AppTheme.surface,
+                            border: Border.all(
+                              color: Colors.white.withOpacity(0.1),
+                              width: 1,
+                            ),
+                          ),
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.stretch,
+                            children: [
+                              Expanded(
+                                child: artist.cover.isNotEmpty
+                                    ? ClipRRect(
                                         borderRadius:
                                             const BorderRadius.vertical(
-                                              top: Radius.circular(12),
+                                              top: Radius.circular(24),
                                             ),
+                                        child: Image.file(
+                                          File(artist.cover),
+                                          fit: BoxFit.cover,
+                                          errorBuilder:
+                                              (context, error, stackTrace) =>
+                                                  Container(
+                                                    color: AppTheme.primary
+                                                        .withOpacity(0.1),
+                                                    child: Icon(
+                                                      Icons.person,
+                                                      size: 48,
+                                                      color: AppTheme.primary,
+                                                    ),
+                                                  ),
+                                        ),
+                                      )
+                                    : Container(
+                                        decoration: BoxDecoration(
+                                          color: AppTheme.primary.withOpacity(
+                                            0.1,
+                                          ),
+                                          borderRadius:
+                                              const BorderRadius.vertical(
+                                                top: Radius.circular(24),
+                                              ),
+                                        ),
+                                        child: Icon(
+                                          Icons.person,
+                                          size: 48,
+                                          color: AppTheme.primary,
+                                        ),
                                       ),
-                                      child: const Icon(Icons.person, size: 48),
-                                    ),
-                            ),
-                            Padding(
-                              padding: const EdgeInsets.symmetric(
-                                horizontal: 8,
-                                vertical: 6,
                               ),
-                              child: Column(
-                                crossAxisAlignment: CrossAxisAlignment.start,
-                                children: [
-                                  Text(
-                                    artist.name,
-                                    style: const TextStyle(
-                                      fontWeight: FontWeight.bold,
-                                      fontSize: 16,
+                              Padding(
+                                padding: const EdgeInsets.symmetric(
+                                  horizontal: 8,
+                                  vertical: 6,
+                                ),
+                                child: Column(
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  children: [
+                                    Text(
+                                      artist.name,
+                                      style: Theme.of(context)
+                                          .textTheme
+                                          .bodyMedium
+                                          ?.copyWith(
+                                            fontSize: AppTheme
+                                                .textTheme
+                                                .bodyMedium
+                                                ?.fontSize,
+                                            fontWeight: FontWeight.w500,
+                                            color: AppTheme.onSurface,
+                                          ),
+                                      maxLines: 2,
+                                      overflow: TextOverflow.ellipsis,
                                     ),
-                                    maxLines: 1,
-                                    overflow: TextOverflow.ellipsis,
-                                  ),
-                                  const SizedBox(height: 4),
-                                  Consumer(
-                                    builder: (context, ref, _) {
-                                      final trackCountAsync = ref.watch(
-                                        artistTrackCountProvider(artist.id),
-                                      );
-                                      final albumCountAsync = ref.watch(
-                                        artistAlbumCountProvider(artist.id),
-                                      );
+                                    const SizedBox(height: 4),
+                                    Consumer(
+                                      builder: (context, ref, _) {
+                                        final trackCountAsync = ref.watch(
+                                          artistTrackCountProvider(artist.id),
+                                        );
+                                        final albumCountAsync = ref.watch(
+                                          artistAlbumCountProvider(artist.id),
+                                        );
 
-                                      return trackCountAsync.when(
-                                        data: (trackCount) {
-                                          return albumCountAsync.when(
-                                            data: (albumCount) {
-                                              return Text(
-                                                '$trackCount songs • $albumCount albums',
-                                                style: const TextStyle(
-                                                  fontSize: 12,
-                                                  color: Colors.grey,
+                                        return trackCountAsync.when(
+                                          data: (trackCount) {
+                                            return albumCountAsync.when(
+                                              data: (albumCount) {
+                                                return Text(
+                                                  '$trackCount songs • $albumCount albums',
+                                                  style: Theme.of(context)
+                                                      .textTheme
+                                                      .bodySmall
+                                                      ?.copyWith(
+                                                        fontSize: AppTheme
+                                                            .textTheme
+                                                            .bodySmall
+                                                            ?.fontSize,
+                                                        color: AppTheme
+                                                            .onSurface
+                                                            .withOpacity(0.7),
+                                                      ),
+                                                  maxLines: 1,
+                                                  overflow:
+                                                      TextOverflow.ellipsis,
+                                                );
+                                              },
+                                              loading: () => Text(
+                                                'Loading...',
+                                                style: Theme.of(context)
+                                                    .textTheme
+                                                    .bodySmall
+                                                    ?.copyWith(
+                                                      fontSize: AppTheme
+                                                          .textTheme
+                                                          .bodySmall
+                                                          ?.fontSize,
+                                                      color: AppTheme.onSurface
+                                                          .withOpacity(0.7),
+                                                    ),
+                                              ),
+                                              error: (err, stack) => Text(
+                                                '0 albums',
+                                                style: Theme.of(context)
+                                                    .textTheme
+                                                    .bodySmall
+                                                    ?.copyWith(
+                                                      fontSize: AppTheme
+                                                          .textTheme
+                                                          .bodySmall
+                                                          ?.fontSize,
+                                                      color: AppTheme.onSurface
+                                                          .withOpacity(0.7),
+                                                    ),
+                                              ),
+                                            );
+                                          },
+                                          loading: () => Text(
+                                            'Loading...',
+                                            style: Theme.of(context)
+                                                .textTheme
+                                                .bodySmall
+                                                ?.copyWith(
+                                                  fontSize: AppTheme
+                                                      .textTheme
+                                                      .bodySmall
+                                                      ?.fontSize,
+                                                  color: AppTheme.onSurface
+                                                      .withOpacity(0.7),
                                                 ),
-                                                maxLines: 1,
-                                                overflow: TextOverflow.ellipsis,
-                                              );
-                                            },
-                                            loading: () => const Text(
-                                              'Loading...',
-                                              style: TextStyle(
-                                                fontSize: 12,
-                                                color: Colors.grey,
-                                              ),
-                                            ),
-                                            error: (err, stack) => const Text(
-                                              '0 albums',
-                                              style: TextStyle(
-                                                fontSize: 12,
-                                                color: Colors.grey,
-                                              ),
-                                            ),
-                                          );
-                                        },
-                                        loading: () => const Text(
-                                          'Loading...',
-                                          style: TextStyle(
-                                            fontSize: 12,
-                                            color: Colors.grey,
                                           ),
-                                        ),
-                                        error: (err, stack) => const Text(
-                                          '0 songs • 0 albums',
-                                          style: TextStyle(
-                                            fontSize: 12,
-                                            color: Colors.grey,
+                                          error: (err, stack) => Text(
+                                            '0 songs • 0 albums',
+                                            style: Theme.of(context)
+                                                .textTheme
+                                                .bodySmall
+                                                ?.copyWith(
+                                                  fontSize: AppTheme
+                                                      .textTheme
+                                                      .bodySmall
+                                                      ?.fontSize,
+                                                  color: AppTheme.onSurface
+                                                      .withOpacity(0.7),
+                                                ),
                                           ),
-                                        ),
-                                      );
-                                    },
-                                  ),
-                                ],
+                                        );
+                                      },
+                                    ),
+                                  ],
+                                ),
                               ),
-                            ),
-                          ],
+                            ],
+                          ),
                         ),
                       ),
                     );

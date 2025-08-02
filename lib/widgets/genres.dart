@@ -1,6 +1,7 @@
 import 'dart:io';
 
 import 'package:flutter/material.dart';
+import 'package:flutter_application_1/theme.dart';
 import 'package:flutter_application_1/main.dart';
 import 'package:flutter_application_1/widgets/song_list_view.dart';
 import 'package:flutter_application_1/widgets/genre_detail_page.dart';
@@ -52,94 +53,135 @@ class _GenresState extends ConsumerState<GenresPage> {
                         );
                       },
                       child: Card(
-                        elevation: 3,
+                        elevation: 0,
                         shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(12),
+                          borderRadius: AppTheme.radiusXl,
                         ),
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.stretch,
-                          children: [
-                            Expanded(
-                              child: Container(
-                                decoration: BoxDecoration(
-                                  gradient: LinearGradient(
-                                    begin: Alignment.topLeft,
-                                    end: Alignment.bottomRight,
-                                    colors: [
-                                      _getGenreColor(
-                                        genre.name,
-                                      ).withOpacity(0.8),
-                                      _getGenreColor(genre.name),
-                                    ],
-                                  ),
-                                  borderRadius: const BorderRadius.vertical(
-                                    top: Radius.circular(12),
-                                  ),
-                                ),
-                                child: Icon(
-                                  Icons.music_note,
-                                  size: 48,
-                                  color: Colors.white,
-                                ),
-                              ),
+                        color: AppTheme.surface,
+                        shadowColor: Colors.transparent,
+                        child: Container(
+                          decoration: BoxDecoration(
+                            borderRadius: AppTheme.radiusXl,
+                            boxShadow: AppTheme.shadowLg,
+                            color: AppTheme.surface,
+                            border: Border.all(
+                              color: Colors.white.withOpacity(0.1),
+                              width: 1,
                             ),
-                            Padding(
-                              padding: const EdgeInsets.symmetric(
-                                horizontal: 8,
-                                vertical: 6,
-                              ),
-                              child: Column(
-                                crossAxisAlignment: CrossAxisAlignment.start,
-                                children: [
-                                  Text(
-                                    genre.name,
-                                    style: const TextStyle(
-                                      fontWeight: FontWeight.bold,
-                                      fontSize: 16,
+                          ),
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.stretch,
+                            children: [
+                              Expanded(
+                                child: Container(
+                                  decoration: BoxDecoration(
+                                    gradient: LinearGradient(
+                                      begin: Alignment.topLeft,
+                                      end: Alignment.bottomRight,
+                                      colors: [
+                                        _getGenreColor(
+                                          genre.name,
+                                        ).withOpacity(0.8),
+                                        _getGenreColor(genre.name),
+                                      ],
                                     ),
-                                    maxLines: 1,
-                                    overflow: TextOverflow.ellipsis,
+                                    borderRadius: const BorderRadius.vertical(
+                                      top: Radius.circular(24),
+                                    ),
                                   ),
-                                  const SizedBox(height: 4),
-                                  Consumer(
-                                    builder: (context, ref, _) {
-                                      final trackCountAsync = ref.watch(
-                                        genreTrackCountProvider(genre.id),
-                                      );
-
-                                      return trackCountAsync.when(
-                                        data: (trackCount) {
-                                          return Text(
-                                            '$trackCount songs',
-                                            style: const TextStyle(
-                                              fontSize: 12,
-                                              color: Colors.grey,
-                                            ),
-                                            maxLines: 1,
-                                            overflow: TextOverflow.ellipsis,
-                                          );
-                                        },
-                                        loading: () => const Text(
-                                          'Loading...',
-                                          style: TextStyle(
-                                            fontSize: 12,
-                                            color: Colors.grey,
-                                          ),
-                                        ),
-                                        error: (err, stack) => const Text(
-                                          '0 songs',
-                                          style: TextStyle(
-                                            fontSize: 12,
-                                            color: Colors.grey,
-                                          ),
-                                        ),
-                                      );
-                                    },
+                                  child: Icon(
+                                    Icons.music_note,
+                                    size: 48,
+                                    color: Colors.white,
                                   ),
-                                ],
+                                ),
                               ),
-                            ),
-                          ],
+                              Padding(
+                                padding: const EdgeInsets.symmetric(
+                                  horizontal: 8,
+                                  vertical: 6,
+                                ),
+                                child: Column(
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  children: [
+                                    Text(
+                                      genre.name,
+                                      style: Theme.of(context)
+                                          .textTheme
+                                          .bodyMedium
+                                          ?.copyWith(
+                                            fontSize: AppTheme
+                                                .textTheme
+                                                .bodyMedium
+                                                ?.fontSize,
+                                            fontWeight: FontWeight.w500,
+                                            color: AppTheme.onSurface,
+                                          ),
+                                      maxLines: 2,
+                                      overflow: TextOverflow.ellipsis,
+                                    ),
+                                    const SizedBox(height: 4),
+                                    Consumer(
+                                      builder: (context, ref, _) {
+                                        final trackCountAsync = ref.watch(
+                                          genreTrackCountProvider(genre.id),
+                                        );
+
+                                        return trackCountAsync.when(
+                                          data: (trackCount) {
+                                            return Text(
+                                              '$trackCount songs',
+                                              style: Theme.of(context)
+                                                  .textTheme
+                                                  .bodySmall
+                                                  ?.copyWith(
+                                                    fontSize: AppTheme
+                                                        .textTheme
+                                                        .bodySmall
+                                                        ?.fontSize,
+                                                    color: AppTheme.onSurface
+                                                        .withOpacity(0.7),
+                                                  ),
+                                              maxLines: 1,
+                                              overflow: TextOverflow.ellipsis,
+                                            );
+                                          },
+                                          loading: () => Text(
+                                            'Loading...',
+                                            style: Theme.of(context)
+                                                .textTheme
+                                                .bodySmall
+                                                ?.copyWith(
+                                                  fontSize: AppTheme
+                                                      .textTheme
+                                                      .bodySmall
+                                                      ?.fontSize,
+                                                  color: AppTheme.onSurface
+                                                      .withOpacity(0.7),
+                                                ),
+                                          ),
+                                          error: (err, stack) => Text(
+                                            '0 songs',
+                                            style: Theme.of(context)
+                                                .textTheme
+                                                .bodySmall
+                                                ?.copyWith(
+                                                  fontSize: AppTheme
+                                                      .textTheme
+                                                      .bodySmall
+                                                      ?.fontSize,
+                                                  color: AppTheme.onSurface
+                                                      .withOpacity(0.7),
+                                                ),
+                                          ),
+                                        );
+                                      },
+                                    ),
+                                  ],
+                                ),
+                              ),
+                            ],
+                          ),
                         ),
                       ),
                     );

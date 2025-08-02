@@ -1,3 +1,4 @@
+import 'dart:ui';
 import 'package:flutter/material.dart';
 import 'package:flutter_application_1/main.dart';
 import 'package:flutter_application_1/theme.dart';
@@ -113,19 +114,55 @@ class _GlobalSearchPageState extends ConsumerState<GlobalSearchPage> {
   }
 
   Widget _buildSearchResults() {
-    return SingleChildScrollView(
-      padding: AppTheme.paddingMd,
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          _buildTracksSection(),
-          const SizedBox(height: 24),
-          _buildAlbumsSection(),
-          const SizedBox(height: 24),
-          _buildArtistsSection(),
-          const SizedBox(height: 24),
-          _buildPlaylistsSection(),
-        ],
+    return Container(
+      margin: const EdgeInsets.symmetric(horizontal: 8, vertical: 8),
+      decoration: BoxDecoration(
+        borderRadius: AppTheme.radiusXl,
+        boxShadow: AppTheme.shadowLg,
+      ),
+      child: ClipRRect(
+        borderRadius: AppTheme.radiusXl,
+        child: BackdropFilter(
+          filter: ImageFilter.blur(sigmaX: 20, sigmaY: 20),
+          child: Container(
+            decoration: BoxDecoration(
+              borderRadius: AppTheme.radiusXl,
+              color: AppTheme.surface,
+            ),
+            child: Container(
+              decoration: BoxDecoration(
+                borderRadius: AppTheme.radiusXl,
+                gradient: LinearGradient(
+                  begin: Alignment.topCenter,
+                  end: Alignment.bottomCenter,
+                  colors: [
+                    Colors.white.withOpacity(0.02),
+                    Colors.white.withOpacity(0.01),
+                  ],
+                ),
+                border: Border.all(
+                  color: Colors.white.withOpacity(0.1),
+                  width: 2,
+                ),
+              ),
+              child: SingleChildScrollView(
+                padding: AppTheme.paddingMd,
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    _buildTracksSection(),
+                    const SizedBox(height: 24),
+                    _buildAlbumsSection(),
+                    const SizedBox(height: 24),
+                    _buildArtistsSection(),
+                    const SizedBox(height: 24),
+                    _buildPlaylistsSection(),
+                  ],
+                ),
+              ),
+            ),
+          ),
+        ),
       ),
     );
   }
@@ -165,7 +202,7 @@ class _GlobalSearchPageState extends ConsumerState<GlobalSearchPage> {
         albums.isEmpty
             ? const Text('No albums found')
             : SizedBox(
-                height: 180,
+                height: 210,
                 child: ListView.separated(
                   scrollDirection: Axis.horizontal,
                   itemCount: albums.take(10).length,
@@ -268,8 +305,9 @@ class _GlobalSearchPageState extends ConsumerState<GlobalSearchPage> {
     return Container(
       margin: const EdgeInsets.only(bottom: 8),
       decoration: BoxDecoration(
+        borderRadius: AppTheme.radiusXl,
+        boxShadow: AppTheme.shadowLg,
         color: AppTheme.surface,
-        borderRadius: AppTheme.radiusMd,
       ),
       child: ListTile(
         leading: ClipRRect(
@@ -333,8 +371,9 @@ class _GlobalSearchPageState extends ConsumerState<GlobalSearchPage> {
       child: Container(
         width: 140,
         decoration: BoxDecoration(
+          borderRadius: AppTheme.radiusXl,
+          boxShadow: AppTheme.shadowLg,
           color: AppTheme.surface,
-          borderRadius: AppTheme.radiusMd,
         ),
         padding: AppTheme.paddingSm,
         child: Column(
@@ -347,7 +386,11 @@ class _GlobalSearchPageState extends ConsumerState<GlobalSearchPage> {
             const SizedBox(height: 8),
             Text(
               album.name ?? 'Unknown Album',
-              style: Theme.of(context).textTheme.titleSmall,
+              style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                fontSize: AppTheme.textTheme.bodyMedium?.fontSize,
+                fontWeight: FontWeight.w500,
+                color: AppTheme.onSurface,
+              ),
               overflow: TextOverflow.ellipsis,
               maxLines: 2,
             ),
@@ -356,9 +399,11 @@ class _GlobalSearchPageState extends ConsumerState<GlobalSearchPage> {
               Text(
                 album.artistName!,
                 style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                  fontSize: AppTheme.textTheme.bodySmall?.fontSize,
                   color: AppTheme.onSurface.withOpacity(0.7),
                 ),
                 overflow: TextOverflow.ellipsis,
+                maxLines: 1,
               ),
             ],
           ],
@@ -384,7 +429,7 @@ class _GlobalSearchPageState extends ConsumerState<GlobalSearchPage> {
 
     return Container(
       width: 124,
-      height: 100,
+      height: 120,
       color: AppTheme.primary.withOpacity(0.1),
       child: Icon(Icons.album, color: AppTheme.primary, size: 40),
     );
@@ -394,8 +439,9 @@ class _GlobalSearchPageState extends ConsumerState<GlobalSearchPage> {
     return Container(
       margin: const EdgeInsets.only(bottom: 8),
       decoration: BoxDecoration(
+        borderRadius: AppTheme.radiusXl,
+        boxShadow: AppTheme.shadowLg,
         color: AppTheme.surface,
-        borderRadius: AppTheme.radiusMd,
       ),
       child: ListTile(
         leading: CircleAvatar(
@@ -424,8 +470,9 @@ class _GlobalSearchPageState extends ConsumerState<GlobalSearchPage> {
     return Container(
       margin: const EdgeInsets.only(bottom: 8),
       decoration: BoxDecoration(
+        borderRadius: AppTheme.radiusXl,
+        boxShadow: AppTheme.shadowLg,
         color: AppTheme.surface,
-        borderRadius: AppTheme.radiusMd,
       ),
       child: ListTile(
         leading: CircleAvatar(

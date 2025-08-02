@@ -80,7 +80,7 @@ class SongListView extends ConsumerWidget {
               ),
               child: Icon(
                 Icons.library_music,
-                size: 16,
+                size: 28,
                 color: AppTheme.primary,
               ),
             ),
@@ -91,15 +91,13 @@ class SongListView extends ConsumerWidget {
                 children: [
                   Text(
                     'Your Music Library',
-                    style: Theme.of(context).textTheme.titleSmall?.copyWith(
-                      color: AppTheme.onSurface,
-                      fontWeight: FontWeight.w600,
-                    ),
+                    style: Theme.of(context).textTheme.bodyMedium,
                   ),
                   const SizedBox(height: 2),
                   Text(
                     '${tracks.length} song${tracks.length != 1 ? 's' : ''} available',
                     style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                      fontSize: AppTheme.textTheme.bodySmall?.fontSize,
                       color: AppTheme.onSurface.withOpacity(0.7),
                     ),
                   ),
@@ -129,6 +127,9 @@ class SongListView extends ConsumerWidget {
             Text(
               'Loading your music...',
               style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                fontSize:
+                    (Theme.of(context).textTheme.bodyMedium?.fontSize ?? 14) *
+                    0.6,
                 color: AppTheme.onSurface.withOpacity(0.7),
               ),
             ),
@@ -147,9 +148,12 @@ class SongListView extends ConsumerWidget {
             const SizedBox(width: 12),
             Text(
               'Error loading music',
-              style: Theme.of(
-                context,
-              ).textTheme.bodyMedium?.copyWith(color: AppTheme.error),
+              style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                fontSize:
+                    (Theme.of(context).textTheme.bodyMedium?.fontSize ?? 14) *
+                    0.6,
+                color: AppTheme.error,
+              ),
             ),
           ],
         ),
@@ -164,13 +168,20 @@ class SongListView extends ConsumerWidget {
     return tracksAsync.when(
       data: (tracks) =>
           tracks.isEmpty ? _buildEmptyState(context) : _buildTracksList(tracks),
-      loading: () => const Center(
+      loading: () => Center(
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            CircularProgressIndicator(),
-            SizedBox(height: 16),
-            Text('Loading your music...'),
+            const CircularProgressIndicator(),
+            const SizedBox(height: 16),
+            Text(
+              'Loading your music...',
+              style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                fontSize:
+                    (Theme.of(context).textTheme.bodyMedium?.fontSize ?? 14) *
+                    0.6,
+              ),
+            ),
           ],
         ),
       ),
@@ -186,14 +197,20 @@ class SongListView extends ConsumerWidget {
             const SizedBox(height: 16),
             Text(
               'Error loading music',
-              style: Theme.of(
-                context,
-              ).textTheme.titleMedium?.copyWith(color: AppTheme.error),
+              style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                fontSize:
+                    (Theme.of(context).textTheme.titleMedium?.fontSize ?? 16) *
+                    0.6,
+                color: AppTheme.error,
+              ),
             ),
             const SizedBox(height: 8),
             Text(
               e.toString(),
               style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                fontSize:
+                    (Theme.of(context).textTheme.bodySmall?.fontSize ?? 12) *
+                    0.6,
                 color: AppTheme.onSurface.withOpacity(0.6),
               ),
               textAlign: TextAlign.center,
@@ -219,7 +236,7 @@ class SongListView extends ConsumerWidget {
               ),
               child: Icon(
                 Icons.library_music_outlined,
-                size: 64,
+                size: 38,
                 color: AppTheme.primary.withOpacity(0.6),
               ),
             ),
@@ -227,6 +244,10 @@ class SongListView extends ConsumerWidget {
             Text(
               'No songs found',
               style: Theme.of(context).textTheme.headlineSmall?.copyWith(
+                fontSize:
+                    (Theme.of(context).textTheme.headlineSmall?.fontSize ??
+                        24) *
+                    0.6,
                 color: AppTheme.onSurface,
                 fontWeight: FontWeight.w600,
               ),
@@ -235,6 +256,9 @@ class SongListView extends ConsumerWidget {
             Text(
               'Add music folders in Settings to get started with your music library',
               style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                fontSize:
+                    (Theme.of(context).textTheme.bodyMedium?.fontSize ?? 14) *
+                    0.6,
                 color: AppTheme.onSurface.withOpacity(0.7),
               ),
               textAlign: TextAlign.center,
@@ -263,7 +287,7 @@ class SongListView extends ConsumerWidget {
 
   Widget _buildTracksList(List<TrackItem> tracks) {
     return ListView.separated(
-      padding: const EdgeInsets.fromLTRB(16, 8, 16, 16),
+      padding: const EdgeInsets.fromLTRB(10, 5, 10, 10),
       itemCount: tracks.length,
       itemBuilder: (context, index) =>
           SongListViewItem(track: tracks[index], tracks: tracks, index: index),
@@ -331,7 +355,7 @@ class _SongListViewItemState extends ConsumerState<SongListViewItem> {
           scale: _scale,
           duration: const Duration(milliseconds: 150),
           child: Container(
-            padding: const EdgeInsets.all(16),
+            padding: const EdgeInsets.all(10),
             decoration: BoxDecoration(
               color: AppTheme.surface,
               borderRadius: AppTheme.radiusMd,
@@ -351,10 +375,10 @@ class _SongListViewItemState extends ConsumerState<SongListViewItem> {
               children: [
                 // Album art
                 ClipRRect(
-                  borderRadius: BorderRadius.circular(8),
+                  borderRadius: BorderRadius.circular(5),
                   child: _buildAlbumArt(),
                 ),
-                const SizedBox(width: 16),
+                const SizedBox(width: 10),
 
                 // Track info
                 Expanded(
@@ -365,6 +389,7 @@ class _SongListViewItemState extends ConsumerState<SongListViewItem> {
                         widget.track.title,
                         style: Theme.of(context).textTheme.titleMedium
                             ?.copyWith(
+                              fontSize: AppTheme.textTheme.bodyMedium?.fontSize,
                               fontWeight: FontWeight.w500,
                               color: AppTheme.onSurface,
                             ),
@@ -375,6 +400,7 @@ class _SongListViewItemState extends ConsumerState<SongListViewItem> {
                       Text(
                         widget.track.artist,
                         style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                          fontSize: AppTheme.textTheme.bodySmall?.fontSize,
                           color: AppTheme.onSurface.withOpacity(0.7),
                         ),
                         overflow: TextOverflow.ellipsis,
@@ -394,7 +420,7 @@ class _SongListViewItemState extends ConsumerState<SongListViewItem> {
                     icon: Icon(
                       CupertinoIcons.ellipsis,
                       color: AppTheme.primary,
-                      size: 20,
+                      size: 12,
                     ),
                     itemBuilder: (context) => [
                       const PopupMenuItem(
@@ -439,13 +465,13 @@ class _SongListViewItemState extends ConsumerState<SongListViewItem> {
     }
 
     return Container(
-      width: 56,
-      height: 56,
+      width: 34,
+      height: 34,
       decoration: BoxDecoration(
         color: AppTheme.primary.withOpacity(0.1),
         borderRadius: BorderRadius.circular(8),
       ),
-      child: Icon(Icons.music_note, color: AppTheme.primary, size: 24),
+      child: Icon(Icons.music_note, color: AppTheme.primary, size: 14),
     );
   }
 
@@ -470,10 +496,33 @@ class _SongListViewItemState extends ConsumerState<SongListViewItem> {
                         itemBuilder: (context, index) {
                           final playlist = playlists[index];
                           return ListTile(
-                            leading: const Icon(Icons.queue_music),
-                            title: Text(playlist.name),
+                            leading: const Icon(Icons.queue_music, size: 14),
+                            title: Text(
+                              playlist.name,
+                              style: Theme.of(context).textTheme.bodyMedium
+                                  ?.copyWith(
+                                    fontSize:
+                                        (Theme.of(
+                                              context,
+                                            ).textTheme.bodyMedium?.fontSize ??
+                                            14) *
+                                        0.6,
+                                  ),
+                            ),
                             subtitle: playlist.description != null
-                                ? Text(playlist.description!)
+                                ? Text(
+                                    playlist.description!,
+                                    style: Theme.of(context).textTheme.bodySmall
+                                        ?.copyWith(
+                                          fontSize:
+                                              (Theme.of(context)
+                                                      .textTheme
+                                                      .bodySmall
+                                                      ?.fontSize ??
+                                                  12) *
+                                              0.6,
+                                        ),
+                                  )
                                 : null,
                             onTap: () async {
                               try {
@@ -485,13 +534,39 @@ class _SongListViewItemState extends ConsumerState<SongListViewItem> {
                                   SnackBar(
                                     content: Text(
                                       'Added "${track.title}" to "${playlist.name}"',
+                                      style: Theme.of(context)
+                                          .textTheme
+                                          .bodyMedium
+                                          ?.copyWith(
+                                            fontSize:
+                                                (Theme.of(context)
+                                                        .textTheme
+                                                        .bodyMedium
+                                                        ?.fontSize ??
+                                                    14) *
+                                                0.6,
+                                          ),
                                     ),
                                   ),
                                 );
                               } catch (e) {
                                 ScaffoldMessenger.of(context).showSnackBar(
                                   SnackBar(
-                                    content: Text('Error: ${e.toString()}'),
+                                    content: Text(
+                                      'Error: ${e.toString()}',
+                                      style: Theme.of(context)
+                                          .textTheme
+                                          .bodyMedium
+                                          ?.copyWith(
+                                            fontSize:
+                                                (Theme.of(context)
+                                                        .textTheme
+                                                        .bodyMedium
+                                                        ?.fontSize ??
+                                                    14) *
+                                                0.6,
+                                          ),
+                                    ),
                                     backgroundColor: Colors.red,
                                   ),
                                 );

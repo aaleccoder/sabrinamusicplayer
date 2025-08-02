@@ -232,7 +232,7 @@ class _MiniPlayerState extends ConsumerState<MiniPlayer>
       children: [
         Text(
           currentTrack.title,
-          style: AppTheme.textTheme.titleMedium?.copyWith(
+          style: AppTheme.textTheme.bodyMedium?.copyWith(
             color: AppTheme.onSurface,
             fontWeight: FontWeight.w600,
           ),
@@ -242,7 +242,7 @@ class _MiniPlayerState extends ConsumerState<MiniPlayer>
         const SizedBox(height: 2),
         Text(
           currentTrack.artist,
-          style: AppTheme.textTheme.bodyMedium?.copyWith(
+          style: AppTheme.textTheme.bodySmall?.copyWith(
             color: AppTheme.onSurface.withOpacity(0.7),
           ),
           overflow: TextOverflow.ellipsis,

@@ -1,6 +1,7 @@
 import 'dart:io';
 
 import 'package:flutter/material.dart';
+import 'package:flutter_application_1/theme.dart';
 import 'package:flutter_application_1/main.dart';
 import 'package:flutter_application_1/widgets/playlist_detail_page.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -48,9 +49,7 @@ class _PlaylistsState extends ConsumerState<PlaylistsPage> {
                         Expanded(
                           child: Text(
                             'My Playlists',
-                            style: Theme.of(context)
-                                .textTheme
-                                .headlineSmall
+                            style: Theme.of(context).textTheme.headlineSmall
                                 ?.copyWith(fontWeight: FontWeight.bold),
                           ),
                         ),
@@ -95,104 +94,185 @@ class _PlaylistsState extends ConsumerState<PlaylistsPage> {
                             itemBuilder: (context, index) {
                               final playlist = playlists[index];
                               return Card(
-                                elevation: 2,
+                                elevation: 0,
                                 margin: const EdgeInsets.only(bottom: 8),
-                                child: ListTile(
-                                  leading: Container(
-                                    width: 50,
-                                    height: 50,
-                                    decoration: BoxDecoration(
-                                      color: Theme.of(
-                                        context,
-                                      ).primaryColor.withOpacity(0.1),
-                                      borderRadius: BorderRadius.circular(8),
-                                    ),
-                                    child: Icon(
-                                      Icons.queue_music,
-                                      color: Theme.of(context).primaryColor,
-                                    ),
-                                  ),
-                                  title: Text(
-                                    playlist.name,
-                                    style: const TextStyle(
-                                      fontWeight: FontWeight.w500,
+                                shape: RoundedRectangleBorder(
+                                  borderRadius: AppTheme.radiusXl,
+                                ),
+                                color: AppTheme.surface,
+                                shadowColor: Colors.transparent,
+                                child: Container(
+                                  decoration: BoxDecoration(
+                                    borderRadius: AppTheme.radiusXl,
+                                    boxShadow: AppTheme.shadowLg,
+                                    color: AppTheme.surface,
+                                    border: Border.all(
+                                      color: Colors.white.withOpacity(0.1),
+                                      width: 1,
                                     ),
                                   ),
-                                  subtitle: playlist.description != null
-                                      ? Text(playlist.description!)
-                                      : Consumer(
-                                          builder: (context, ref, _) {
-                                            final trackCountAsync = ref.watch(
-                                              playlistTrackCountProvider(
-                                                playlist.id,
-                                              ),
-                                            );
-                                            return trackCountAsync.when(
-                                              data: (count) =>
-                                                  Text('$count songs'),
-                                              loading: () =>
-                                                  const Text('Loading...'),
-                                              error: (err, stack) =>
-                                                  const Text('0 songs'),
-                                            );
-                                          },
+                                  child: ListTile(
+                                    leading: Container(
+                                      width: 50,
+                                      height: 50,
+                                      decoration: BoxDecoration(
+                                        color: AppTheme.primary.withOpacity(
+                                          0.1,
                                         ),
-                                  trailing: PopupMenuButton(
-                                    itemBuilder: (context) => [
-                                      const PopupMenuItem(
-                                        value: 'edit',
-                                        child: Row(
-                                          children: [
-                                            Icon(Icons.edit),
-                                            SizedBox(width: 8),
-                                            Text('Edit'),
-                                          ],
-                                        ),
+                                        borderRadius: AppTheme.radiusMd,
                                       ),
-                                      const PopupMenuItem(
-                                        value: 'delete',
-                                        child: Row(
-                                          children: [
-                                            Icon(
-                                              Icons.delete,
-                                              color: Colors.red,
-                                            ),
-                                            SizedBox(width: 8),
-                                            Text(
-                                              'Delete',
-                                              style: TextStyle(
+                                      child: Icon(
+                                        Icons.queue_music,
+                                        color: AppTheme.primary,
+                                      ),
+                                    ),
+                                    title: Text(
+                                      playlist.name,
+                                      style: Theme.of(context)
+                                          .textTheme
+                                          .bodyMedium
+                                          ?.copyWith(
+                                            fontSize: AppTheme
+                                                .textTheme
+                                                .bodyMedium
+                                                ?.fontSize,
+                                            fontWeight: FontWeight.w500,
+                                            color: AppTheme.onSurface,
+                                          ),
+                                    ),
+                                    subtitle: playlist.description != null
+                                        ? Text(
+                                            playlist.description!,
+                                            style: Theme.of(context)
+                                                .textTheme
+                                                .bodySmall
+                                                ?.copyWith(
+                                                  fontSize: AppTheme
+                                                      .textTheme
+                                                      .bodySmall
+                                                      ?.fontSize,
+                                                  color: AppTheme.onSurface
+                                                      .withOpacity(0.7),
+                                                ),
+                                            maxLines: 2,
+                                            overflow: TextOverflow.ellipsis,
+                                          )
+                                        : Consumer(
+                                            builder: (context, ref, _) {
+                                              final trackCountAsync = ref.watch(
+                                                playlistTrackCountProvider(
+                                                  playlist.id,
+                                                ),
+                                              );
+                                              return trackCountAsync.when(
+                                                data: (count) => Text(
+                                                  '$count songs',
+                                                  style: Theme.of(context)
+                                                      .textTheme
+                                                      .bodySmall
+                                                      ?.copyWith(
+                                                        fontSize: AppTheme
+                                                            .textTheme
+                                                            .bodySmall
+                                                            ?.fontSize,
+                                                        color: AppTheme
+                                                            .onSurface
+                                                            .withOpacity(0.7),
+                                                      ),
+                                                  maxLines: 1,
+                                                  overflow:
+                                                      TextOverflow.ellipsis,
+                                                ),
+                                                loading: () => Text(
+                                                  'Loading...',
+                                                  style: Theme.of(context)
+                                                      .textTheme
+                                                      .bodySmall
+                                                      ?.copyWith(
+                                                        fontSize: AppTheme
+                                                            .textTheme
+                                                            .bodySmall
+                                                            ?.fontSize,
+                                                        color: AppTheme
+                                                            .onSurface
+                                                            .withOpacity(0.7),
+                                                      ),
+                                                ),
+                                                error: (err, stack) => Text(
+                                                  '0 songs',
+                                                  style: Theme.of(context)
+                                                      .textTheme
+                                                      .bodySmall
+                                                      ?.copyWith(
+                                                        fontSize: AppTheme
+                                                            .textTheme
+                                                            .bodySmall
+                                                            ?.fontSize,
+                                                        color: AppTheme
+                                                            .onSurface
+                                                            .withOpacity(0.7),
+                                                      ),
+                                                ),
+                                              );
+                                            },
+                                          ),
+                                    trailing: PopupMenuButton(
+                                      itemBuilder: (context) => [
+                                        const PopupMenuItem(
+                                          value: 'edit',
+                                          child: Row(
+                                            children: [
+                                              Icon(Icons.edit),
+                                              SizedBox(width: 8),
+                                              Text('Edit'),
+                                            ],
+                                          ),
+                                        ),
+                                        const PopupMenuItem(
+                                          value: 'delete',
+                                          child: Row(
+                                            children: [
+                                              Icon(
+                                                Icons.delete,
                                                 color: Colors.red,
                                               ),
-                                            ),
-                                          ],
+                                              SizedBox(width: 8),
+                                              Text(
+                                                'Delete',
+                                                style: TextStyle(
+                                                  color: Colors.red,
+                                                ),
+                                              ),
+                                            ],
+                                          ),
                                         ),
-                                      ),
-                                    ],
-                                    onSelected: (value) {
-                                      if (value == 'edit') {
-                                        _showEditPlaylistDialog(
-                                          context,
-                                          playlist,
-                                        );
-                                      } else if (value == 'delete') {
-                                        _showDeletePlaylistDialog(
-                                          context,
-                                          playlist,
-                                        );
-                                      }
+                                      ],
+                                      onSelected: (value) {
+                                        if (value == 'edit') {
+                                          _showEditPlaylistDialog(
+                                            context,
+                                            playlist,
+                                          );
+                                        } else if (value == 'delete') {
+                                          _showDeletePlaylistDialog(
+                                            context,
+                                            playlist,
+                                          );
+                                        }
+                                      },
+                                    ),
+                                    onTap: () {
+                                      Navigator.push(
+                                        context,
+                                        MaterialPageRoute(
+                                          builder: (context) =>
+                                              PlaylistDetailPage(
+                                                playlist: playlist,
+                                              ),
+                                        ),
+                                      );
                                     },
                                   ),
-                                  onTap: () {
-                                    Navigator.push(
-                                      context,
-                                      MaterialPageRoute(
-                                        builder: (context) =>
-                                            PlaylistDetailPage(
-                                          playlist: playlist,
-                                        ),
-                                      ),
-                                    );
-                                  },
                                 ),
                               );
                             },
@@ -247,7 +327,9 @@ class _PlaylistsState extends ConsumerState<PlaylistsPage> {
           ElevatedButton(
             onPressed: () async {
               if (nameController.text.trim().isNotEmpty) {
-                await ref.read(appDatabaseProvider).createPlaylist(
+                await ref
+                    .read(appDatabaseProvider)
+                    .createPlaylist(
                       nameController.text.trim(),
                       description: descriptionController.text.trim().isEmpty
                           ? null
@@ -304,7 +386,9 @@ class _PlaylistsState extends ConsumerState<PlaylistsPage> {
           ElevatedButton(
             onPressed: () async {
               if (nameController.text.trim().isNotEmpty) {
-                await ref.read(appDatabaseProvider).updatePlaylist(
+                await ref
+                    .read(appDatabaseProvider)
+                    .updatePlaylist(
                       playlist.id,
                       name: nameController.text.trim(),
                       description: descriptionController.text.trim().isEmpty

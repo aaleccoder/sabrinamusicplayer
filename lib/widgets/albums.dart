@@ -1,6 +1,7 @@
 import 'dart:io';
 
 import 'package:flutter/material.dart';
+import 'package:flutter_application_1/theme.dart';
 import 'package:flutter_application_1/main.dart';
 import 'package:flutter_application_1/widgets/song_list_view.dart';
 import 'package:flutter_application_1/widgets/album_detail_page.dart';
@@ -63,78 +64,109 @@ class _AlbumsState extends ConsumerState<AlbumsPage> {
                         );
                       },
                       child: Card(
-                        elevation: 3,
+                        elevation: 0,
                         shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(12),
+                          borderRadius: AppTheme.radiusXl,
                         ),
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.stretch,
-                          children: [
-                            Expanded(
-                              child: ClipRRect(
-                                borderRadius: const BorderRadius.vertical(
-                                  top: Radius.circular(12),
-                                ),
-                                child: () {
-                                  // Gracefully handle file paths and content URIs for album art
-                                  try {
-                                    if (album.cover != null &&
-                                        album.cover!.isNotEmpty) {
-                                      final coverUri = Uri.parse(album.cover!);
-                                      if (coverUri.isScheme('file')) {
-                                        final file = File.fromUri(coverUri);
-                                        if (file.existsSync()) {
-                                          return Image.file(
-                                            file,
-                                            fit: BoxFit.cover,
-                                          );
+                        color: AppTheme.surface,
+                        shadowColor: Colors.transparent,
+                        child: Container(
+                          decoration: BoxDecoration(
+                            borderRadius: AppTheme.radiusXl,
+                            boxShadow: AppTheme.shadowLg,
+                            color: AppTheme.surface,
+                            border: Border.all(
+                              color: Colors.white.withOpacity(0.1),
+                              width: 1,
+                            ),
+                          ),
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.stretch,
+                            children: [
+                              Expanded(
+                                child: ClipRRect(
+                                  borderRadius: const BorderRadius.vertical(
+                                    top: Radius.circular(24),
+                                  ),
+                                  child: () {
+                                    try {
+                                      if (album.cover != null &&
+                                          album.cover!.isNotEmpty) {
+                                        final coverUri = Uri.parse(
+                                          album.cover!,
+                                        );
+                                        if (coverUri.isScheme('file')) {
+                                          final file = File.fromUri(coverUri);
+                                          if (file.existsSync()) {
+                                            return Image.file(
+                                              file,
+                                              fit: BoxFit.cover,
+                                            );
+                                          }
                                         }
                                       }
-                                    }
-                                  } catch (e) {
-                                    // Log or handle error, for now, fall back to placeholder
-                                  }
-                                  // Fallback placeholder for invalid or non-existent art
-                                  return Container(
-                                    decoration: BoxDecoration(
-                                      color: Colors.grey[300],
-                                    ),
-                                    child: const Icon(Icons.image, size: 48),
-                                  );
-                                }(),
+                                    } catch (e) {}
+                                    return Container(
+                                      decoration: BoxDecoration(
+                                        color: AppTheme.primary.withOpacity(
+                                          0.1,
+                                        ),
+                                      ),
+                                      child: Icon(
+                                        Icons.image,
+                                        size: 48,
+                                        color: AppTheme.primary,
+                                      ),
+                                    );
+                                  }(),
+                                ),
                               ),
-                            ),
-                            Padding(
-                              padding: const EdgeInsets.symmetric(
-                                horizontal: 8,
-                                vertical: 6,
-                              ),
-                              child: Column(
-                                crossAxisAlignment: CrossAxisAlignment.start,
-                                children: [
-                                  Text(
-                                    album.name ?? 'Unknown Album',
-                                    style: const TextStyle(
-                                      fontWeight: FontWeight.bold,
-                                      fontSize: 16,
+                              Padding(
+                                padding: const EdgeInsets.symmetric(
+                                  horizontal: 8,
+                                  vertical: 6,
+                                ),
+                                child: Column(
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  children: [
+                                    Text(
+                                      album.name ?? 'Unknown Album',
+                                      style: Theme.of(context)
+                                          .textTheme
+                                          .bodyMedium
+                                          ?.copyWith(
+                                            fontSize: AppTheme
+                                                .textTheme
+                                                .bodyMedium
+                                                ?.fontSize,
+                                            fontWeight: FontWeight.w500,
+                                            color: AppTheme.onSurface,
+                                          ),
+                                      maxLines: 2,
+                                      overflow: TextOverflow.ellipsis,
                                     ),
-                                    maxLines: 1,
-                                    overflow: TextOverflow.ellipsis,
-                                  ),
-                                  const SizedBox(height: 4),
-                                  Text(
-                                    album.artistName ?? 'Unknown Artist',
-                                    style: const TextStyle(
-                                      fontSize: 14,
-                                      color: Colors.grey,
+                                    const SizedBox(height: 4),
+                                    Text(
+                                      album.artistName ?? 'Unknown Artist',
+                                      style: Theme.of(context)
+                                          .textTheme
+                                          .bodySmall
+                                          ?.copyWith(
+                                            fontSize: AppTheme
+                                                .textTheme
+                                                .bodySmall
+                                                ?.fontSize,
+                                            color: AppTheme.onSurface
+                                                .withOpacity(0.7),
+                                          ),
+                                      maxLines: 1,
+                                      overflow: TextOverflow.ellipsis,
                                     ),
-                                    maxLines: 1,
-                                    overflow: TextOverflow.ellipsis,
-                                  ),
-                                ],
+                                  ],
+                                ),
                               ),
-                            ),
-                          ],
+                            ],
+                          ),
                         ),
                       ),
                     );

@@ -348,21 +348,24 @@ class _HomeState extends ConsumerState<Home> with TickerProviderStateMixin {
             Positioned(
               left: 0,
               right: 0,
-              bottom:
-                  102, // Navigation bar height (70) + margins (16*2) + small gap
+              bottom: 100, // Navigation bar height (60) + margin (16)
               child: MiniPlayer(),
+            ),
+            Positioned(
+              left: 16,
+              right: 16,
+              bottom: 16,
+              child: _buildModernNavigationBar(),
             ),
             LibraryScanningOverlay(),
           ],
         ),
       ),
-      bottomNavigationBar: _buildModernNavigationBar(),
     );
   }
 
   Widget _buildModernNavigationBar() {
     return Container(
-      margin: const EdgeInsets.all(16),
       decoration: BoxDecoration(
         borderRadius: AppTheme.radiusXl,
         boxShadow: AppTheme.shadowLg,
@@ -374,33 +377,37 @@ class _HomeState extends ConsumerState<Home> with TickerProviderStateMixin {
           child: Container(
             decoration: BoxDecoration(
               borderRadius: AppTheme.radiusXl,
-              gradient: LinearGradient(
-                begin: Alignment.topCenter,
-                end: Alignment.bottomCenter,
-                colors: [
-                  Colors.white.withOpacity(0.15),
-                  Colors.white.withOpacity(0.05),
+              color: AppTheme.surface,
+            ),
+            child: Container(
+              height: 80,
+              decoration: BoxDecoration(
+                borderRadius: AppTheme.radiusXl,
+                gradient: LinearGradient(
+                  begin: Alignment.topCenter,
+                  end: Alignment.bottomCenter,
+                  colors: [
+                    Colors.white.withOpacity(0.02),
+                    Colors.white.withOpacity(0.01),
+                  ],
+                ),
+                border: Border.all(
+                  color: Colors.white.withOpacity(0.1),
+                  width: 2,
+                ),
+              ),
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                children: [
+                  _buildNavDestination(Icons.home_rounded, 'Home', 0),
+                  _buildNavDestination(
+                    Icons.library_music_rounded,
+                    'Library',
+                    1,
+                  ),
+                  _buildNavDestination(Icons.settings_rounded, 'Settings', 2),
                 ],
               ),
-              border: Border.all(
-                color: Colors.white.withOpacity(0.2),
-                width: 1,
-              ),
-            ),
-            child: NavigationBar(
-              height: 70,
-              selectedIndex: _selectedIndex,
-              onDestinationSelected: _onItemTapped,
-              backgroundColor: Colors.transparent,
-              surfaceTintColor: Colors.transparent,
-              shadowColor: Colors.transparent,
-              elevation: 0,
-              indicatorColor: Colors.transparent,
-              destinations: [
-                _buildNavDestination(Icons.home_rounded, 'Home', 0),
-                _buildNavDestination(Icons.library_music_rounded, 'Library', 1),
-                _buildNavDestination(Icons.settings_rounded, 'Settings', 2),
-              ],
             ),
           ),
         ),
@@ -408,40 +415,62 @@ class _HomeState extends ConsumerState<Home> with TickerProviderStateMixin {
     );
   }
 
-  NavigationDestination _buildNavDestination(
-    IconData icon,
-    String label,
-    int index,
-  ) {
+  Widget _buildNavDestination(IconData icon, String label, int index) {
     final isSelected = _selectedIndex == index;
 
-    return NavigationDestination(
-      icon: AnimatedContainer(
-        duration: AppTheme.animationFast,
-        curve: AppTheme.curveDefault,
-        padding: EdgeInsets.all(isSelected ? 8 : 4),
-        decoration: isSelected
-            ? BoxDecoration(
-                color: AppTheme.primary.withOpacity(0.2),
-                borderRadius: AppTheme.radiusMd,
-                boxShadow: [
-                  BoxShadow(
-                    color: AppTheme.primary.withOpacity(0.3),
-                    blurRadius: 8,
-                    offset: const Offset(0, 2),
-                  ),
-                ],
-              )
-            : null,
-        child: Icon(
-          icon,
-          size: isSelected ? 26 : 24,
-          color: isSelected
-              ? AppTheme.primary
-              : AppTheme.onSurface.withOpacity(0.6),
+    return Expanded(
+      child: GestureDetector(
+        onTap: () => _onItemTapped(index),
+        behavior: HitTestBehavior.opaque,
+        child: Container(
+          padding: const EdgeInsets.symmetric(vertical: 6),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              AnimatedContainer(
+                duration: AppTheme.animationFast,
+                curve: AppTheme.curveDefault,
+                padding: EdgeInsets.all(isSelected ? 6 : 4),
+                decoration: isSelected
+                    ? BoxDecoration(
+                        color: AppTheme.primary.withOpacity(0.3),
+                        borderRadius: AppTheme.radiusSm,
+                        boxShadow: [
+                          BoxShadow(
+                            color: AppTheme.primary.withOpacity(0.4),
+                            blurRadius: 6,
+                            offset: const Offset(0, 2),
+                          ),
+                        ],
+                      )
+                    : null,
+                child: Icon(
+                  icon,
+                  size: isSelected ? 28 : 24,
+                  color: isSelected
+                      ? AppTheme.primary
+                      : AppTheme.onSurface.withOpacity(0.7),
+                ),
+              ),
+              const SizedBox(height: 2),
+              AnimatedDefaultTextStyle(
+                duration: AppTheme.animationFast,
+                style:
+                    AppTheme.textTheme.labelSmall?.copyWith(
+                      color: isSelected
+                          ? AppTheme.primary
+                          : AppTheme.onSurface.withOpacity(0.7),
+                      fontWeight: isSelected
+                          ? FontWeight.w600
+                          : FontWeight.w500,
+                    ) ??
+                    const TextStyle(),
+                child: Text(label),
+              ),
+            ],
+          ),
         ),
       ),
-      label: label,
     );
   }
 }
