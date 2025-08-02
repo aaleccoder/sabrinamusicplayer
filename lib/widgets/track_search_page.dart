@@ -9,7 +9,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 class TrackSearchPage extends ConsumerStatefulWidget {
   final PlaylistItem? playlist;
 
-  const TrackSearchPage({Key? key, this.playlist}) : super(key: key);
+  const TrackSearchPage({super.key, this.playlist});
 
   @override
   ConsumerState<TrackSearchPage> createState() => _TrackSearchPageState();

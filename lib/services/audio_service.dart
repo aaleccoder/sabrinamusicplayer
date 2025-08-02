@@ -1,5 +1,5 @@
+import 'dart:async';
 import 'package:flutter_application_1/widgets/song_list_view.dart';
-import 'package:just_audio/just_audio.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:audio_service/audio_service.dart';
 import 'package:flutter_application_1/services/background_audio_handler.dart';
@@ -53,78 +53,108 @@ class AudioPlayerState {
 class AudioPlayerNotifier extends StateNotifier<AudioPlayerState> {
   BackgroundAudioHandler? _audioHandler;
   List<TrackItem> _originalQueue = [];
+  final Completer<void> _initializationCompleter = Completer<void>();
 
   AudioPlayerNotifier() : super(AudioPlayerState()) {
     _initializeAudioService();
   }
 
+  StreamSubscription<Duration>? _positionSubscription;
+
   Future<void> _initializeAudioService() async {
-    _audioHandler = await AudioService.init(
-      builder: () => BackgroundAudioHandler(),
-      config: AudioServiceConfig(
-        androidNotificationChannelId:
-            'com.example.flutter_application_1.channel.audio',
-        androidNotificationChannelName: 'Music Player',
-        androidNotificationChannelDescription: 'Music playback controls',
-        androidNotificationOngoing: true,
-        androidNotificationIcon: 'mipmap/ic_launcher',
-        androidShowNotificationBadge: true,
-        androidStopForegroundOnPause: false,
-        fastForwardInterval: const Duration(seconds: 10),
-        rewindInterval: const Duration(seconds: 10),
-        preloadArtwork: true,
-        artDownscaleWidth: 200,
-        artDownscaleHeight: 200,
-      ),
-    );
-
-    // Listen to audio handler events and update state
-    _audioHandler?.playbackState.listen((playbackState) {
-      state = state.copyWith(
-        isPlaying: playbackState.playing,
-        position: playbackState.updatePosition,
-        bufferedPosition: playbackState.bufferedPosition,
+    try {
+      _audioHandler = await AudioService.init(
+        builder: () => BackgroundAudioHandler(),
+        config: AudioServiceConfig(
+          androidNotificationChannelId:
+              'com.example.flutter_application_1.channel.audio',
+          androidNotificationChannelName: 'Music Player',
+          androidNotificationChannelDescription: 'Music playback controls',
+          androidNotificationIcon: 'mipmap/ic_launcher',
+          androidShowNotificationBadge: true,
+          androidStopForegroundOnPause: true,
+          fastForwardInterval: const Duration(seconds: 10),
+          rewindInterval: const Duration(seconds: 10),
+          preloadArtwork: true,
+          artDownscaleWidth: 200,
+          artDownscaleHeight: 200,
+        ),
       );
-    });
 
-    _audioHandler?.mediaItem.listen((mediaItem) {
-      if (mediaItem != null) {
-        final currentTrack = TrackItem(
-          id: mediaItem.extras?['trackId'] ?? 0,
-          title: mediaItem.title,
-          artist: mediaItem.artist ?? '',
-          cover: mediaItem.artUri?.toString() ?? '',
-          fileuri: mediaItem.id,
+      // Listen to audio handler events and update state
+      _audioHandler?.playbackState.listen((playbackState) {
+        print(
+          '[AudioService] playbackState update: '
+          'playing=${playbackState.playing}, '
+          'buffered=${playbackState.bufferedPosition}',
         );
+        state = state.copyWith(
+          isPlaying: playbackState.playing,
+          bufferedPosition: playbackState.bufferedPosition,
+        );
+      });
+
+      // Listen to positionStream for frequent position updates
+      if (_audioHandler != null && _audioHandler is BackgroundAudioHandler) {
+        final handler = _audioHandler as BackgroundAudioHandler;
+        _positionSubscription = handler.positionStream.listen((pos) {
+          print('[AudioService] position update: $pos');
+          state = state.copyWith(position: pos);
+        });
+      }
+
+      _audioHandler?.mediaItem.listen((mediaItem) {
+        if (mediaItem != null) {
+          final currentTrack = TrackItem(
+            id: mediaItem.extras?['trackId'] ?? 0,
+            title: mediaItem.title,
+            artist: mediaItem.artist ?? '',
+            cover: mediaItem.artUri?.toString() ?? '',
+            fileuri: mediaItem.id,
+          );
+
+          state = state.copyWith(
+            currentTrack: currentTrack,
+            duration: mediaItem.duration,
+          );
+        }
+      });
+
+      _audioHandler?.queue.listen((queue) {
+        final trackQueue = queue
+            .map(
+              (mediaItem) => TrackItem(
+                id: mediaItem.extras?['trackId'] ?? 0,
+                title: mediaItem.title,
+                artist: mediaItem.artist ?? '',
+                cover: mediaItem.artUri?.toString() ?? '',
+                fileuri: mediaItem.id,
+              ),
+            )
+            .toList();
 
         state = state.copyWith(
-          currentTrack: currentTrack,
-          duration: mediaItem.duration,
+          queue: trackQueue,
+          currentIndex: _audioHandler?.currentIndex ?? 0,
         );
-      }
-    });
+      });
+      // ... existing listeners setup ...
 
-    _audioHandler?.queue.listen((queue) {
-      final trackQueue = queue
-          .map(
-            (mediaItem) => TrackItem(
-              id: mediaItem.extras?['trackId'] ?? 0,
-              title: mediaItem.title,
-              artist: mediaItem.artist ?? '',
-              cover: mediaItem.artUri?.toString() ?? '',
-              fileuri: mediaItem.id,
-            ),
-          )
-          .toList();
-
-      state = state.copyWith(
-        queue: trackQueue,
-        currentIndex: _audioHandler?.currentIndex ?? 0,
-      );
-    });
+      _initializationCompleter.complete();
+    } catch (e) {
+      print('AudioService initialization error: $e');
+      _initializationCompleter.completeError(e);
+    }
   }
 
   Future<void> createQueue(List<TrackItem> tracks) async {
+    try {
+      await _initializationCompleter.future;
+    } catch (e) {
+      print('AudioService initialization failed, not initialized: $e');
+      return;
+    }
+
     if (tracks.isNotEmpty && _audioHandler != null) {
       _originalQueue = List.from(tracks);
       final mediaItems = tracks
@@ -143,16 +173,18 @@ class AudioPlayerNotifier extends StateNotifier<AudioPlayerState> {
   }
 
   Future<void> play(TrackItem track) async {
+    try {
+      await _initializationCompleter.future;
+    } catch (e) {
+      print('AudioService initialization failed: $e');
+      return;
+    }
+
     if (_audioHandler == null) return;
 
-    // If it's a new track, play it with the current queue
-    if (state.currentTrack?.fileuri != track.fileuri) {
-      final currentQueue = state.queue ?? [track];
-      await _audioHandler!.playTrack(track, currentQueue);
-    } else {
-      // Just resume playback
-      await _audioHandler!.play();
-    }
+    // Always call playTrack to ensure the audio source is set for the selected track
+    final currentQueue = state.queue ?? [track];
+    await _audioHandler!.playTrack(track, currentQueue);
   }
 
   Future<void> next() async {
@@ -206,6 +238,13 @@ class AudioPlayerNotifier extends StateNotifier<AudioPlayerState> {
   }
 
   Future<void> playAllShuffled(List<TrackItem> tracks) async {
+    try {
+      await _initializationCompleter.future;
+    } catch (e) {
+      print('AudioService initialization failed: $e');
+      return;
+    }
+
     if (tracks.isNotEmpty && _audioHandler != null) {
       await createQueue(tracks);
       await _audioHandler!.shuffleQueue();

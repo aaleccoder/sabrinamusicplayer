@@ -25,7 +25,7 @@ class PlaylistItem {
 }
 
 class PlaylistsPage extends ConsumerStatefulWidget {
-  const PlaylistsPage({Key? key}) : super(key: key);
+  const PlaylistsPage({super.key});
 
   @override
   ConsumerState<PlaylistsPage> createState() => _PlaylistsState();

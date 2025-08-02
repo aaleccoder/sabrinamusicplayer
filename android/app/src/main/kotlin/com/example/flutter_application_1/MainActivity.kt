@@ -11,7 +11,7 @@ import android.util.Log
 import android.util.LruCache
 import android.util.Size
 import androidx.annotation.NonNull
-import io.flutter.embedding.android.FlutterActivity
+import com.ryanheise.audioservice.AudioServiceFragmentActivity
 import io.flutter.embedding.engine.FlutterEngine
 import io.flutter.plugin.common.MethodChannel
 import kotlinx.coroutines.*
@@ -20,7 +20,7 @@ import java.io.FileOutputStream
 import java.io.IOException
 import java.security.MessageDigest
 
-class MainActivity : FlutterActivity() {
+class MainActivity : AudioServiceFragmentActivity() {
     private val CHANNEL = "com.example.flutter_application_1/metadata"
 
     // Use coroutines for better concurrency management

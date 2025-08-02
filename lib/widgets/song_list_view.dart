@@ -5,7 +5,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter_application_1/main.dart';
 import 'package:flutter_application_1/theme.dart';
 import 'package:flutter_application_1/widgets/home_scan_banner.dart';
-import 'package:flutter_application_1/widgets/playlists.dart';
 import 'package:flutter_application_1/widgets/search_bar.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
@@ -372,7 +371,7 @@ class _SongListViewItemState extends ConsumerState<SongListViewItem> {
     final musicPlayer = ref.watch(audioPlayerNotifierProvider.notifier);
     final queue = widget.tracks.sublist(widget.index);
     await musicPlayer.createQueue(queue);
-    musicPlayer.play(track);
+    await musicPlayer.play(track);
   }
 
   void _onTapUp(TapUpDetails details) {

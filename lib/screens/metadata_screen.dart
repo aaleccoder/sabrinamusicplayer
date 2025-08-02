@@ -1,7 +1,4 @@
-import 'dart:convert';
-import 'dart:typed_data';
 import 'package:flutter/material.dart';
-import 'package:file_picker/file_picker.dart';
 import 'package:flutter_application_1/services/metadata_service.dart';
 
 class MetadataScreen extends StatefulWidget {

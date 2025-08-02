@@ -26,7 +26,7 @@ class AlbumItem {
 }
 
 class AlbumsPage extends ConsumerStatefulWidget {
-  const AlbumsPage({Key? key}) : super(key: key);
+  const AlbumsPage({super.key});
 
   @override
   ConsumerState<AlbumsPage> createState() => _AlbumsState();

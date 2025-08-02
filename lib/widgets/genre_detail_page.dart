@@ -11,7 +11,7 @@ import 'package:flutter_application_1/main.dart';
 class GenreDetailPage extends ConsumerStatefulWidget {
   final GenreItem genre;
 
-  const GenreDetailPage({Key? key, required this.genre}) : super(key: key);
+  const GenreDetailPage({super.key, required this.genre});
 
   @override
   ConsumerState<GenreDetailPage> createState() => _GenreDetailPageState();
@@ -282,12 +282,12 @@ class GenreTrackListItem extends StatefulWidget {
   final VoidCallback onTap;
 
   const GenreTrackListItem({
-    Key? key,
+    super.key,
     required this.track,
     required this.tracks,
     required this.index,
     required this.onTap,
-  }) : super(key: key);
+  });
 
   @override
   State<GenreTrackListItem> createState() => _GenreTrackListItemState();

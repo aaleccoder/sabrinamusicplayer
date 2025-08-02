@@ -1,7 +1,6 @@
 import 'dart:ui';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import '../models/library_scanning_state.dart';
 import '../providers/library_scanning_provider.dart';
 import '../theme.dart';
 

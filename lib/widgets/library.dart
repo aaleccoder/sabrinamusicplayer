@@ -8,7 +8,7 @@ import 'playlists.dart';
 import 'mini_player.dart';
 
 class Library extends ConsumerStatefulWidget {
-  const Library({Key? key}) : super(key: key);
+  const Library({super.key});
 
   @override
   ConsumerState<Library> createState() => _LibraryState();
@@ -96,8 +96,8 @@ class _LibraryItem extends StatelessWidget {
     required this.label,
     required this.color,
     required this.onTap,
-    Key? key,
-  }) : super(key: key);
+    super.key,
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -136,7 +136,7 @@ class _LibraryItem extends StatelessWidget {
 }
 
 class AlbumsPageWrapper extends StatelessWidget {
-  const AlbumsPageWrapper({Key? key}) : super(key: key);
+  const AlbumsPageWrapper({super.key});
 
   @override
   Widget build(BuildContext context) {
@@ -153,7 +153,7 @@ class AlbumsPageWrapper extends StatelessWidget {
 }
 
 class ArtistsPageWrapper extends StatelessWidget {
-  const ArtistsPageWrapper({Key? key}) : super(key: key);
+  const ArtistsPageWrapper({super.key});
 
   @override
   Widget build(BuildContext context) {
@@ -170,7 +170,7 @@ class ArtistsPageWrapper extends StatelessWidget {
 }
 
 class PlaylistsPageWrapper extends StatelessWidget {
-  const PlaylistsPageWrapper({Key? key}) : super(key: key);
+  const PlaylistsPageWrapper({super.key});
 
   @override
   Widget build(BuildContext context) {
@@ -187,7 +187,7 @@ class PlaylistsPageWrapper extends StatelessWidget {
 }
 
 class GenresPageWrapper extends StatelessWidget {
-  const GenresPageWrapper({Key? key}) : super(key: key);
+  const GenresPageWrapper({super.key});
 
   @override
   Widget build(BuildContext context) {

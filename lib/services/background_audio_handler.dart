@@ -24,6 +24,9 @@ class BackgroundAudioHandler extends BaseAudioHandler
 
     // Listen to audio player events and update media controls
     _audioPlayer.playbackEventStream.map(_transformEvent).pipe(playbackState);
+    _audioPlayer.positionStream.listen((pos) {
+      print('[BackgroundAudioHandler] position update: $pos');
+    });
 
     // Handle audio player completion
     _audioPlayer.playerStateStream.listen((playerState) {
@@ -155,7 +158,6 @@ class BackgroundAudioHandler extends BaseAudioHandler
 
     _currentIndex = (_currentIndex + 1) % _queue.length;
 
-    // If we've reached the end and repeat mode is none, stop
     if (_currentIndex == 0 && _repeatMode == AudioServiceRepeatMode.none) {
       await pause();
       return;
@@ -284,7 +286,6 @@ class BackgroundAudioHandler extends BaseAudioHandler
     );
   }
 
-  /// Get the current queue as TrackItems
   List<TrackItem> getCurrentQueue() {
     return _queue
         .map(
@@ -299,16 +300,12 @@ class BackgroundAudioHandler extends BaseAudioHandler
         .toList();
   }
 
-  /// Get current playback position
   Duration get position => _audioPlayer.position;
 
-  /// Get current track duration
   Duration? get duration => _audioPlayer.duration;
 
-  /// Get current playing state
   bool get isPlaying => _audioPlayer.playing;
 
-  /// Get current queue index
   int get currentIndex => _currentIndex;
 
   @override
@@ -326,9 +323,9 @@ class BackgroundAudioHandler extends BaseAudioHandler
     }
   }
 
-  /// Get current repeat mode
   AudioServiceRepeatMode get repeatMode => _repeatMode;
 
-  /// Get current shuffle mode
   AudioServiceShuffleMode get shuffleMode => _shuffleMode;
+
+  Stream<Duration> get positionStream => _audioPlayer.positionStream;
 }

@@ -1,7 +1,6 @@
 import 'dart:io';
 import 'dart:ui';
 
-import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_application_1/main.dart';
 import 'package:flutter_application_1/screens/player_screen.dart';

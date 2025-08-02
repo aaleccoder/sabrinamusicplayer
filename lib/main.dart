@@ -174,6 +174,10 @@ void main() async {
 
   await Permission.audio.request();
   await Permission.storage.request();
+  await Permission.notification.request();
+  await Permission.mediaLibrary.request();
+  await Permission.photos.request();
+  await Permission.accessNotificationPolicy.request();
 
   runApp(const ProviderScope(child: MainApp()));
 }
@@ -193,12 +197,10 @@ class MainApp extends StatelessWidget {
           primary: AppTheme.primary,
           secondary: AppTheme.secondary,
           surface: AppTheme.surface,
-          background: AppTheme.background,
           error: AppTheme.error,
           onPrimary: AppTheme.onPrimary,
           onSecondary: AppTheme.onSecondary,
           onSurface: AppTheme.onSurface,
-          onBackground: AppTheme.onBackground,
           onError: AppTheme.onError,
         ),
         textTheme: AppTheme.textTheme,
@@ -220,8 +222,8 @@ class MainApp extends StatelessWidget {
           elevation: 0,
           backgroundColor: Colors.transparent,
           indicatorColor: AppTheme.primary.withOpacity(0.2),
-          labelTextStyle: MaterialStateProperty.resolveWith((states) {
-            if (states.contains(MaterialState.selected)) {
+          labelTextStyle: WidgetStateProperty.resolveWith((states) {
+            if (states.contains(WidgetState.selected)) {
               return AppTheme.textTheme.labelMedium?.copyWith(
                 color: AppTheme.primary,
                 fontWeight: FontWeight.w600,
@@ -231,8 +233,8 @@ class MainApp extends StatelessWidget {
               color: AppTheme.onSurface.withOpacity(0.6),
             );
           }),
-          iconTheme: MaterialStateProperty.resolveWith((states) {
-            if (states.contains(MaterialState.selected)) {
+          iconTheme: WidgetStateProperty.resolveWith((states) {
+            if (states.contains(WidgetState.selected)) {
               return IconThemeData(color: AppTheme.primary, size: 24);
             }
             return IconThemeData(

@@ -25,7 +25,7 @@ class ArtistItem {
 }
 
 class ArtistsPage extends ConsumerStatefulWidget {
-  const ArtistsPage({Key? key}) : super(key: key);
+  const ArtistsPage({super.key});
 
   @override
   ConsumerState<ArtistsPage> createState() => _ArtistsState();

@@ -1,20 +1,11 @@
-import 'dart:convert';
-import 'dart:ffi';
-import 'dart:io';
-import 'dart:typed_data';
-import 'package:crypto/crypto.dart';
 import 'package:drift/drift.dart';
 import 'package:flutter/foundation.dart';
-import 'package:flutter/services.dart';
 import 'package:flutter_application_1/main.dart';
 import 'package:flutter_application_1/models/schema.dart';
 import 'package:flutter_application_1/providers/library_scanning_provider.dart';
 import 'package:flutter_application_1/services/metadata_service.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:path/path.dart' as p;
-import 'package:path_provider/path_provider.dart';
-import 'package:shared_preferences/shared_preferences.dart';
-import 'package:uuid/uuid.dart';
 
 class LibraryService {
   Future<void> scanLibrary(WidgetRef ref) async {

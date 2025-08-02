@@ -13,8 +13,7 @@ import 'package:image_picker/image_picker.dart';
 class PlaylistDetailPage extends ConsumerStatefulWidget {
   final PlaylistItem playlist;
 
-  const PlaylistDetailPage({Key? key, required this.playlist})
-    : super(key: key);
+  const PlaylistDetailPage({super.key, required this.playlist});
 
   @override
   ConsumerState<PlaylistDetailPage> createState() => _PlaylistDetailPageState();
@@ -552,14 +551,14 @@ class PlaylistTrackListItem extends StatefulWidget {
   final VoidCallback onRemove;
 
   const PlaylistTrackListItem({
-    Key? key,
+    super.key,
     required this.track,
     required this.tracks,
     required this.index,
     required this.playlist,
     required this.onTap,
     required this.onRemove,
-  }) : super(key: key);
+  });
 
   @override
   State<PlaylistTrackListItem> createState() => _PlaylistTrackListItemState();

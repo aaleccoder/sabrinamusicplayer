@@ -14,7 +14,7 @@ import 'package:flutter_application_1/main.dart';
 class ArtistDetailPage extends ConsumerStatefulWidget {
   final ArtistItem artist;
 
-  const ArtistDetailPage({Key? key, required this.artist}) : super(key: key);
+  const ArtistDetailPage({super.key, required this.artist});
 
   @override
   ConsumerState<ArtistDetailPage> createState() => _ArtistDetailPageState();
@@ -504,12 +504,12 @@ class ArtistTrackListItem extends StatefulWidget {
   final VoidCallback onTap;
 
   const ArtistTrackListItem({
-    Key? key,
+    super.key,
     required this.track,
     required this.tracks,
     required this.index,
     required this.onTap,
-  }) : super(key: key);
+  });
 
   @override
   State<ArtistTrackListItem> createState() => _ArtistTrackListItemState();

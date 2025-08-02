@@ -15,7 +15,7 @@ class GenreItem {
 }
 
 class GenresPage extends ConsumerStatefulWidget {
-  const GenresPage({Key? key}) : super(key: key);
+  const GenresPage({super.key});
 
   @override
   ConsumerState<GenresPage> createState() => _GenresState();
