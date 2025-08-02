@@ -545,12 +545,35 @@ class _PlayerScreenState extends ConsumerState<PlayerScreen>
     return '$minutes:$seconds';
   }
 
-  Widget _buildControlsSection(audioService, audioState) {
+  Widget _buildControlsSection(
+    AudioPlayerNotifier audioService,
+    AudioPlayerState audioState,
+  ) {
+    IconData repeatIcon;
+    switch (audioState.repeatMode) {
+      case RepeatMode.none:
+        repeatIcon = Icons.repeat_rounded;
+        break;
+      case RepeatMode.one:
+        repeatIcon = Icons.repeat_one_on_rounded;
+        break;
+      case RepeatMode.all:
+        repeatIcon = Icons.repeat_on_rounded;
+        break;
+    }
+
     return Container(
       padding: AppTheme.paddingLg,
       child: Row(
-        mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+        mainAxisAlignment: MainAxisAlignment.spaceAround,
         children: [
+          _buildControlButton(
+            icon: Icons.shuffle_rounded,
+            onPressed: audioService.toggleShuffle,
+            size: 50,
+            isPrimary: false,
+            color: audioState.isShuffleActive ? AppTheme.primary : null,
+          ),
           _buildControlButton(
             icon: CupertinoIcons.backward_fill,
             onPressed: audioService.previous,
@@ -579,6 +602,15 @@ class _PlayerScreenState extends ConsumerState<PlayerScreen>
             onPressed: audioService.next,
             size: 60,
             isPrimary: false,
+          ),
+          _buildControlButton(
+            icon: repeatIcon,
+            onPressed: audioService.cycleRepeatMode,
+            size: 50,
+            isPrimary: false,
+            color: audioState.repeatMode != RepeatMode.none
+                ? AppTheme.primary
+                : null,
           ),
         ],
       ),
@@ -647,6 +679,7 @@ class _PlayerScreenState extends ConsumerState<PlayerScreen>
     required VoidCallback onPressed,
     required double size,
     required bool isPrimary,
+    Color? color,
   }) {
     return Container(
       key: key,
@@ -684,7 +717,9 @@ class _PlayerScreenState extends ConsumerState<PlayerScreen>
             decoration: const BoxDecoration(shape: BoxShape.circle),
             child: Icon(
               icon,
-              color: isPrimary ? AppTheme.onPrimary : AppTheme.onSurface,
+              color:
+                  color ??
+                  (isPrimary ? AppTheme.onPrimary : AppTheme.onSurface),
               size: isPrimary ? size * 0.4 : size * 0.35,
             ),
           ),

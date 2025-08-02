@@ -184,9 +184,6 @@ class BackgroundAudioHandler extends BaseAudioHandler
   @override
   Future<void> setShuffleMode(AudioServiceShuffleMode shuffleMode) async {
     _shuffleMode = shuffleMode;
-    if (shuffleMode == AudioServiceShuffleMode.all) {
-      await shuffleQueue();
-    }
     playbackState.add(_transformEvent(PlaybackEvent()));
   }
 

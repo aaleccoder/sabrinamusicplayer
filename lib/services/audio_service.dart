@@ -6,6 +6,8 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:audio_service/audio_service.dart';
 import 'package:flutter_application_1/services/background_audio_handler.dart';
 
+enum RepeatMode { none, one, all }
+
 class AudioPlayerState {
   final TrackItem? currentTrack;
   final bool isPlaying;
@@ -14,6 +16,8 @@ class AudioPlayerState {
   final Duration position;
   final Duration bufferedPosition;
   final Duration? duration;
+  final bool isShuffleActive;
+  final RepeatMode repeatMode;
 
   AudioPlayerState({
     this.currentTrack,
@@ -23,6 +27,8 @@ class AudioPlayerState {
     this.position = Duration.zero,
     this.bufferedPosition = Duration.zero,
     this.duration,
+    this.isShuffleActive = false,
+    this.repeatMode = RepeatMode.none,
   });
 
   AudioPlayerState copyWith({
@@ -33,6 +39,8 @@ class AudioPlayerState {
     Duration? position,
     Duration? bufferedPosition,
     Object? duration = const Object(),
+    bool? isShuffleActive,
+    RepeatMode? repeatMode,
   }) {
     return AudioPlayerState(
       currentTrack: identical(currentTrack, const Object())
@@ -48,6 +56,8 @@ class AudioPlayerState {
       duration: identical(duration, const Object())
           ? this.duration
           : duration as Duration?,
+      isShuffleActive: isShuffleActive ?? this.isShuffleActive,
+      repeatMode: repeatMode ?? this.repeatMode,
     );
   }
 }
@@ -300,10 +310,11 @@ class AudioPlayerNotifier extends StateNotifier<AudioPlayerState> {
   BackgroundAudioHandler? get audioHandler => _audioHandler;
 
   /// Set repeat mode
-  Future<void> setRepeatMode(AudioServiceRepeatMode repeatMode) async {
-    if (_audioHandler != null) {
-      await _audioHandler!.setRepeatMode(repeatMode);
-    }
+  Future<void> setRepeatMode(RepeatMode repeatMode) async {
+    state = state.copyWith(repeatMode: repeatMode);
+    final audioServiceRepeatMode =
+        AudioServiceRepeatMode.values[repeatMode.index];
+    await _audioHandler?.setRepeatMode(audioServiceRepeatMode);
   }
 
   /// Set shuffle mode
@@ -323,8 +334,33 @@ class AudioPlayerNotifier extends StateNotifier<AudioPlayerState> {
 
   /// Toggle shuffle mode
   Future<void> toggleShuffle() async {
-    if (_audioHandler != null) {
-      await _audioHandler!.customAction('shuffle');
+    final isShuffleActive = !state.isShuffleActive;
+    state = state.copyWith(isShuffleActive: isShuffleActive);
+
+    if (isShuffleActive) {
+      final currentQueue = state.queue;
+      if (currentQueue != null && currentQueue.isNotEmpty) {
+        _originalQueue = List.from(currentQueue);
+        final shuffledQueue = List<TrackItem>.from(currentQueue)..shuffle();
+        final List<MediaItem> mediaItems = shuffledQueue
+            .map(BackgroundAudioHandler.trackToMediaItem)
+            .toList();
+        await _audioHandler?.updateQueue(mediaItems);
+        state = state.copyWith(queue: shuffledQueue);
+      }
+    } else {
+      final List<MediaItem> mediaItems = _originalQueue
+          .map(BackgroundAudioHandler.trackToMediaItem)
+          .toList();
+      await _audioHandler?.updateQueue(mediaItems);
+      state = state.copyWith(queue: _originalQueue);
     }
+  }
+
+  void cycleRepeatMode() {
+    final currentMode = state.repeatMode;
+    final nextMode =
+        RepeatMode.values[(currentMode.index + 1) % RepeatMode.values.length];
+    setRepeatMode(nextMode);
   }
 }
