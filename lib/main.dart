@@ -11,6 +11,7 @@ import 'package:flutter_application_1/theme.dart';
 import 'package:flutter_application_1/widgets/albums.dart';
 import 'package:flutter_application_1/widgets/artists.dart';
 import 'package:flutter_application_1/widgets/genres.dart';
+import 'package:flutter_application_1/widgets/playlists.dart';
 import 'package:flutter_application_1/widgets/library.dart';
 import 'package:flutter_application_1/widgets/library_scanning_overlay.dart';
 import 'package:flutter_application_1/widgets/mini_player.dart';
@@ -276,7 +277,14 @@ class Home extends ConsumerStatefulWidget {
 
 class _HomeState extends ConsumerState<Home> with TickerProviderStateMixin {
   int _selectedIndex = 0;
-  final List<Widget> _pages = [SongListView(), Library(), SettingsPage()];
+  final List<Widget> _pages = [
+    SongListView(),
+    const AlbumsPage(),
+    const ArtistsPage(),
+    const GenresPage(),
+    const Library(),
+    const SettingsPage(),
+  ];
   late AnimationController _animationController;
   late Animation<double> _fadeAnimation;
   late Animation<Offset> _slideAnimation;
@@ -421,13 +429,12 @@ class _HomeState extends ConsumerState<Home> with TickerProviderStateMixin {
               child: Row(
                 mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                 children: [
-                  _buildNavDestination(Icons.home_rounded, 'Home', 0),
-                  _buildNavDestination(
-                    Icons.library_music_rounded,
-                    'Library',
-                    1,
-                  ),
-                  _buildNavDestination(Icons.settings_rounded, 'Settings', 2),
+                  _buildNavDestination(Icons.music_note, 'Songs', 0),
+                  _buildNavDestination(Icons.album, 'Albums', 1),
+                  _buildNavDestination(Icons.person, 'Artists', 2),
+                  _buildNavDestination(Icons.category, 'Genres', 3),
+                  _buildNavDestination(Icons.library_music, 'Library', 4),
+                  _buildNavDestination(Icons.settings, 'Settings', 5),
                 ],
               ),
             ),
