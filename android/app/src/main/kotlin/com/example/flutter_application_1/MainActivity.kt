@@ -93,6 +93,29 @@ class MainActivity : AudioServiceFragmentActivity() {
                         result.error("INVALID_ARGUMENT", "trackId is required", null)
                     }
                 }
+                 "getPathFromUri" -> {
+                    val uriString = call.argument<String>("uri")
+                    if (uriString != null) {
+                        scope.launch {
+                            try {
+                                val path = getPathFromUri(uriString)
+                                withContext(Dispatchers.Main) {
+                                    result.success(path)
+                                }
+                            } catch (e: Exception) {
+                                withContext(Dispatchers.Main) {
+                                    result.error(
+                                        "URI_ERROR",
+                                        "Error resolving URI to path.",
+                                        e.toString()
+                                    )
+                                }
+                            }
+                        }
+                    } else {
+                        result.error("INVALID_ARGUMENT", "uri is required", null)
+                    }
+                }
                 else -> {
                     result.notImplemented()
                 }
@@ -479,6 +502,19 @@ class MainActivity : AudioServiceFragmentActivity() {
         )?.use { cursor ->
             if (cursor.moveToFirst()) {
                 return cursor.getLong(cursor.getColumnIndexOrThrow(MediaStore.Audio.Media.ALBUM_ID))
+            }
+        }
+        return null
+    }
+
+    private fun getPathFromUri(uriString: String): String? {
+        val uri = Uri.parse(uriString)
+        val projection = arrayOf(MediaStore.Audio.Media.DATA)
+        
+        contentResolver.query(uri, projection, null, null, null)?.use { cursor ->
+            if (cursor.moveToFirst()) {
+                val dataIndex = cursor.getColumnIndexOrThrow(MediaStore.Audio.Media.DATA)
+                return cursor.getString(dataIndex)
             }
         }
         return null

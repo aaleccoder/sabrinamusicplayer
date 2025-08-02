@@ -1,3 +1,4 @@
+import 'dart:developer' as developer;
 import 'package:drift/drift.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter_application_1/main.dart';
@@ -344,6 +345,7 @@ class LibraryService {
   ) async {
     final database = ref.read(appDatabaseProvider);
     final metadataService = MetadataService();
+    developer.log('Excluding directory and removing tracks: $path');
 
     // Add to excluded directories table
     await database
@@ -363,6 +365,7 @@ class LibraryService {
     }
 
     if (tracksToDelete.isNotEmpty) {
+      developer.log('Deleting ${tracksToDelete.length} tracks from $path');
       // Delete tracks from that directory
       await (database.delete(
         database.tracks,

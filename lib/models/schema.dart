@@ -715,10 +715,6 @@ class AppDatabase extends _$AppDatabase {
     );
   }
 
-  Future<void> deleteTracksInDirectory(String path) async {
-    await (delete(tracks)..where((t) => t.fileuri.like('$path%'))).go();
-  }
-
   Future<void> cleanupOrphanedMetadata() async {
     // Delete albums that have no tracks
     await customStatement('''

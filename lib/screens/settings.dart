@@ -1,4 +1,5 @@
 import 'package:drift/drift.dart' hide Column;
+import 'dart:developer' as developer;
 import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_application_1/main.dart';
@@ -42,11 +43,11 @@ class _SettingsPageState extends ConsumerState<SettingsPage> {
         database.excludedDirectories,
       )..where((u) => u.path.equals(selectedDirectory))).get();
       if (exists.isEmpty) {
-        await database
-            .into(database.excludedDirectories)
-            .insert(
-              ExcludedDirectoriesCompanion(path: Value(selectedDirectory)),
-            );
+        await LibraryService().addExcludedDirectoryAndRemoveTracks(
+          ref,
+          selectedDirectory,
+        );
+        developer.log('Excluded folder added: $selectedDirectory');
         await _loadExcludedFolders();
       }
     }
@@ -57,7 +58,7 @@ class _SettingsPageState extends ConsumerState<SettingsPage> {
     await (database.delete(
       database.excludedDirectories,
     )..where((tbl) => tbl.path.equals(path))).go();
-    await database.deleteTracksInDirectory(path);
+    developer.log('Excluded folder removed: $path');
     await _loadExcludedFolders();
   }
 
