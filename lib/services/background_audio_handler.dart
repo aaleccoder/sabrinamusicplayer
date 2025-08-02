@@ -84,7 +84,7 @@ class BackgroundAudioHandler extends BaseAudioHandler
   static MediaItem trackToMediaItem(TrackItem track) {
     return MediaItem(
       id: track.fileuri,
-      album: '', // You might want to add album info to TrackItem
+      album: track.album,
       title: track.title,
       artist: track.artist,
       duration: null, // Will be set when audio loads
@@ -93,6 +93,8 @@ class BackgroundAudioHandler extends BaseAudioHandler
         'trackId': track.id,
         'liked': track.liked,
         'unliked': track.unliked,
+        'year': track.year,
+        'createdAt': track.createdAt.toIso8601String(),
       },
     );
   }
@@ -283,6 +285,9 @@ class BackgroundAudioHandler extends BaseAudioHandler
       artist: mediaItem.artist ?? '',
       cover: mediaItem.artUri?.toString() ?? '',
       fileuri: mediaItem.id,
+      album: mediaItem.album,
+      year: mediaItem.extras?['year'],
+      createdAt: DateTime.parse(mediaItem.extras!['createdAt'] as String),
     );
   }
 
@@ -297,6 +302,9 @@ class BackgroundAudioHandler extends BaseAudioHandler
             artist: mediaItem.artist ?? '',
             cover: mediaItem.artUri?.toString() ?? '',
             fileuri: mediaItem.id,
+            album: mediaItem.album,
+            year: mediaItem.extras?['year'],
+            createdAt: DateTime.parse(mediaItem.extras!['createdAt'] as String),
           ),
         )
         .toList();

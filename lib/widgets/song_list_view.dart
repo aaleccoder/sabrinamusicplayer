@@ -8,14 +8,23 @@ import 'package:flutter_application_1/widgets/home_scan_banner.dart';
 import 'package:flutter_application_1/widgets/search_bar.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+enum SortOption { alphabetical, album, artist, year, dateAdded }
+
+final sortOptionProvider = StateProvider<SortOption>(
+  (ref) => SortOption.alphabetical,
+);
+
 class TrackItem {
   int id;
   String title;
   String artist;
+  String? album;
   String cover;
   String fileuri;
   bool liked;
   bool unliked;
+  String? year;
+  DateTime createdAt;
 
   TrackItem({
     required this.unliked,
@@ -23,8 +32,11 @@ class TrackItem {
     required this.id,
     required this.title,
     required this.artist,
+    this.album,
     required this.cover,
     required this.fileuri,
+    this.year,
+    required this.createdAt,
   });
 }
 
@@ -33,7 +45,8 @@ class SongListView extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final tracksAsync = ref.watch(tracksProvider);
+    final sortOption = ref.watch(sortOptionProvider);
+    final tracksAsync = ref.watch(tracksProvider(sortOption));
 
     return Scaffold(
       body: SafeArea(
@@ -51,12 +64,59 @@ class SongListView extends ConsumerWidget {
             _buildSongCountHeader(context, tracksAsync),
             _buildShuffleRow(context, ref, tracksAsync),
 
+            _buildSortDropdown(context, ref),
+
             // Songs list
             Expanded(child: _buildSongsList(context, tracksAsync)),
           ],
         ),
       ),
     );
+  }
+
+  Widget _buildSortDropdown(BuildContext context, WidgetRef ref) {
+    final sortOption = ref.watch(sortOptionProvider);
+
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 16.0),
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.end,
+        children: [
+          DropdownButton<SortOption>(
+            value: sortOption,
+            onChanged: (SortOption? newValue) {
+              if (newValue != null) {
+                ref.read(sortOptionProvider.notifier).state = newValue;
+              }
+            },
+            items: SortOption.values.map((SortOption option) {
+              return DropdownMenuItem<SortOption>(
+                value: option,
+                child: Text(
+                  _getSortOptionName(option),
+                  style: Theme.of(context).textTheme.bodyMedium,
+                ),
+              );
+            }).toList(),
+          ),
+        ],
+      ),
+    );
+  }
+
+  String _getSortOptionName(SortOption option) {
+    switch (option) {
+      case SortOption.alphabetical:
+        return 'Alphabetical';
+      case SortOption.album:
+        return 'Album';
+      case SortOption.artist:
+        return 'Artist';
+      case SortOption.year:
+        return 'Year';
+      case SortOption.dateAdded:
+        return 'Date Added';
+    }
   }
 
   Widget _buildSongCountHeader(
@@ -533,7 +593,7 @@ class _SongListViewItemState extends ConsumerState<SongListViewItem> {
                           _showAddToPlaylistDialog(context, widget.track);
                           break;
                       }
-                      ref.refresh(tracksProvider);
+                      ref.refresh(tracksProvider(SortOption.alphabetical));
                       ref.refresh(likedTracksProvider);
                       ref.refresh(unlikedTracksProvider);
                     },

@@ -169,6 +169,7 @@ class LibraryService {
               trackNumber: Value(metadata['track_number']),
               year: Value(metadata['year']),
               albumId: Value(albumIdMap[albumKey]),
+              createdAt: Value(DateTime.now()),
               artistId: Value(artistIdMap[artistName]),
               genreId: Value(genreIdMap[genreName]),
               coverImage: albumArtUri != null

@@ -137,10 +137,15 @@ class AppDatabase extends _$AppDatabase {
     )..where((t) => t.id.equals(track.id))).write(updateData);
   }
 
-  Stream<List<TrackItem>> watchAllTracks({bool? isFavorite, bool? isUnliked}) {
-    final query = select(
-      tracks,
-    ).join([leftOuterJoin(artists, artists.id.equalsExp(tracks.artistId))]);
+  Stream<List<TrackItem>> watchAllTracks({
+    bool? isFavorite,
+    bool? isUnliked,
+    SortOption sortOption = SortOption.alphabetical,
+  }) {
+    final query = select(tracks).join([
+      leftOuterJoin(artists, artists.id.equalsExp(tracks.artistId)),
+      leftOuterJoin(albums, albums.id.equalsExp(tracks.albumId)),
+    ]);
 
     if (isFavorite != null) {
       query.where(tracks.isFavorite.equals(isFavorite));
@@ -149,10 +154,30 @@ class AppDatabase extends _$AppDatabase {
       query.where(tracks.isUnliked.equals(isUnliked));
     }
 
+    // Sorting logic
+    switch (sortOption) {
+      case SortOption.alphabetical:
+        query.orderBy([OrderingTerm.asc(tracks.title)]);
+        break;
+      case SortOption.album:
+        query.orderBy([OrderingTerm.asc(albums.name)]);
+        break;
+      case SortOption.artist:
+        query.orderBy([OrderingTerm.asc(artists.name)]);
+        break;
+      case SortOption.year:
+        query.orderBy([OrderingTerm.desc(tracks.year)]);
+        break;
+      case SortOption.dateAdded:
+        query.orderBy([OrderingTerm.desc(tracks.createdAt)]);
+        break;
+    }
+
     return query.watch().map((rows) {
       return rows.map((row) {
         final track = row.readTable(tracks);
         final artist = row.readTableOrNull(artists);
+        final album = row.readTableOrNull(albums);
 
         return TrackItem(
           unliked: track.isUnliked,
@@ -160,8 +185,11 @@ class AppDatabase extends _$AppDatabase {
           id: track.id,
           title: track.title,
           artist: artist?.name ?? '',
+          album: album?.name,
           cover: track.coverImage ?? '',
           fileuri: track.fileuri,
+          year: track.year,
+          createdAt: track.createdAt,
         );
       }).toList();
     });
@@ -225,39 +253,54 @@ class AppDatabase extends _$AppDatabase {
   Stream<List<TrackItem>> watchTracksByAlbum(int albumId) {
     final query = select(tracks).join([
       leftOuterJoin(artists, artists.id.equalsExp(tracks.artistId)),
+      leftOuterJoin(albums, albums.id.equalsExp(tracks.albumId)),
     ])..where(tracks.albumId.equals(albumId));
 
     return query.watch().map((rows) {
       return rows.map((row) {
         final track = row.readTable(tracks);
         final artist = row.readTableOrNull(artists);
+        final album = row.readTableOrNull(albums);
 
         return TrackItem(
           unliked: track.isUnliked,
           id: track.id,
           title: track.title,
           artist: artist?.name ?? '',
+          album: album?.name,
           cover: track.coverImage ?? '',
           fileuri: track.fileuri,
           liked: track.isFavorite,
+          year: track.year,
+          createdAt: track.createdAt,
         );
       }).toList();
     });
   }
 
   Stream<List<TrackItem>> watchTracksByArtist(int artistId) {
-    final query = select(tracks)..where((t) => t.artistId.equals(artistId));
+    final query = select(tracks).join([
+      leftOuterJoin(artists, artists.id.equalsExp(tracks.artistId)),
+      leftOuterJoin(albums, albums.id.equalsExp(tracks.albumId)),
+    ])..where(tracks.artistId.equals(artistId));
 
     return query.watch().map((rows) {
-      return rows.map((track) {
+      return rows.map((row) {
+        final track = row.readTable(tracks);
+        final artist = row.readTableOrNull(artists);
+        final album = row.readTableOrNull(albums);
+
         return TrackItem(
           unliked: track.isUnliked,
           id: track.id,
           title: track.title,
-          artist: '', // Artist name not needed when fetching by artist
+          artist: artist?.name ?? '',
+          album: album?.name,
           cover: track.coverImage ?? '',
           fileuri: track.fileuri,
           liked: track.isFavorite,
+          year: track.year,
+          createdAt: track.createdAt,
         );
       }).toList();
     });
@@ -312,23 +355,33 @@ class AppDatabase extends _$AppDatabase {
 
   // Optimized search methods with indexes
   Stream<List<TrackItem>> watchSearchTracks(String query) {
-    final searchQuery = select(tracks).join([
-      leftOuterJoin(artists, artists.id.equalsExp(tracks.artistId)),
-    ])..where(tracks.title.like('%$query%') | artists.name.like('%$query%'));
+    final searchQuery =
+        select(tracks).join([
+          leftOuterJoin(artists, artists.id.equalsExp(tracks.artistId)),
+          leftOuterJoin(albums, albums.id.equalsExp(tracks.albumId)),
+        ])..where(
+          tracks.title.like('%$query%') |
+              artists.name.like('%$query%') |
+              albums.name.like('%$query%'),
+        );
 
     return searchQuery.watch().map((rows) {
       return rows.map((row) {
         final track = row.readTable(tracks);
         final artist = row.readTableOrNull(artists);
+        final album = row.readTableOrNull(albums);
 
         return TrackItem(
           unliked: track.isUnliked,
           id: track.id,
           title: track.title,
           artist: artist?.name ?? '',
+          album: album?.name,
           cover: track.coverImage ?? '',
           fileuri: track.fileuri,
           liked: track.isFavorite,
+          year: track.year,
+          createdAt: track.createdAt,
         );
       }).toList();
     });
@@ -383,6 +436,7 @@ class AppDatabase extends _$AppDatabase {
   Future<List<TrackItem>> getTracksByGenre(int genreId) async {
     final query = select(tracks).join([
       leftOuterJoin(artists, artists.id.equalsExp(tracks.artistId)),
+      leftOuterJoin(albums, albums.id.equalsExp(tracks.albumId)),
     ])..where(tracks.genreId.equals(genreId));
 
     final rows = await query.get();
@@ -390,15 +444,19 @@ class AppDatabase extends _$AppDatabase {
     return rows.map((row) {
       final track = row.readTable(tracks);
       final artist = row.readTableOrNull(artists);
+      final album = row.readTableOrNull(albums);
 
       return TrackItem(
         id: track.id,
         title: track.title,
         artist: artist?.name ?? '',
+        album: album?.name,
         cover: track.coverImage ?? '',
         fileuri: track.fileuri,
         liked: track.isFavorite,
         unliked: track.isUnliked,
+        year: track.year,
+        createdAt: track.createdAt,
       );
     }).toList();
   }
@@ -437,6 +495,7 @@ class AppDatabase extends _$AppDatabase {
               playlistTracks.trackId.equalsExp(tracks.id),
             ),
             leftOuterJoin(artists, artists.id.equalsExp(tracks.artistId)),
+            leftOuterJoin(albums, albums.id.equalsExp(tracks.albumId)),
           ])
           ..where(playlistTracks.playlistId.equals(playlistId))
           ..orderBy([OrderingTerm.asc(playlistTracks.addedAt)]);
@@ -446,15 +505,19 @@ class AppDatabase extends _$AppDatabase {
     return rows.map((row) {
       final track = row.readTable(tracks);
       final artist = row.readTableOrNull(artists);
+      final album = row.readTableOrNull(albums);
 
       return TrackItem(
         unliked: track.isUnliked,
         id: track.id,
         title: track.title,
         artist: artist?.name ?? '',
+        album: album?.name,
         cover: track.coverImage ?? '',
         fileuri: track.fileuri,
         liked: track.isFavorite,
+        year: track.year,
+        createdAt: track.createdAt,
       );
     }).toList();
   }
@@ -598,21 +661,26 @@ class AppDatabase extends _$AppDatabase {
   }) async {
     final query = select(tracks).join([
       leftOuterJoin(artists, artists.id.equalsExp(tracks.artistId)),
+      leftOuterJoin(albums, albums.id.equalsExp(tracks.albumId)),
     ])..limit(limit, offset: offset);
 
     final rows = await query.get();
     return rows.map((row) {
       final track = row.readTable(tracks);
       final artist = row.readTableOrNull(artists);
+      final album = row.readTableOrNull(albums);
 
       return TrackItem(
         unliked: track.isUnliked,
         id: track.id,
         title: track.title,
         artist: artist?.name ?? '',
+        album: album?.name,
         cover: track.coverImage ?? '',
         fileuri: track.fileuri,
         liked: track.isFavorite,
+        year: track.year,
+        createdAt: track.createdAt,
       );
     }).toList();
   }

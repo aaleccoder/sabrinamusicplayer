@@ -75,17 +75,19 @@ class AudioPlayerNotifier extends StateNotifier<AudioPlayerState> {
     _initializeAudioService();
 
     // Listen to track updates and refresh the current track if it's playing
-    _ref.listen(tracksProvider, (previous, next) {
+    _ref.listen(tracksProvider(SortOption.alphabetical), (previous, next) {
       final tracks = next.asData?.value;
       if (tracks != null && state.currentTrack != null) {
-        final updatedTrack = tracks.firstWhere(
-          (t) => t.id == state.currentTrack!.id,
-          // orElse is not needed here because if the track is not in the list,
-          // it means it has been deleted, and we should not update it.
-        );
-        if (state.currentTrack!.liked != updatedTrack.liked ||
-            state.currentTrack!.unliked != updatedTrack.unliked) {
-          state = state.copyWith(currentTrack: updatedTrack);
+        try {
+          final updatedTrack = tracks.firstWhere(
+            (t) => t.id == state.currentTrack!.id,
+          );
+          if (state.currentTrack!.liked != updatedTrack.liked ||
+              state.currentTrack!.unliked != updatedTrack.unliked) {
+            state = state.copyWith(currentTrack: updatedTrack);
+          }
+        } catch (e) {
+          // Track not found, do nothing
         }
       }
     });
@@ -139,6 +141,9 @@ class AudioPlayerNotifier extends StateNotifier<AudioPlayerState> {
             artist: mediaItem.artist ?? '',
             cover: mediaItem.artUri?.toString() ?? '',
             fileuri: mediaItem.id,
+            album: mediaItem.album,
+            year: mediaItem.extras?['year'],
+            createdAt: DateTime.parse(mediaItem.extras!['createdAt'] as String),
           );
 
           state = state.copyWith(
@@ -159,6 +164,11 @@ class AudioPlayerNotifier extends StateNotifier<AudioPlayerState> {
                 artist: mediaItem.artist ?? '',
                 cover: mediaItem.artUri?.toString() ?? '',
                 fileuri: mediaItem.id,
+                album: mediaItem.album,
+                year: mediaItem.extras?['year'],
+                createdAt: DateTime.parse(
+                  mediaItem.extras!['createdAt'] as String,
+                ),
               ),
             )
             .toList();

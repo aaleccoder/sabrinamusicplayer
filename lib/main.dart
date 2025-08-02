@@ -30,9 +30,12 @@ final audioPlayerNotifierProvider =
       return AudioPlayerNotifier(ref);
     });
 
-final tracksProvider = StreamProvider<List<TrackItem>>((ref) {
+final tracksProvider = StreamProvider.family<List<TrackItem>, SortOption>((
+  ref,
+  sortOption,
+) {
   final db = ref.watch(appDatabaseProvider);
-  return db.watchAllTracks(isUnliked: false);
+  return db.watchAllTracks(isUnliked: false, sortOption: sortOption);
 });
 
 final likedTracksProvider = StreamProvider<List<TrackItem>>((ref) {
