@@ -137,17 +137,10 @@ class _MiniPlayerState extends ConsumerState<MiniPlayer>
                   padding: AppTheme.paddingMd,
                   decoration: BoxDecoration(
                     borderRadius: AppTheme.radiusXl,
-                    gradient: LinearGradient(
-                      begin: Alignment.topLeft,
-                      end: Alignment.bottomRight,
-                      colors: [
-                        Colors.white.withOpacity(0.2),
-                        Colors.white.withOpacity(0.05),
-                      ],
-                    ),
+                    color: Colors.black.withOpacity(0.90),
                     border: Border.all(
-                      color: Colors.white.withOpacity(0.2),
-                      width: 1,
+                      color: Colors.white.withOpacity(0.13),
+                      width: 1.5,
                     ),
                   ),
                   child: Row(

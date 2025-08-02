@@ -1,3 +1,4 @@
+import 'dart:ui';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_application_1/models/schema.dart';
@@ -398,24 +399,19 @@ class _HomeState extends ConsumerState<Home> with TickerProviderStateMixin {
   }
 
   Widget _buildModernNavigationBar() {
-    return Container(
-      height: 80,
-      decoration: BoxDecoration(
-        borderRadius: AppTheme.radiusXl,
-        color: AppTheme.surface,
-        boxShadow: AppTheme.shadowLg,
-        gradient: LinearGradient(
-          begin: Alignment.topCenter,
-          end: Alignment.bottomCenter,
-          colors: [
-            Colors.white.withOpacity(0.02),
-            Colors.white.withOpacity(0.01),
-          ],
+    return ClipRRect(
+      borderRadius: AppTheme.radiusXl,
+      child: Container(
+        height: 80,
+        decoration: BoxDecoration(
+          borderRadius: AppTheme.radiusXl,
+          color: Colors.black.withOpacity(
+            0.90,
+          ), // Dark frosted glass, 90% opacity
+
+          border: Border.all(color: Colors.white.withOpacity(0.13), width: 1.5),
+          // No boxShadow
         ),
-        border: Border.all(color: Colors.white.withOpacity(0.1), width: 2),
-      ),
-      child: ClipRRect(
-        borderRadius: AppTheme.radiusXl,
         child: Row(
           mainAxisAlignment: MainAxisAlignment.spaceEvenly,
           children: [
