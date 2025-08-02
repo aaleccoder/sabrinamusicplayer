@@ -343,6 +343,7 @@ class _PlayerScreenState extends ConsumerState<PlayerScreen>
                     ),
                   ),
                   const SizedBox(width: 16),
+                  // Favorite icon
                   Container(
                     decoration: BoxDecoration(
                       shape: BoxShape.circle,
@@ -352,8 +353,22 @@ class _PlayerScreenState extends ConsumerState<PlayerScreen>
                       color: Colors.transparent,
                       child: InkWell(
                         borderRadius: BorderRadius.circular(20),
-                        onTap: () {
-                          // TODO: Implement like functionality
+                        onTap: () async {
+                          // Toggle liked status
+                          currentTrack.liked = !currentTrack.liked;
+                          // If liked, it cannot be unliked
+                          if (currentTrack.liked) {
+                            currentTrack.unliked = false;
+                          }
+
+                          // Update UI immediately
+                          setState(() {});
+
+                          // Persist change and refresh data providers
+                          await ref.read(
+                            updateTrackProvider(currentTrack).future,
+                          );
+                          ref.invalidate(tracksProvider);
                         },
                         child: Container(
                           width: 40,
@@ -362,8 +377,59 @@ class _PlayerScreenState extends ConsumerState<PlayerScreen>
                             shape: BoxShape.circle,
                           ),
                           child: Icon(
-                            Icons.favorite_border_rounded,
-                            color: AppTheme.onSurface.withOpacity(0.7),
+                            currentTrack.liked
+                                ? Icons.favorite_rounded
+                                : Icons.favorite_border_rounded,
+                            color: currentTrack.liked
+                                ? AppTheme.error
+                                : AppTheme.onSurface.withOpacity(0.7),
+                            size: 20,
+                          ),
+                        ),
+                      ),
+                    ),
+                  ),
+                  const SizedBox(width: 8),
+                  // Unliked icon
+                  Container(
+                    decoration: BoxDecoration(
+                      shape: BoxShape.circle,
+                      color: Colors.white.withOpacity(0.1),
+                    ),
+                    child: Material(
+                      color: Colors.transparent,
+                      child: InkWell(
+                        borderRadius: BorderRadius.circular(20),
+                        onTap: () async {
+                          // Toggle unliked status
+                          currentTrack.unliked = !currentTrack.unliked;
+                          // If unliked, it cannot be liked
+                          if (currentTrack.unliked) {
+                            currentTrack.liked = false;
+                          }
+
+                          // Update UI immediately
+                          setState(() {});
+
+                          // Persist change and refresh data providers
+                          await ref.read(
+                            updateTrackProvider(currentTrack).future,
+                          );
+                          ref.invalidate(tracksProvider);
+                        },
+                        child: Container(
+                          width: 40,
+                          height: 40,
+                          decoration: const BoxDecoration(
+                            shape: BoxShape.circle,
+                          ),
+                          child: Icon(
+                            currentTrack.unliked != true
+                                ? Icons.thumb_down_alt_outlined
+                                : Icons.thumb_down_alt_rounded,
+                            color: currentTrack.unliked == true
+                                ? AppTheme.error
+                                : AppTheme.onSurface.withOpacity(0.7),
                             size: 20,
                           ),
                         ),

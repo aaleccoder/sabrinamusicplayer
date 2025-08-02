@@ -9,13 +9,17 @@ import 'package:flutter_application_1/widgets/search_bar.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 class TrackItem {
-  final int id;
-  final String title;
-  final String artist;
-  final String cover;
-  final String fileuri;
+  int id;
+  String title;
+  String artist;
+  String cover;
+  String fileuri;
+  bool liked;
+  bool unliked;
 
   TrackItem({
+    required this.unliked,
+    required this.liked,
     required this.id,
     required this.title,
     required this.artist,
@@ -467,22 +471,72 @@ class _SongListViewItemState extends ConsumerState<SongListViewItem> {
                       color: AppTheme.primary,
                       size: 12,
                     ),
-                    itemBuilder: (context) => [
-                      const PopupMenuItem(
-                        value: 'add_to_playlist',
-                        child: Row(
-                          children: [
-                            Icon(Icons.playlist_add),
-                            SizedBox(width: 8),
-                            Text('Add to Playlist'),
-                          ],
-                        ),
-                      ),
-                    ],
-                    onSelected: (value) {
-                      if (value == 'add_to_playlist') {
-                        _showAddToPlaylistDialog(context, widget.track);
+                    itemBuilder: (BuildContext context) =>
+                        <PopupMenuEntry<String>>[
+                          PopupMenuItem<String>(
+                            value: 'like',
+                            child: Row(
+                              children: [
+                                Icon(
+                                  widget.track.liked
+                                      ? Icons.favorite
+                                      : Icons.favorite_border,
+                                ),
+                                SizedBox(width: 8),
+                                Text(widget.track.liked ? 'Unlike' : 'Like'),
+                              ],
+                            ),
+                          ),
+                          PopupMenuItem<String>(
+                            value: 'unlike',
+                            child: Row(
+                              children: [
+                                Icon(
+                                  widget.track.unliked
+                                      ? Icons.thumb_down
+                                      : Icons.thumb_down_alt_outlined,
+                                ),
+                                SizedBox(width: 8),
+                                Text(
+                                  widget.track.unliked
+                                      ? 'Remove Unlike'
+                                      : 'Unlike',
+                                ),
+                              ],
+                            ),
+                          ),
+                          const PopupMenuDivider(),
+                          const PopupMenuItem<String>(
+                            value: 'add_to_playlist',
+                            child: Row(
+                              children: [
+                                Icon(Icons.playlist_add),
+                                SizedBox(width: 8),
+                                Text('Add to Playlist'),
+                              ],
+                            ),
+                          ),
+                        ],
+                    onSelected: (value) async {
+                      final db = ref.read(appDatabaseProvider);
+                      switch (value) {
+                        case 'like':
+                          await db.updateTrack(
+                            widget.track..liked = !widget.track.liked,
+                          );
+                          break;
+                        case 'unlike':
+                          await db.updateTrack(
+                            widget.track..unliked = !widget.track.unliked,
+                          );
+                          break;
+                        case 'add_to_playlist':
+                          _showAddToPlaylistDialog(context, widget.track);
+                          break;
                       }
+                      ref.refresh(tracksProvider);
+                      ref.refresh(likedTracksProvider);
+                      ref.refresh(unlikedTracksProvider);
                     },
                   ),
                 ),

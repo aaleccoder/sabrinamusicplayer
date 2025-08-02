@@ -1,4 +1,6 @@
 import 'dart:async';
+import 'package:flutter/material.dart';
+import 'package:flutter_application_1/main.dart';
 import 'package:flutter_application_1/widgets/song_list_view.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:audio_service/audio_service.dart';
@@ -55,8 +57,26 @@ class AudioPlayerNotifier extends StateNotifier<AudioPlayerState> {
   List<TrackItem> _originalQueue = [];
   final Completer<void> _initializationCompleter = Completer<void>();
 
-  AudioPlayerNotifier() : super(AudioPlayerState()) {
+  final Ref _ref;
+
+  AudioPlayerNotifier(this._ref) : super(AudioPlayerState()) {
     _initializeAudioService();
+
+    // Listen to track updates and refresh the current track if it's playing
+    _ref.listen(tracksProvider, (previous, next) {
+      final tracks = next.asData?.value;
+      if (tracks != null && state.currentTrack != null) {
+        final updatedTrack = tracks.firstWhere(
+          (t) => t.id == state.currentTrack!.id,
+          // orElse is not needed here because if the track is not in the list,
+          // it means it has been deleted, and we should not update it.
+        );
+        if (state.currentTrack!.liked != updatedTrack.liked ||
+            state.currentTrack!.unliked != updatedTrack.unliked) {
+          state = state.copyWith(currentTrack: updatedTrack);
+        }
+      }
+    });
   }
 
   StreamSubscription<Duration>? _positionSubscription;
@@ -83,11 +103,6 @@ class AudioPlayerNotifier extends StateNotifier<AudioPlayerState> {
 
       // Listen to audio handler events and update state
       _audioHandler?.playbackState.listen((playbackState) {
-        print(
-          '[AudioService] playbackState update: '
-          'playing=${playbackState.playing}, '
-          'buffered=${playbackState.bufferedPosition}',
-        );
         state = state.copyWith(
           isPlaying: playbackState.playing,
           bufferedPosition: playbackState.bufferedPosition,
@@ -98,7 +113,6 @@ class AudioPlayerNotifier extends StateNotifier<AudioPlayerState> {
       if (_audioHandler != null && _audioHandler is BackgroundAudioHandler) {
         final handler = _audioHandler as BackgroundAudioHandler;
         _positionSubscription = handler.positionStream.listen((pos) {
-          print('[AudioService] position update: $pos');
           state = state.copyWith(position: pos);
         });
       }
@@ -106,6 +120,8 @@ class AudioPlayerNotifier extends StateNotifier<AudioPlayerState> {
       _audioHandler?.mediaItem.listen((mediaItem) {
         if (mediaItem != null) {
           final currentTrack = TrackItem(
+            liked: mediaItem.extras?['liked'] ?? false,
+            unliked: mediaItem.extras?['unliked'] ?? false,
             id: mediaItem.extras?['trackId'] ?? 0,
             title: mediaItem.title,
             artist: mediaItem.artist ?? '',
@@ -124,6 +140,8 @@ class AudioPlayerNotifier extends StateNotifier<AudioPlayerState> {
         final trackQueue = queue
             .map(
               (mediaItem) => TrackItem(
+                liked: mediaItem.extras?['liked'] ?? false,
+                unliked: mediaItem.extras?['unliked'] ?? false,
                 id: mediaItem.extras?['trackId'] ?? 0,
                 title: mediaItem.title,
                 artist: mediaItem.artist ?? '',
@@ -142,7 +160,6 @@ class AudioPlayerNotifier extends StateNotifier<AudioPlayerState> {
 
       _initializationCompleter.complete();
     } catch (e) {
-      print('AudioService initialization error: $e');
       _initializationCompleter.completeError(e);
     }
   }
@@ -151,7 +168,7 @@ class AudioPlayerNotifier extends StateNotifier<AudioPlayerState> {
     try {
       await _initializationCompleter.future;
     } catch (e) {
-      print('AudioService initialization failed, not initialized: $e');
+      debugPrint('AudioService initialization failed, not initialized: $e');
       return;
     }
 
@@ -176,7 +193,7 @@ class AudioPlayerNotifier extends StateNotifier<AudioPlayerState> {
     try {
       await _initializationCompleter.future;
     } catch (e) {
-      print('AudioService initialization failed: $e');
+      debugPrint('AudioService initialization failed: $e');
       return;
     }
 
@@ -241,7 +258,7 @@ class AudioPlayerNotifier extends StateNotifier<AudioPlayerState> {
     try {
       await _initializationCompleter.future;
     } catch (e) {
-      print('AudioService initialization failed: $e');
+      debugPrint('AudioService initialization failed: $e');
       return;
     }
 

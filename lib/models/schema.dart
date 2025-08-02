@@ -66,6 +66,8 @@ class Tracks extends Table {
   TextColumn get lyrics => text().nullable()();
   IntColumn get duration => integer().nullable()();
   TextColumn get trackNumber => text().nullable()();
+  BoolColumn get isFavorite => boolean().withDefault(const Constant(false))();
+  BoolColumn get isUnliked => boolean().withDefault(const Constant(false))();
   TextColumn get year => text().nullable()();
   DateTimeColumn get createdAt => dateTime().withDefault(currentDateAndTime)();
   DateTimeColumn get updatedAt => dateTime().nullable()();
@@ -119,25 +121,50 @@ class AppDatabase extends _$AppDatabase {
     ''');
   }
 
-  Future<List<TrackItem>> getAllTracks() async {
+  Future<int> updateTrack(TrackItem track) async {
+    final updateData = TracksCompanion(
+      id: Value(track.id),
+      title: Value(track.title),
+      fileuri: Value(track.fileuri),
+      coverImage: Value(track.cover),
+      isFavorite: Value(track.liked),
+      isUnliked: Value(track.unliked),
+      updatedAt: Value(DateTime.now()),
+    );
+
+    return (update(
+      tracks,
+    )..where((t) => t.id.equals(track.id))).write(updateData);
+  }
+
+  Stream<List<TrackItem>> watchAllTracks({bool? isFavorite, bool? isUnliked}) {
     final query = select(
       tracks,
     ).join([leftOuterJoin(artists, artists.id.equalsExp(tracks.artistId))]);
 
-    final rows = await query.get();
+    if (isFavorite != null) {
+      query.where(tracks.isFavorite.equals(isFavorite));
+    }
+    if (isUnliked != null) {
+      query.where(tracks.isUnliked.equals(isUnliked));
+    }
 
-    return rows.map((row) {
-      final track = row.readTable(tracks);
-      final artist = row.readTableOrNull(artists);
+    return query.watch().map((rows) {
+      return rows.map((row) {
+        final track = row.readTable(tracks);
+        final artist = row.readTableOrNull(artists);
 
-      return TrackItem(
-        id: track.id,
-        title: track.title,
-        artist: artist?.name ?? '',
-        cover: track.coverImage ?? '',
-        fileuri: track.fileuri,
-      );
-    }).toList();
+        return TrackItem(
+          unliked: track.isUnliked,
+          liked: track.isFavorite,
+          id: track.id,
+          title: track.title,
+          artist: artist?.name ?? '',
+          cover: track.coverImage ?? '',
+          fileuri: track.fileuri,
+        );
+      }).toList();
+    });
   }
 
   // Lightweight methods that only fetch basic info
@@ -195,41 +222,45 @@ class AppDatabase extends _$AppDatabase {
     }).toList();
   }
 
-  Future<List<TrackItem>> getTracksByAlbum(int albumId) async {
+  Stream<List<TrackItem>> watchTracksByAlbum(int albumId) {
     final query = select(tracks).join([
       leftOuterJoin(artists, artists.id.equalsExp(tracks.artistId)),
     ])..where(tracks.albumId.equals(albumId));
 
-    final rows = await query.get();
+    return query.watch().map((rows) {
+      return rows.map((row) {
+        final track = row.readTable(tracks);
+        final artist = row.readTableOrNull(artists);
 
-    return rows.map((row) {
-      final track = row.readTable(tracks);
-      final artist = row.readTableOrNull(artists);
-
-      return TrackItem(
-        id: track.id,
-        title: track.title,
-        artist: artist?.name ?? '',
-        cover: track.coverImage ?? '',
-        fileuri: track.fileuri,
-      );
-    }).toList();
+        return TrackItem(
+          unliked: track.isUnliked,
+          id: track.id,
+          title: track.title,
+          artist: artist?.name ?? '',
+          cover: track.coverImage ?? '',
+          fileuri: track.fileuri,
+          liked: track.isFavorite,
+        );
+      }).toList();
+    });
   }
 
-  Future<List<TrackItem>> getTracksByArtist(int artistId) async {
+  Stream<List<TrackItem>> watchTracksByArtist(int artistId) {
     final query = select(tracks)..where((t) => t.artistId.equals(artistId));
 
-    final rows = await query.get();
-
-    return rows.map((track) {
-      return TrackItem(
-        id: track.id,
-        title: track.title,
-        artist: '', // Artist name not needed when fetching by artist
-        cover: track.coverImage ?? '',
-        fileuri: track.fileuri,
-      );
-    }).toList();
+    return query.watch().map((rows) {
+      return rows.map((track) {
+        return TrackItem(
+          unliked: track.isUnliked,
+          id: track.id,
+          title: track.title,
+          artist: '', // Artist name not needed when fetching by artist
+          cover: track.coverImage ?? '',
+          fileuri: track.fileuri,
+          liked: track.isFavorite,
+        );
+      }).toList();
+    });
   }
 
   // Optimized count methods using indexes
@@ -280,24 +311,27 @@ class AppDatabase extends _$AppDatabase {
   }
 
   // Optimized search methods with indexes
-  Future<List<TrackItem>> searchTracks(String query) async {
+  Stream<List<TrackItem>> watchSearchTracks(String query) {
     final searchQuery = select(tracks).join([
       leftOuterJoin(artists, artists.id.equalsExp(tracks.artistId)),
     ])..where(tracks.title.like('%$query%') | artists.name.like('%$query%'));
 
-    final rows = await searchQuery.get();
-    return rows.map((row) {
-      final track = row.readTable(tracks);
-      final artist = row.readTableOrNull(artists);
+    return searchQuery.watch().map((rows) {
+      return rows.map((row) {
+        final track = row.readTable(tracks);
+        final artist = row.readTableOrNull(artists);
 
-      return TrackItem(
-        id: track.id,
-        title: track.title,
-        artist: artist?.name ?? '',
-        cover: track.coverImage ?? '',
-        fileuri: track.fileuri,
-      );
-    }).toList();
+        return TrackItem(
+          unliked: track.isUnliked,
+          id: track.id,
+          title: track.title,
+          artist: artist?.name ?? '',
+          cover: track.coverImage ?? '',
+          fileuri: track.fileuri,
+          liked: track.isFavorite,
+        );
+      }).toList();
+    });
   }
 
   Future<List<ArtistItem>> searchArtists(String query) async {
@@ -363,6 +397,8 @@ class AppDatabase extends _$AppDatabase {
         artist: artist?.name ?? '',
         cover: track.coverImage ?? '',
         fileuri: track.fileuri,
+        liked: track.isFavorite,
+        unliked: track.isUnliked,
       );
     }).toList();
   }
@@ -412,11 +448,13 @@ class AppDatabase extends _$AppDatabase {
       final artist = row.readTableOrNull(artists);
 
       return TrackItem(
+        unliked: track.isUnliked,
         id: track.id,
         title: track.title,
         artist: artist?.name ?? '',
         cover: track.coverImage ?? '',
         fileuri: track.fileuri,
+        liked: track.isFavorite,
       );
     }).toList();
   }
@@ -568,11 +606,13 @@ class AppDatabase extends _$AppDatabase {
       final artist = row.readTableOrNull(artists);
 
       return TrackItem(
+        unliked: track.isUnliked,
         id: track.id,
         title: track.title,
         artist: artist?.name ?? '',
         cover: track.coverImage ?? '',
         fileuri: track.fileuri,
+        liked: track.isFavorite,
       );
     }).toList();
   }
@@ -637,33 +677,3 @@ class AppDatabase extends _$AppDatabase {
     });
   }
 }
-
-/*
-CREATE TABLE music_directories (
-  id INTEGER PRIMARY KEY AUTOINCREMENT,
-  
-  -- 📁 Full path to the root directory (e.g., /storage/emulated/0/Music)
-  path TEXT NOT NULL UNIQUE,
-  
-  -- ✅ Whether this directory is enabled for scanning
-  is_enabled INTEGER NOT NULL DEFAULT 1,
-  
-  -- 🕒 Last scanned timestamp (ms since epoch), NULL if never scanned
-  last_scanned INTEGER,
-  
-  -- 🔍 Whether to scan subdirectories recursively (default: true)
-  scan_subdirectories INTEGER NOT NULL DEFAULT 1,
-  
-  -- 📦 Cached total size of audio files (bytes)
-  total_size INTEGER NOT NULL DEFAULT 0,
-  
-  -- 🎵 Number of audio files found
-  file_count INTEGER NOT NULL DEFAULT 0,
-  
-  -- 📅 When the directory was added (ms since epoch)
-  date_added INTEGER NOT NULL,
-  
-  -- 🚫 List of subdirectories to exclude (stored as JSON array of paths)
-  excluded_subdirectories TEXT -- e.g., ["/Music/Podcasts", "/Music/Ads"]
-);
-*/

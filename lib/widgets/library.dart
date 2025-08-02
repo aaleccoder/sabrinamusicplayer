@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_application_1/models/schema.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:flutter_application_1/main.dart';
+import 'package:flutter_application_1/widgets/song_list_view.dart';
 import 'albums.dart';
 import 'artists.dart';
 import 'genres.dart';
@@ -74,6 +76,40 @@ class _LibraryState extends ConsumerState<Library> {
                   context,
                   MaterialPageRoute(
                     builder: (context) => const PlaylistsPageWrapper(),
+                  ),
+                );
+              },
+            ),
+            const SizedBox(height: 24),
+            _LibraryItem(
+              icon: Icons.favorite,
+              label: "Liked Songs",
+              color: Colors.red,
+              onTap: () {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (context) => FilteredSongsPageWrapper(
+                      title: 'Liked Songs',
+                      provider: likedTracksProvider,
+                    ),
+                  ),
+                );
+              },
+            ),
+            const SizedBox(height: 24),
+            _LibraryItem(
+              icon: Icons.thumb_down,
+              label: "Unliked Songs",
+              color: Colors.grey,
+              onTap: () {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (context) => FilteredSongsPageWrapper(
+                      title: 'Unliked Songs',
+                      provider: unlikedTracksProvider,
+                    ),
                   ),
                 );
               },
@@ -165,6 +201,57 @@ class ArtistsPageWrapper extends StatelessWidget {
           const MiniPlayer(),
         ],
       ),
+    );
+  }
+}
+
+class FilteredSongsPageWrapper extends StatelessWidget {
+  final String title;
+  final StreamProvider<List<TrackItem>> provider;
+
+  const FilteredSongsPageWrapper({
+    super.key,
+    required this.title,
+    required this.provider,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(title: Text(title), centerTitle: true),
+      body: Column(
+        children: [
+          Expanded(child: FilteredSongsPage(provider: provider)),
+          const MiniPlayer(),
+        ],
+      ),
+    );
+  }
+}
+
+class FilteredSongsPage extends ConsumerWidget {
+  final StreamProvider<List<TrackItem>> provider;
+
+  const FilteredSongsPage({super.key, required this.provider});
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final tracksAsync = ref.watch(provider);
+    return tracksAsync.when(
+      data: (tracks) => tracks.isEmpty
+          ? const Center(child: Text('No songs found.'))
+          : ListView.separated(
+              padding: const EdgeInsets.fromLTRB(10, 5, 10, 10),
+              itemCount: tracks.length,
+              itemBuilder: (context, index) => SongListViewItem(
+                track: tracks[index],
+                tracks: tracks,
+                index: index,
+              ),
+              separatorBuilder: (context, index) => const SizedBox(height: 8),
+            ),
+      loading: () => const Center(child: CircularProgressIndicator()),
+      error: (e, _) => Center(child: Text('Error: $e')),
     );
   }
 }

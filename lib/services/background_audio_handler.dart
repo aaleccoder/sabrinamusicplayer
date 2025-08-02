@@ -24,9 +24,6 @@ class BackgroundAudioHandler extends BaseAudioHandler
 
     // Listen to audio player events and update media controls
     _audioPlayer.playbackEventStream.map(_transformEvent).pipe(playbackState);
-    _audioPlayer.positionStream.listen((pos) {
-      print('[BackgroundAudioHandler] position update: $pos');
-    });
 
     // Handle audio player completion
     _audioPlayer.playerStateStream.listen((playerState) {
@@ -92,7 +89,11 @@ class BackgroundAudioHandler extends BaseAudioHandler
       artist: track.artist,
       duration: null, // Will be set when audio loads
       artUri: track.cover.isNotEmpty ? Uri.parse(track.cover) : null,
-      extras: {'trackId': track.id},
+      extras: {
+        'trackId': track.id,
+        'liked': track.liked,
+        'unliked': track.unliked,
+      },
     );
   }
 
@@ -278,6 +279,8 @@ class BackgroundAudioHandler extends BaseAudioHandler
 
     final mediaItem = _queue[_currentIndex];
     return TrackItem(
+      liked: mediaItem.extras?['liked'] ?? false,
+      unliked: mediaItem.extras?['unliked'] ?? false,
       id: mediaItem.extras?['trackId'] ?? 0,
       title: mediaItem.title,
       artist: mediaItem.artist ?? '',
@@ -290,6 +293,8 @@ class BackgroundAudioHandler extends BaseAudioHandler
     return _queue
         .map(
           (mediaItem) => TrackItem(
+            liked: mediaItem.extras?['liked'] ?? false,
+            unliked: mediaItem.extras?['unliked'] ?? false,
             id: mediaItem.extras?['trackId'] ?? 0,
             title: mediaItem.title,
             artist: mediaItem.artist ?? '',

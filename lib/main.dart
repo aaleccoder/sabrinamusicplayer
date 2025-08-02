@@ -26,12 +26,22 @@ final appDatabaseProvider = Provider<AppDatabase>((ref) {
 
 final audioPlayerNotifierProvider =
     StateNotifierProvider<AudioPlayerNotifier, AudioPlayerState>((ref) {
-      return AudioPlayerNotifier();
+      return AudioPlayerNotifier(ref);
     });
 
-final tracksProvider = FutureProvider<List<TrackItem>>((ref) {
+final tracksProvider = StreamProvider<List<TrackItem>>((ref) {
   final db = ref.watch(appDatabaseProvider);
-  return db.getAllTracks();
+  return db.watchAllTracks(isUnliked: false);
+});
+
+final likedTracksProvider = StreamProvider<List<TrackItem>>((ref) {
+  final db = ref.watch(appDatabaseProvider);
+  return db.watchAllTracks(isFavorite: true);
+});
+
+final unlikedTracksProvider = StreamProvider<List<TrackItem>>((ref) {
+  final db = ref.watch(appDatabaseProvider);
+  return db.watchAllTracks(isUnliked: true);
 });
 
 final albumsProvider = FutureProvider<List<AlbumItem>>((ref) {
@@ -69,20 +79,20 @@ final albumsByArtistProvider = FutureProvider.family<List<AlbumItem>, int>((
   return db.getAlbumsByArtist(artistId);
 });
 
-final tracksByArtistProvider = FutureProvider.family<List<TrackItem>, int>((
+final tracksByArtistProvider = StreamProvider.family<List<TrackItem>, int>((
   ref,
   artistId,
 ) {
   final db = ref.watch(appDatabaseProvider);
-  return db.getTracksByArtist(artistId);
+  return db.watchTracksByArtist(artistId);
 });
 
-final tracksByAlbumProvider = FutureProvider.family<List<TrackItem>, int>((
+final tracksByAlbumProvider = StreamProvider.family<List<TrackItem>, int>((
   ref,
   albumId,
 ) {
   final db = ref.watch(appDatabaseProvider);
-  return db.getTracksByAlbum(albumId);
+  return db.watchTracksByAlbum(albumId);
 });
 
 final albumTrackCountProvider = FutureProvider.family<int, int>((ref, albumId) {
@@ -132,12 +142,12 @@ final playlistTrackCountProvider = FutureProvider.family<int, int>((
 });
 
 // Search providers
-final searchTracksProvider = FutureProvider.family<List<TrackItem>, String>((
+final searchTracksProvider = StreamProvider.family<List<TrackItem>, String>((
   ref,
   query,
 ) {
   final db = ref.watch(appDatabaseProvider);
-  return db.searchTracks(query);
+  return db.watchSearchTracks(query);
 });
 
 final searchAlbumsProvider = FutureProvider.family<List<AlbumItem>, String>((
@@ -168,6 +178,14 @@ final searchPlaylistsProvider =
             .toList(),
       );
     });
+
+final updateTrackProvider = FutureProvider.family<void, TrackItem>((
+  ref,
+  track,
+) async {
+  final db = ref.watch(appDatabaseProvider);
+  await db.updateTrack(track);
+});
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();

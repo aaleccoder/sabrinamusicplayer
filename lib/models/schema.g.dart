@@ -1009,6 +1009,36 @@ class $TracksTable extends Tracks with TableInfo<$TracksTable, Track> {
     type: DriftSqlType.string,
     requiredDuringInsert: false,
   );
+  static const VerificationMeta _isFavoriteMeta = const VerificationMeta(
+    'isFavorite',
+  );
+  @override
+  late final GeneratedColumn<bool> isFavorite = GeneratedColumn<bool>(
+    'is_favorite',
+    aliasedName,
+    false,
+    type: DriftSqlType.bool,
+    requiredDuringInsert: false,
+    defaultConstraints: GeneratedColumn.constraintIsAlways(
+      'CHECK ("is_favorite" IN (0, 1))',
+    ),
+    defaultValue: const Constant(false),
+  );
+  static const VerificationMeta _isUnlikedMeta = const VerificationMeta(
+    'isUnliked',
+  );
+  @override
+  late final GeneratedColumn<bool> isUnliked = GeneratedColumn<bool>(
+    'is_unliked',
+    aliasedName,
+    false,
+    type: DriftSqlType.bool,
+    requiredDuringInsert: false,
+    defaultConstraints: GeneratedColumn.constraintIsAlways(
+      'CHECK ("is_unliked" IN (0, 1))',
+    ),
+    defaultValue: const Constant(false),
+  );
   static const VerificationMeta _yearMeta = const VerificationMeta('year');
   @override
   late final GeneratedColumn<String> year = GeneratedColumn<String>(
@@ -1092,6 +1122,8 @@ class $TracksTable extends Tracks with TableInfo<$TracksTable, Track> {
     lyrics,
     duration,
     trackNumber,
+    isFavorite,
+    isUnliked,
     year,
     createdAt,
     updatedAt,
@@ -1155,6 +1187,18 @@ class $TracksTable extends Tracks with TableInfo<$TracksTable, Track> {
           data['track_number']!,
           _trackNumberMeta,
         ),
+      );
+    }
+    if (data.containsKey('is_favorite')) {
+      context.handle(
+        _isFavoriteMeta,
+        isFavorite.isAcceptableOrUnknown(data['is_favorite']!, _isFavoriteMeta),
+      );
+    }
+    if (data.containsKey('is_unliked')) {
+      context.handle(
+        _isUnlikedMeta,
+        isUnliked.isAcceptableOrUnknown(data['is_unliked']!, _isUnlikedMeta),
       );
     }
     if (data.containsKey('year')) {
@@ -1230,6 +1274,14 @@ class $TracksTable extends Tracks with TableInfo<$TracksTable, Track> {
         DriftSqlType.string,
         data['${effectivePrefix}track_number'],
       ),
+      isFavorite: attachedDatabase.typeMapping.read(
+        DriftSqlType.bool,
+        data['${effectivePrefix}is_favorite'],
+      )!,
+      isUnliked: attachedDatabase.typeMapping.read(
+        DriftSqlType.bool,
+        data['${effectivePrefix}is_unliked'],
+      )!,
       year: attachedDatabase.typeMapping.read(
         DriftSqlType.string,
         data['${effectivePrefix}year'],
@@ -1271,6 +1323,8 @@ class Track extends DataClass implements Insertable<Track> {
   final String? lyrics;
   final int? duration;
   final String? trackNumber;
+  final bool isFavorite;
+  final bool isUnliked;
   final String? year;
   final DateTime createdAt;
   final DateTime? updatedAt;
@@ -1285,6 +1339,8 @@ class Track extends DataClass implements Insertable<Track> {
     this.lyrics,
     this.duration,
     this.trackNumber,
+    required this.isFavorite,
+    required this.isUnliked,
     this.year,
     required this.createdAt,
     this.updatedAt,
@@ -1310,6 +1366,8 @@ class Track extends DataClass implements Insertable<Track> {
     if (!nullToAbsent || trackNumber != null) {
       map['track_number'] = Variable<String>(trackNumber);
     }
+    map['is_favorite'] = Variable<bool>(isFavorite);
+    map['is_unliked'] = Variable<bool>(isUnliked);
     if (!nullToAbsent || year != null) {
       map['year'] = Variable<String>(year);
     }
@@ -1346,6 +1404,8 @@ class Track extends DataClass implements Insertable<Track> {
       trackNumber: trackNumber == null && nullToAbsent
           ? const Value.absent()
           : Value(trackNumber),
+      isFavorite: Value(isFavorite),
+      isUnliked: Value(isUnliked),
       year: year == null && nullToAbsent ? const Value.absent() : Value(year),
       createdAt: Value(createdAt),
       updatedAt: updatedAt == null && nullToAbsent
@@ -1376,6 +1436,8 @@ class Track extends DataClass implements Insertable<Track> {
       lyrics: serializer.fromJson<String?>(json['lyrics']),
       duration: serializer.fromJson<int?>(json['duration']),
       trackNumber: serializer.fromJson<String?>(json['trackNumber']),
+      isFavorite: serializer.fromJson<bool>(json['isFavorite']),
+      isUnliked: serializer.fromJson<bool>(json['isUnliked']),
       year: serializer.fromJson<String?>(json['year']),
       createdAt: serializer.fromJson<DateTime>(json['createdAt']),
       updatedAt: serializer.fromJson<DateTime?>(json['updatedAt']),
@@ -1395,6 +1457,8 @@ class Track extends DataClass implements Insertable<Track> {
       'lyrics': serializer.toJson<String?>(lyrics),
       'duration': serializer.toJson<int?>(duration),
       'trackNumber': serializer.toJson<String?>(trackNumber),
+      'isFavorite': serializer.toJson<bool>(isFavorite),
+      'isUnliked': serializer.toJson<bool>(isUnliked),
       'year': serializer.toJson<String?>(year),
       'createdAt': serializer.toJson<DateTime>(createdAt),
       'updatedAt': serializer.toJson<DateTime?>(updatedAt),
@@ -1412,6 +1476,8 @@ class Track extends DataClass implements Insertable<Track> {
     Value<String?> lyrics = const Value.absent(),
     Value<int?> duration = const Value.absent(),
     Value<String?> trackNumber = const Value.absent(),
+    bool? isFavorite,
+    bool? isUnliked,
     Value<String?> year = const Value.absent(),
     DateTime? createdAt,
     Value<DateTime?> updatedAt = const Value.absent(),
@@ -1426,6 +1492,8 @@ class Track extends DataClass implements Insertable<Track> {
     lyrics: lyrics.present ? lyrics.value : this.lyrics,
     duration: duration.present ? duration.value : this.duration,
     trackNumber: trackNumber.present ? trackNumber.value : this.trackNumber,
+    isFavorite: isFavorite ?? this.isFavorite,
+    isUnliked: isUnliked ?? this.isUnliked,
     year: year.present ? year.value : this.year,
     createdAt: createdAt ?? this.createdAt,
     updatedAt: updatedAt.present ? updatedAt.value : this.updatedAt,
@@ -1446,6 +1514,10 @@ class Track extends DataClass implements Insertable<Track> {
       trackNumber: data.trackNumber.present
           ? data.trackNumber.value
           : this.trackNumber,
+      isFavorite: data.isFavorite.present
+          ? data.isFavorite.value
+          : this.isFavorite,
+      isUnliked: data.isUnliked.present ? data.isUnliked.value : this.isUnliked,
       year: data.year.present ? data.year.value : this.year,
       createdAt: data.createdAt.present ? data.createdAt.value : this.createdAt,
       updatedAt: data.updatedAt.present ? data.updatedAt.value : this.updatedAt,
@@ -1465,6 +1537,8 @@ class Track extends DataClass implements Insertable<Track> {
           ..write('lyrics: $lyrics, ')
           ..write('duration: $duration, ')
           ..write('trackNumber: $trackNumber, ')
+          ..write('isFavorite: $isFavorite, ')
+          ..write('isUnliked: $isUnliked, ')
           ..write('year: $year, ')
           ..write('createdAt: $createdAt, ')
           ..write('updatedAt: $updatedAt, ')
@@ -1484,6 +1558,8 @@ class Track extends DataClass implements Insertable<Track> {
     lyrics,
     duration,
     trackNumber,
+    isFavorite,
+    isUnliked,
     year,
     createdAt,
     updatedAt,
@@ -1502,6 +1578,8 @@ class Track extends DataClass implements Insertable<Track> {
           other.lyrics == this.lyrics &&
           other.duration == this.duration &&
           other.trackNumber == this.trackNumber &&
+          other.isFavorite == this.isFavorite &&
+          other.isUnliked == this.isUnliked &&
           other.year == this.year &&
           other.createdAt == this.createdAt &&
           other.updatedAt == this.updatedAt &&
@@ -1518,6 +1596,8 @@ class TracksCompanion extends UpdateCompanion<Track> {
   final Value<String?> lyrics;
   final Value<int?> duration;
   final Value<String?> trackNumber;
+  final Value<bool> isFavorite;
+  final Value<bool> isUnliked;
   final Value<String?> year;
   final Value<DateTime> createdAt;
   final Value<DateTime?> updatedAt;
@@ -1532,6 +1612,8 @@ class TracksCompanion extends UpdateCompanion<Track> {
     this.lyrics = const Value.absent(),
     this.duration = const Value.absent(),
     this.trackNumber = const Value.absent(),
+    this.isFavorite = const Value.absent(),
+    this.isUnliked = const Value.absent(),
     this.year = const Value.absent(),
     this.createdAt = const Value.absent(),
     this.updatedAt = const Value.absent(),
@@ -1547,6 +1629,8 @@ class TracksCompanion extends UpdateCompanion<Track> {
     this.lyrics = const Value.absent(),
     this.duration = const Value.absent(),
     this.trackNumber = const Value.absent(),
+    this.isFavorite = const Value.absent(),
+    this.isUnliked = const Value.absent(),
     this.year = const Value.absent(),
     this.createdAt = const Value.absent(),
     this.updatedAt = const Value.absent(),
@@ -1563,6 +1647,8 @@ class TracksCompanion extends UpdateCompanion<Track> {
     Expression<String>? lyrics,
     Expression<int>? duration,
     Expression<String>? trackNumber,
+    Expression<bool>? isFavorite,
+    Expression<bool>? isUnliked,
     Expression<String>? year,
     Expression<DateTime>? createdAt,
     Expression<DateTime>? updatedAt,
@@ -1578,6 +1664,8 @@ class TracksCompanion extends UpdateCompanion<Track> {
       if (lyrics != null) 'lyrics': lyrics,
       if (duration != null) 'duration': duration,
       if (trackNumber != null) 'track_number': trackNumber,
+      if (isFavorite != null) 'is_favorite': isFavorite,
+      if (isUnliked != null) 'is_unliked': isUnliked,
       if (year != null) 'year': year,
       if (createdAt != null) 'created_at': createdAt,
       if (updatedAt != null) 'updated_at': updatedAt,
@@ -1595,6 +1683,8 @@ class TracksCompanion extends UpdateCompanion<Track> {
     Value<String?>? lyrics,
     Value<int?>? duration,
     Value<String?>? trackNumber,
+    Value<bool>? isFavorite,
+    Value<bool>? isUnliked,
     Value<String?>? year,
     Value<DateTime>? createdAt,
     Value<DateTime?>? updatedAt,
@@ -1610,6 +1700,8 @@ class TracksCompanion extends UpdateCompanion<Track> {
       lyrics: lyrics ?? this.lyrics,
       duration: duration ?? this.duration,
       trackNumber: trackNumber ?? this.trackNumber,
+      isFavorite: isFavorite ?? this.isFavorite,
+      isUnliked: isUnliked ?? this.isUnliked,
       year: year ?? this.year,
       createdAt: createdAt ?? this.createdAt,
       updatedAt: updatedAt ?? this.updatedAt,
@@ -1643,6 +1735,12 @@ class TracksCompanion extends UpdateCompanion<Track> {
     if (trackNumber.present) {
       map['track_number'] = Variable<String>(trackNumber.value);
     }
+    if (isFavorite.present) {
+      map['is_favorite'] = Variable<bool>(isFavorite.value);
+    }
+    if (isUnliked.present) {
+      map['is_unliked'] = Variable<bool>(isUnliked.value);
+    }
     if (year.present) {
       map['year'] = Variable<String>(year.value);
     }
@@ -1674,6 +1772,8 @@ class TracksCompanion extends UpdateCompanion<Track> {
           ..write('lyrics: $lyrics, ')
           ..write('duration: $duration, ')
           ..write('trackNumber: $trackNumber, ')
+          ..write('isFavorite: $isFavorite, ')
+          ..write('isUnliked: $isUnliked, ')
           ..write('year: $year, ')
           ..write('createdAt: $createdAt, ')
           ..write('updatedAt: $updatedAt, ')
@@ -3674,6 +3774,8 @@ typedef $$TracksTableCreateCompanionBuilder =
       Value<String?> lyrics,
       Value<int?> duration,
       Value<String?> trackNumber,
+      Value<bool> isFavorite,
+      Value<bool> isUnliked,
       Value<String?> year,
       Value<DateTime> createdAt,
       Value<DateTime?> updatedAt,
@@ -3690,6 +3792,8 @@ typedef $$TracksTableUpdateCompanionBuilder =
       Value<String?> lyrics,
       Value<int?> duration,
       Value<String?> trackNumber,
+      Value<bool> isFavorite,
+      Value<bool> isUnliked,
       Value<String?> year,
       Value<DateTime> createdAt,
       Value<DateTime?> updatedAt,
@@ -3815,6 +3919,16 @@ class $$TracksTableFilterComposer
 
   ColumnFilters<String> get trackNumber => $composableBuilder(
     column: $table.trackNumber,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<bool> get isFavorite => $composableBuilder(
+    column: $table.isFavorite,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<bool> get isUnliked => $composableBuilder(
+    column: $table.isUnliked,
     builder: (column) => ColumnFilters(column),
   );
 
@@ -3972,6 +4086,16 @@ class $$TracksTableOrderingComposer
     builder: (column) => ColumnOrderings(column),
   );
 
+  ColumnOrderings<bool> get isFavorite => $composableBuilder(
+    column: $table.isFavorite,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<bool> get isUnliked => $composableBuilder(
+    column: $table.isUnliked,
+    builder: (column) => ColumnOrderings(column),
+  );
+
   ColumnOrderings<String> get year => $composableBuilder(
     column: $table.year,
     builder: (column) => ColumnOrderings(column),
@@ -4090,6 +4214,14 @@ class $$TracksTableAnnotationComposer
     column: $table.trackNumber,
     builder: (column) => column,
   );
+
+  GeneratedColumn<bool> get isFavorite => $composableBuilder(
+    column: $table.isFavorite,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<bool> get isUnliked =>
+      $composableBuilder(column: $table.isUnliked, builder: (column) => column);
 
   GeneratedColumn<String> get year =>
       $composableBuilder(column: $table.year, builder: (column) => column);
@@ -4235,6 +4367,8 @@ class $$TracksTableTableManager
                 Value<String?> lyrics = const Value.absent(),
                 Value<int?> duration = const Value.absent(),
                 Value<String?> trackNumber = const Value.absent(),
+                Value<bool> isFavorite = const Value.absent(),
+                Value<bool> isUnliked = const Value.absent(),
                 Value<String?> year = const Value.absent(),
                 Value<DateTime> createdAt = const Value.absent(),
                 Value<DateTime?> updatedAt = const Value.absent(),
@@ -4249,6 +4383,8 @@ class $$TracksTableTableManager
                 lyrics: lyrics,
                 duration: duration,
                 trackNumber: trackNumber,
+                isFavorite: isFavorite,
+                isUnliked: isUnliked,
                 year: year,
                 createdAt: createdAt,
                 updatedAt: updatedAt,
@@ -4265,6 +4401,8 @@ class $$TracksTableTableManager
                 Value<String?> lyrics = const Value.absent(),
                 Value<int?> duration = const Value.absent(),
                 Value<String?> trackNumber = const Value.absent(),
+                Value<bool> isFavorite = const Value.absent(),
+                Value<bool> isUnliked = const Value.absent(),
                 Value<String?> year = const Value.absent(),
                 Value<DateTime> createdAt = const Value.absent(),
                 Value<DateTime?> updatedAt = const Value.absent(),
@@ -4279,6 +4417,8 @@ class $$TracksTableTableManager
                 lyrics: lyrics,
                 duration: duration,
                 trackNumber: trackNumber,
+                isFavorite: isFavorite,
+                isUnliked: isUnliked,
                 year: year,
                 createdAt: createdAt,
                 updatedAt: updatedAt,
