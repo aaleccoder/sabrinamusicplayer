@@ -27,6 +27,7 @@ class TrackItem {
   String artist;
   String? album;
   String cover;
+  String fullCover;
   String fileuri;
   bool liked;
   bool unliked;
@@ -34,6 +35,7 @@ class TrackItem {
   DateTime createdAt;
 
   TrackItem({
+    required this.fullCover,
     required this.unliked,
     required this.liked,
     required this.id,

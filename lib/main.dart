@@ -33,22 +33,26 @@ final tracksProvider = StreamProvider.family<List<TrackItem>, SortOption>((
   sortOption,
 ) {
   final db = ref.watch(appDatabaseProvider);
-  return db.watchAllTracks(isUnliked: false, sortOption: sortOption);
+  return db.watchAllTracks(
+    isUnliked: false,
+    sortOption: sortOption,
+    coverSize: CoverSize.s128,
+  );
 });
 
 final likedTracksProvider = StreamProvider<List<TrackItem>>((ref) {
   final db = ref.watch(appDatabaseProvider);
-  return db.watchAllTracks(isFavorite: true);
+  return db.watchAllTracks(isFavorite: true, coverSize: CoverSize.s32);
 });
 
 final unlikedTracksProvider = StreamProvider<List<TrackItem>>((ref) {
   final db = ref.watch(appDatabaseProvider);
-  return db.watchAllTracks(isUnliked: true);
+  return db.watchAllTracks(isUnliked: true, coverSize: CoverSize.s32);
 });
 
 final albumsProvider = FutureProvider<List<AlbumItem>>((ref) {
   final db = ref.watch(appDatabaseProvider);
-  return db.getAllAlbums();
+  return db.getAllAlbums(coverSize: CoverSize.s128);
 });
 
 final artistsProvider = FutureProvider<List<ArtistItem>>((ref) {
@@ -217,7 +221,7 @@ class MainApp extends StatelessWidget {
     return MaterialApp(
       onGenerateRoute: AppRoutes.generateRoute,
       debugShowCheckedModeBanner: false,
-      showPerformanceOverlay: kDebugMode,
+      showPerformanceOverlay: false,
 
       theme: ThemeData(
         fontFamily: "Sora",

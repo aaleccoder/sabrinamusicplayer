@@ -635,6 +635,28 @@ class $AlbumsTable extends Albums with TableInfo<$AlbumsTable, Album> {
     type: DriftSqlType.string,
     requiredDuringInsert: false,
   );
+  static const VerificationMeta _coverImage128Meta = const VerificationMeta(
+    'coverImage128',
+  );
+  @override
+  late final GeneratedColumn<String> coverImage128 = GeneratedColumn<String>(
+    'cover_image128',
+    aliasedName,
+    true,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+  );
+  static const VerificationMeta _coverImage32Meta = const VerificationMeta(
+    'coverImage32',
+  );
+  @override
+  late final GeneratedColumn<String> coverImage32 = GeneratedColumn<String>(
+    'cover_image32',
+    aliasedName,
+    true,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+  );
   @override
   List<GeneratedColumn> get $columns => [
     id,
@@ -642,6 +664,8 @@ class $AlbumsTable extends Albums with TableInfo<$AlbumsTable, Album> {
     artistId,
     genreId,
     coverImage,
+    coverImage128,
+    coverImage32,
   ];
   @override
   String get aliasedName => _alias ?? actualTableName;
@@ -684,6 +708,24 @@ class $AlbumsTable extends Albums with TableInfo<$AlbumsTable, Album> {
         coverImage.isAcceptableOrUnknown(data['cover_image']!, _coverImageMeta),
       );
     }
+    if (data.containsKey('cover_image128')) {
+      context.handle(
+        _coverImage128Meta,
+        coverImage128.isAcceptableOrUnknown(
+          data['cover_image128']!,
+          _coverImage128Meta,
+        ),
+      );
+    }
+    if (data.containsKey('cover_image32')) {
+      context.handle(
+        _coverImage32Meta,
+        coverImage32.isAcceptableOrUnknown(
+          data['cover_image32']!,
+          _coverImage32Meta,
+        ),
+      );
+    }
     return context;
   }
 
@@ -713,6 +755,14 @@ class $AlbumsTable extends Albums with TableInfo<$AlbumsTable, Album> {
         DriftSqlType.string,
         data['${effectivePrefix}cover_image'],
       ),
+      coverImage128: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}cover_image128'],
+      ),
+      coverImage32: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}cover_image32'],
+      ),
     );
   }
 
@@ -728,12 +778,16 @@ class Album extends DataClass implements Insertable<Album> {
   final int? artistId;
   final int? genreId;
   final String? coverImage;
+  final String? coverImage128;
+  final String? coverImage32;
   const Album({
     required this.id,
     required this.name,
     this.artistId,
     this.genreId,
     this.coverImage,
+    this.coverImage128,
+    this.coverImage32,
   });
   @override
   Map<String, Expression> toColumns(bool nullToAbsent) {
@@ -748,6 +802,12 @@ class Album extends DataClass implements Insertable<Album> {
     }
     if (!nullToAbsent || coverImage != null) {
       map['cover_image'] = Variable<String>(coverImage);
+    }
+    if (!nullToAbsent || coverImage128 != null) {
+      map['cover_image128'] = Variable<String>(coverImage128);
+    }
+    if (!nullToAbsent || coverImage32 != null) {
+      map['cover_image32'] = Variable<String>(coverImage32);
     }
     return map;
   }
@@ -765,6 +825,12 @@ class Album extends DataClass implements Insertable<Album> {
       coverImage: coverImage == null && nullToAbsent
           ? const Value.absent()
           : Value(coverImage),
+      coverImage128: coverImage128 == null && nullToAbsent
+          ? const Value.absent()
+          : Value(coverImage128),
+      coverImage32: coverImage32 == null && nullToAbsent
+          ? const Value.absent()
+          : Value(coverImage32),
     );
   }
 
@@ -779,6 +845,8 @@ class Album extends DataClass implements Insertable<Album> {
       artistId: serializer.fromJson<int?>(json['artistId']),
       genreId: serializer.fromJson<int?>(json['genreId']),
       coverImage: serializer.fromJson<String?>(json['coverImage']),
+      coverImage128: serializer.fromJson<String?>(json['coverImage128']),
+      coverImage32: serializer.fromJson<String?>(json['coverImage32']),
     );
   }
   @override
@@ -790,6 +858,8 @@ class Album extends DataClass implements Insertable<Album> {
       'artistId': serializer.toJson<int?>(artistId),
       'genreId': serializer.toJson<int?>(genreId),
       'coverImage': serializer.toJson<String?>(coverImage),
+      'coverImage128': serializer.toJson<String?>(coverImage128),
+      'coverImage32': serializer.toJson<String?>(coverImage32),
     };
   }
 
@@ -799,12 +869,18 @@ class Album extends DataClass implements Insertable<Album> {
     Value<int?> artistId = const Value.absent(),
     Value<int?> genreId = const Value.absent(),
     Value<String?> coverImage = const Value.absent(),
+    Value<String?> coverImage128 = const Value.absent(),
+    Value<String?> coverImage32 = const Value.absent(),
   }) => Album(
     id: id ?? this.id,
     name: name ?? this.name,
     artistId: artistId.present ? artistId.value : this.artistId,
     genreId: genreId.present ? genreId.value : this.genreId,
     coverImage: coverImage.present ? coverImage.value : this.coverImage,
+    coverImage128: coverImage128.present
+        ? coverImage128.value
+        : this.coverImage128,
+    coverImage32: coverImage32.present ? coverImage32.value : this.coverImage32,
   );
   Album copyWithCompanion(AlbumsCompanion data) {
     return Album(
@@ -815,6 +891,12 @@ class Album extends DataClass implements Insertable<Album> {
       coverImage: data.coverImage.present
           ? data.coverImage.value
           : this.coverImage,
+      coverImage128: data.coverImage128.present
+          ? data.coverImage128.value
+          : this.coverImage128,
+      coverImage32: data.coverImage32.present
+          ? data.coverImage32.value
+          : this.coverImage32,
     );
   }
 
@@ -825,13 +907,23 @@ class Album extends DataClass implements Insertable<Album> {
           ..write('name: $name, ')
           ..write('artistId: $artistId, ')
           ..write('genreId: $genreId, ')
-          ..write('coverImage: $coverImage')
+          ..write('coverImage: $coverImage, ')
+          ..write('coverImage128: $coverImage128, ')
+          ..write('coverImage32: $coverImage32')
           ..write(')'))
         .toString();
   }
 
   @override
-  int get hashCode => Object.hash(id, name, artistId, genreId, coverImage);
+  int get hashCode => Object.hash(
+    id,
+    name,
+    artistId,
+    genreId,
+    coverImage,
+    coverImage128,
+    coverImage32,
+  );
   @override
   bool operator ==(Object other) =>
       identical(this, other) ||
@@ -840,7 +932,9 @@ class Album extends DataClass implements Insertable<Album> {
           other.name == this.name &&
           other.artistId == this.artistId &&
           other.genreId == this.genreId &&
-          other.coverImage == this.coverImage);
+          other.coverImage == this.coverImage &&
+          other.coverImage128 == this.coverImage128 &&
+          other.coverImage32 == this.coverImage32);
 }
 
 class AlbumsCompanion extends UpdateCompanion<Album> {
@@ -849,12 +943,16 @@ class AlbumsCompanion extends UpdateCompanion<Album> {
   final Value<int?> artistId;
   final Value<int?> genreId;
   final Value<String?> coverImage;
+  final Value<String?> coverImage128;
+  final Value<String?> coverImage32;
   const AlbumsCompanion({
     this.id = const Value.absent(),
     this.name = const Value.absent(),
     this.artistId = const Value.absent(),
     this.genreId = const Value.absent(),
     this.coverImage = const Value.absent(),
+    this.coverImage128 = const Value.absent(),
+    this.coverImage32 = const Value.absent(),
   });
   AlbumsCompanion.insert({
     this.id = const Value.absent(),
@@ -862,6 +960,8 @@ class AlbumsCompanion extends UpdateCompanion<Album> {
     this.artistId = const Value.absent(),
     this.genreId = const Value.absent(),
     this.coverImage = const Value.absent(),
+    this.coverImage128 = const Value.absent(),
+    this.coverImage32 = const Value.absent(),
   }) : name = Value(name);
   static Insertable<Album> custom({
     Expression<int>? id,
@@ -869,6 +969,8 @@ class AlbumsCompanion extends UpdateCompanion<Album> {
     Expression<int>? artistId,
     Expression<int>? genreId,
     Expression<String>? coverImage,
+    Expression<String>? coverImage128,
+    Expression<String>? coverImage32,
   }) {
     return RawValuesInsertable({
       if (id != null) 'id': id,
@@ -876,6 +978,8 @@ class AlbumsCompanion extends UpdateCompanion<Album> {
       if (artistId != null) 'artist_id': artistId,
       if (genreId != null) 'genre_id': genreId,
       if (coverImage != null) 'cover_image': coverImage,
+      if (coverImage128 != null) 'cover_image128': coverImage128,
+      if (coverImage32 != null) 'cover_image32': coverImage32,
     });
   }
 
@@ -885,6 +989,8 @@ class AlbumsCompanion extends UpdateCompanion<Album> {
     Value<int?>? artistId,
     Value<int?>? genreId,
     Value<String?>? coverImage,
+    Value<String?>? coverImage128,
+    Value<String?>? coverImage32,
   }) {
     return AlbumsCompanion(
       id: id ?? this.id,
@@ -892,6 +998,8 @@ class AlbumsCompanion extends UpdateCompanion<Album> {
       artistId: artistId ?? this.artistId,
       genreId: genreId ?? this.genreId,
       coverImage: coverImage ?? this.coverImage,
+      coverImage128: coverImage128 ?? this.coverImage128,
+      coverImage32: coverImage32 ?? this.coverImage32,
     );
   }
 
@@ -913,6 +1021,12 @@ class AlbumsCompanion extends UpdateCompanion<Album> {
     if (coverImage.present) {
       map['cover_image'] = Variable<String>(coverImage.value);
     }
+    if (coverImage128.present) {
+      map['cover_image128'] = Variable<String>(coverImage128.value);
+    }
+    if (coverImage32.present) {
+      map['cover_image32'] = Variable<String>(coverImage32.value);
+    }
     return map;
   }
 
@@ -923,7 +1037,9 @@ class AlbumsCompanion extends UpdateCompanion<Album> {
           ..write('name: $name, ')
           ..write('artistId: $artistId, ')
           ..write('genreId: $genreId, ')
-          ..write('coverImage: $coverImage')
+          ..write('coverImage: $coverImage, ')
+          ..write('coverImage128: $coverImage128, ')
+          ..write('coverImage32: $coverImage32')
           ..write(')'))
         .toString();
   }
@@ -966,17 +1082,6 @@ class $TracksTable extends Tracks with TableInfo<$TracksTable, Track> {
     false,
     type: DriftSqlType.string,
     requiredDuringInsert: true,
-  );
-  static const VerificationMeta _coverImageMeta = const VerificationMeta(
-    'coverImage',
-  );
-  @override
-  late final GeneratedColumn<String> coverImage = GeneratedColumn<String>(
-    'cover_image',
-    aliasedName,
-    true,
-    type: DriftSqlType.string,
-    requiredDuringInsert: false,
   );
   static const VerificationMeta _lyricsMeta = const VerificationMeta('lyrics');
   @override
@@ -1118,7 +1223,6 @@ class $TracksTable extends Tracks with TableInfo<$TracksTable, Track> {
     id,
     title,
     fileuri,
-    coverImage,
     lyrics,
     duration,
     trackNumber,
@@ -1161,12 +1265,6 @@ class $TracksTable extends Tracks with TableInfo<$TracksTable, Track> {
       );
     } else if (isInserting) {
       context.missing(_fileuriMeta);
-    }
-    if (data.containsKey('cover_image')) {
-      context.handle(
-        _coverImageMeta,
-        coverImage.isAcceptableOrUnknown(data['cover_image']!, _coverImageMeta),
-      );
     }
     if (data.containsKey('lyrics')) {
       context.handle(
@@ -1258,10 +1356,6 @@ class $TracksTable extends Tracks with TableInfo<$TracksTable, Track> {
         DriftSqlType.string,
         data['${effectivePrefix}fileuri'],
       )!,
-      coverImage: attachedDatabase.typeMapping.read(
-        DriftSqlType.string,
-        data['${effectivePrefix}cover_image'],
-      ),
       lyrics: attachedDatabase.typeMapping.read(
         DriftSqlType.string,
         data['${effectivePrefix}lyrics'],
@@ -1319,7 +1413,6 @@ class Track extends DataClass implements Insertable<Track> {
   final int id;
   final String title;
   final String fileuri;
-  final String? coverImage;
   final String? lyrics;
   final int? duration;
   final String? trackNumber;
@@ -1335,7 +1428,6 @@ class Track extends DataClass implements Insertable<Track> {
     required this.id,
     required this.title,
     required this.fileuri,
-    this.coverImage,
     this.lyrics,
     this.duration,
     this.trackNumber,
@@ -1354,9 +1446,6 @@ class Track extends DataClass implements Insertable<Track> {
     map['id'] = Variable<int>(id);
     map['title'] = Variable<String>(title);
     map['fileuri'] = Variable<String>(fileuri);
-    if (!nullToAbsent || coverImage != null) {
-      map['cover_image'] = Variable<String>(coverImage);
-    }
     if (!nullToAbsent || lyrics != null) {
       map['lyrics'] = Variable<String>(lyrics);
     }
@@ -1392,9 +1481,6 @@ class Track extends DataClass implements Insertable<Track> {
       id: Value(id),
       title: Value(title),
       fileuri: Value(fileuri),
-      coverImage: coverImage == null && nullToAbsent
-          ? const Value.absent()
-          : Value(coverImage),
       lyrics: lyrics == null && nullToAbsent
           ? const Value.absent()
           : Value(lyrics),
@@ -1432,7 +1518,6 @@ class Track extends DataClass implements Insertable<Track> {
       id: serializer.fromJson<int>(json['id']),
       title: serializer.fromJson<String>(json['title']),
       fileuri: serializer.fromJson<String>(json['fileuri']),
-      coverImage: serializer.fromJson<String?>(json['coverImage']),
       lyrics: serializer.fromJson<String?>(json['lyrics']),
       duration: serializer.fromJson<int?>(json['duration']),
       trackNumber: serializer.fromJson<String?>(json['trackNumber']),
@@ -1453,7 +1538,6 @@ class Track extends DataClass implements Insertable<Track> {
       'id': serializer.toJson<int>(id),
       'title': serializer.toJson<String>(title),
       'fileuri': serializer.toJson<String>(fileuri),
-      'coverImage': serializer.toJson<String?>(coverImage),
       'lyrics': serializer.toJson<String?>(lyrics),
       'duration': serializer.toJson<int?>(duration),
       'trackNumber': serializer.toJson<String?>(trackNumber),
@@ -1472,7 +1556,6 @@ class Track extends DataClass implements Insertable<Track> {
     int? id,
     String? title,
     String? fileuri,
-    Value<String?> coverImage = const Value.absent(),
     Value<String?> lyrics = const Value.absent(),
     Value<int?> duration = const Value.absent(),
     Value<String?> trackNumber = const Value.absent(),
@@ -1488,7 +1571,6 @@ class Track extends DataClass implements Insertable<Track> {
     id: id ?? this.id,
     title: title ?? this.title,
     fileuri: fileuri ?? this.fileuri,
-    coverImage: coverImage.present ? coverImage.value : this.coverImage,
     lyrics: lyrics.present ? lyrics.value : this.lyrics,
     duration: duration.present ? duration.value : this.duration,
     trackNumber: trackNumber.present ? trackNumber.value : this.trackNumber,
@@ -1506,9 +1588,6 @@ class Track extends DataClass implements Insertable<Track> {
       id: data.id.present ? data.id.value : this.id,
       title: data.title.present ? data.title.value : this.title,
       fileuri: data.fileuri.present ? data.fileuri.value : this.fileuri,
-      coverImage: data.coverImage.present
-          ? data.coverImage.value
-          : this.coverImage,
       lyrics: data.lyrics.present ? data.lyrics.value : this.lyrics,
       duration: data.duration.present ? data.duration.value : this.duration,
       trackNumber: data.trackNumber.present
@@ -1533,7 +1612,6 @@ class Track extends DataClass implements Insertable<Track> {
           ..write('id: $id, ')
           ..write('title: $title, ')
           ..write('fileuri: $fileuri, ')
-          ..write('coverImage: $coverImage, ')
           ..write('lyrics: $lyrics, ')
           ..write('duration: $duration, ')
           ..write('trackNumber: $trackNumber, ')
@@ -1554,7 +1632,6 @@ class Track extends DataClass implements Insertable<Track> {
     id,
     title,
     fileuri,
-    coverImage,
     lyrics,
     duration,
     trackNumber,
@@ -1574,7 +1651,6 @@ class Track extends DataClass implements Insertable<Track> {
           other.id == this.id &&
           other.title == this.title &&
           other.fileuri == this.fileuri &&
-          other.coverImage == this.coverImage &&
           other.lyrics == this.lyrics &&
           other.duration == this.duration &&
           other.trackNumber == this.trackNumber &&
@@ -1592,7 +1668,6 @@ class TracksCompanion extends UpdateCompanion<Track> {
   final Value<int> id;
   final Value<String> title;
   final Value<String> fileuri;
-  final Value<String?> coverImage;
   final Value<String?> lyrics;
   final Value<int?> duration;
   final Value<String?> trackNumber;
@@ -1608,7 +1683,6 @@ class TracksCompanion extends UpdateCompanion<Track> {
     this.id = const Value.absent(),
     this.title = const Value.absent(),
     this.fileuri = const Value.absent(),
-    this.coverImage = const Value.absent(),
     this.lyrics = const Value.absent(),
     this.duration = const Value.absent(),
     this.trackNumber = const Value.absent(),
@@ -1625,7 +1699,6 @@ class TracksCompanion extends UpdateCompanion<Track> {
     this.id = const Value.absent(),
     required String title,
     required String fileuri,
-    this.coverImage = const Value.absent(),
     this.lyrics = const Value.absent(),
     this.duration = const Value.absent(),
     this.trackNumber = const Value.absent(),
@@ -1643,7 +1716,6 @@ class TracksCompanion extends UpdateCompanion<Track> {
     Expression<int>? id,
     Expression<String>? title,
     Expression<String>? fileuri,
-    Expression<String>? coverImage,
     Expression<String>? lyrics,
     Expression<int>? duration,
     Expression<String>? trackNumber,
@@ -1660,7 +1732,6 @@ class TracksCompanion extends UpdateCompanion<Track> {
       if (id != null) 'id': id,
       if (title != null) 'title': title,
       if (fileuri != null) 'fileuri': fileuri,
-      if (coverImage != null) 'cover_image': coverImage,
       if (lyrics != null) 'lyrics': lyrics,
       if (duration != null) 'duration': duration,
       if (trackNumber != null) 'track_number': trackNumber,
@@ -1679,7 +1750,6 @@ class TracksCompanion extends UpdateCompanion<Track> {
     Value<int>? id,
     Value<String>? title,
     Value<String>? fileuri,
-    Value<String?>? coverImage,
     Value<String?>? lyrics,
     Value<int?>? duration,
     Value<String?>? trackNumber,
@@ -1696,7 +1766,6 @@ class TracksCompanion extends UpdateCompanion<Track> {
       id: id ?? this.id,
       title: title ?? this.title,
       fileuri: fileuri ?? this.fileuri,
-      coverImage: coverImage ?? this.coverImage,
       lyrics: lyrics ?? this.lyrics,
       duration: duration ?? this.duration,
       trackNumber: trackNumber ?? this.trackNumber,
@@ -1722,9 +1791,6 @@ class TracksCompanion extends UpdateCompanion<Track> {
     }
     if (fileuri.present) {
       map['fileuri'] = Variable<String>(fileuri.value);
-    }
-    if (coverImage.present) {
-      map['cover_image'] = Variable<String>(coverImage.value);
     }
     if (lyrics.present) {
       map['lyrics'] = Variable<String>(lyrics.value);
@@ -1768,7 +1834,6 @@ class TracksCompanion extends UpdateCompanion<Track> {
           ..write('id: $id, ')
           ..write('title: $title, ')
           ..write('fileuri: $fileuri, ')
-          ..write('coverImage: $coverImage, ')
           ..write('lyrics: $lyrics, ')
           ..write('duration: $duration, ')
           ..write('trackNumber: $trackNumber, ')
@@ -3290,6 +3355,8 @@ typedef $$AlbumsTableCreateCompanionBuilder =
       Value<int?> artistId,
       Value<int?> genreId,
       Value<String?> coverImage,
+      Value<String?> coverImage128,
+      Value<String?> coverImage32,
     });
 typedef $$AlbumsTableUpdateCompanionBuilder =
     AlbumsCompanion Function({
@@ -3298,6 +3365,8 @@ typedef $$AlbumsTableUpdateCompanionBuilder =
       Value<int?> artistId,
       Value<int?> genreId,
       Value<String?> coverImage,
+      Value<String?> coverImage128,
+      Value<String?> coverImage32,
     });
 
 final class $$AlbumsTableReferences
@@ -3380,6 +3449,16 @@ class $$AlbumsTableFilterComposer
 
   ColumnFilters<String> get coverImage => $composableBuilder(
     column: $table.coverImage,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get coverImage128 => $composableBuilder(
+    column: $table.coverImage128,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get coverImage32 => $composableBuilder(
+    column: $table.coverImage32,
     builder: (column) => ColumnFilters(column),
   );
 
@@ -3479,6 +3558,16 @@ class $$AlbumsTableOrderingComposer
     builder: (column) => ColumnOrderings(column),
   );
 
+  ColumnOrderings<String> get coverImage128 => $composableBuilder(
+    column: $table.coverImage128,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get coverImage32 => $composableBuilder(
+    column: $table.coverImage32,
+    builder: (column) => ColumnOrderings(column),
+  );
+
   $$ArtistsTableOrderingComposer get artistId {
     final $$ArtistsTableOrderingComposer composer = $composerBuilder(
       composer: this,
@@ -3543,6 +3632,16 @@ class $$AlbumsTableAnnotationComposer
 
   GeneratedColumn<String> get coverImage => $composableBuilder(
     column: $table.coverImage,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<String> get coverImage128 => $composableBuilder(
+    column: $table.coverImage128,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<String> get coverImage32 => $composableBuilder(
+    column: $table.coverImage32,
     builder: (column) => column,
   );
 
@@ -3651,12 +3750,16 @@ class $$AlbumsTableTableManager
                 Value<int?> artistId = const Value.absent(),
                 Value<int?> genreId = const Value.absent(),
                 Value<String?> coverImage = const Value.absent(),
+                Value<String?> coverImage128 = const Value.absent(),
+                Value<String?> coverImage32 = const Value.absent(),
               }) => AlbumsCompanion(
                 id: id,
                 name: name,
                 artistId: artistId,
                 genreId: genreId,
                 coverImage: coverImage,
+                coverImage128: coverImage128,
+                coverImage32: coverImage32,
               ),
           createCompanionCallback:
               ({
@@ -3665,12 +3768,16 @@ class $$AlbumsTableTableManager
                 Value<int?> artistId = const Value.absent(),
                 Value<int?> genreId = const Value.absent(),
                 Value<String?> coverImage = const Value.absent(),
+                Value<String?> coverImage128 = const Value.absent(),
+                Value<String?> coverImage32 = const Value.absent(),
               }) => AlbumsCompanion.insert(
                 id: id,
                 name: name,
                 artistId: artistId,
                 genreId: genreId,
                 coverImage: coverImage,
+                coverImage128: coverImage128,
+                coverImage32: coverImage32,
               ),
           withReferenceMapper: (p0) => p0
               .map(
@@ -3770,7 +3877,6 @@ typedef $$TracksTableCreateCompanionBuilder =
       Value<int> id,
       required String title,
       required String fileuri,
-      Value<String?> coverImage,
       Value<String?> lyrics,
       Value<int?> duration,
       Value<String?> trackNumber,
@@ -3788,7 +3894,6 @@ typedef $$TracksTableUpdateCompanionBuilder =
       Value<int> id,
       Value<String> title,
       Value<String> fileuri,
-      Value<String?> coverImage,
       Value<String?> lyrics,
       Value<int?> duration,
       Value<String?> trackNumber,
@@ -3899,11 +4004,6 @@ class $$TracksTableFilterComposer
 
   ColumnFilters<String> get fileuri => $composableBuilder(
     column: $table.fileuri,
-    builder: (column) => ColumnFilters(column),
-  );
-
-  ColumnFilters<String> get coverImage => $composableBuilder(
-    column: $table.coverImage,
     builder: (column) => ColumnFilters(column),
   );
 
@@ -4066,11 +4166,6 @@ class $$TracksTableOrderingComposer
     builder: (column) => ColumnOrderings(column),
   );
 
-  ColumnOrderings<String> get coverImage => $composableBuilder(
-    column: $table.coverImage,
-    builder: (column) => ColumnOrderings(column),
-  );
-
   ColumnOrderings<String> get lyrics => $composableBuilder(
     column: $table.lyrics,
     builder: (column) => ColumnOrderings(column),
@@ -4198,11 +4293,6 @@ class $$TracksTableAnnotationComposer
 
   GeneratedColumn<String> get fileuri =>
       $composableBuilder(column: $table.fileuri, builder: (column) => column);
-
-  GeneratedColumn<String> get coverImage => $composableBuilder(
-    column: $table.coverImage,
-    builder: (column) => column,
-  );
 
   GeneratedColumn<String> get lyrics =>
       $composableBuilder(column: $table.lyrics, builder: (column) => column);
@@ -4363,7 +4453,6 @@ class $$TracksTableTableManager
                 Value<int> id = const Value.absent(),
                 Value<String> title = const Value.absent(),
                 Value<String> fileuri = const Value.absent(),
-                Value<String?> coverImage = const Value.absent(),
                 Value<String?> lyrics = const Value.absent(),
                 Value<int?> duration = const Value.absent(),
                 Value<String?> trackNumber = const Value.absent(),
@@ -4379,7 +4468,6 @@ class $$TracksTableTableManager
                 id: id,
                 title: title,
                 fileuri: fileuri,
-                coverImage: coverImage,
                 lyrics: lyrics,
                 duration: duration,
                 trackNumber: trackNumber,
@@ -4397,7 +4485,6 @@ class $$TracksTableTableManager
                 Value<int> id = const Value.absent(),
                 required String title,
                 required String fileuri,
-                Value<String?> coverImage = const Value.absent(),
                 Value<String?> lyrics = const Value.absent(),
                 Value<int?> duration = const Value.absent(),
                 Value<String?> trackNumber = const Value.absent(),
@@ -4413,7 +4500,6 @@ class $$TracksTableTableManager
                 id: id,
                 title: title,
                 fileuri: fileuri,
-                coverImage: coverImage,
                 lyrics: lyrics,
                 duration: duration,
                 trackNumber: trackNumber,

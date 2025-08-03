@@ -278,6 +278,7 @@ class BackgroundAudioHandler extends BaseAudioHandler
 
     final mediaItem = _queue[_currentIndex];
     return TrackItem(
+      fullCover: mediaItem.artUri?.toString() ?? '',
       liked: mediaItem.extras?['liked'] ?? false,
       unliked: mediaItem.extras?['unliked'] ?? false,
       id: mediaItem.extras?['trackId'] ?? 0,
@@ -295,6 +296,7 @@ class BackgroundAudioHandler extends BaseAudioHandler
     return _queue
         .map(
           (mediaItem) => TrackItem(
+            fullCover: mediaItem.artUri?.toString() ?? '',
             liked: mediaItem.extras?['liked'] ?? false,
             unliked: mediaItem.extras?['unliked'] ?? false,
             id: mediaItem.extras?['trackId'] ?? 0,

@@ -41,7 +41,7 @@ class MainActivity : AudioServiceFragmentActivity() {
     }
 
     // Cache for album art URIs by album ID to avoid duplicate processing
-    private val albumArtCache = mutableMapOf<Long, String?>()
+    private val albumArtCache = mutableMapOf<Long, Triple<String?, String?, String?>>()
     
     // Single retriever instance per thread for better resource management
     private val retrieverThreadLocal = ThreadLocal.withInitial { MediaMetadataRetriever() }
@@ -205,8 +205,8 @@ class MainActivity : AudioServiceFragmentActivity() {
                     id
                 ).toString()
 
-                // Get album art URI from cache (already processed)
-                val albumArtUri = albumArtCache[albumId]
+                // Get album art URIs from cache (already processed)
+                val (albumArtUri, albumArtUri128, albumArtUri32) = albumArtCache[albumId] ?: Triple(null, null, null)
 
                 list += mapOf(
                     "id" to id.toString(),
@@ -214,6 +214,8 @@ class MainActivity : AudioServiceFragmentActivity() {
                     "artist" to cursor.getString(artistCol),
                     "album" to cursor.getString(albumCol),
                     "album_art_uri" to albumArtUri,
+                    "album_art_uri_128" to albumArtUri128,
+                    "album_art_uri_32" to albumArtUri32,
                     "duration" to cursor.getString(durCol),
                     "year" to cursor.getString(yearCol),
                     "track" to cursor.getInt(trackCol).takeIf { it > 0 }?.toString(),
@@ -250,8 +252,8 @@ class MainActivity : AudioServiceFragmentActivity() {
                 if (albumArtCache.containsKey(albumId)) continue
                 
                 // Try to get cached album art or extract new one
-                val albumArtUri = getOrExtractAlbumArt(albumId, systemAlbumArt)
-                albumArtCache[albumId] = albumArtUri
+                val (fullSizeUri, thumb128Uri, thumb32Uri) = getOrExtractAlbumArt(albumId, systemAlbumArt)
+                albumArtCache[albumId] = Triple(fullSizeUri, thumb128Uri, thumb32Uri)
             }
         }
     }
@@ -262,25 +264,37 @@ class MainActivity : AudioServiceFragmentActivity() {
      * @param systemAlbumArt System-provided album art path (may be null)
      * @return Album art URI or null if not available
      */
-    private suspend fun getOrExtractAlbumArt(albumId: Long, systemAlbumArt: String?): String? {
+    private suspend fun getOrExtractAlbumArt(albumId: Long, systemAlbumArt: String?): Triple<String?, String?, String?> {
         // Create cache filename based on album ID
         val cacheFileName = "album_${albumId}.jpg"
         val cacheFile = File(albumArtCacheDir, cacheFileName)
-        
-        // Return cached version if it exists
+
+        var albumArtUri: String? = null
+        var albumArtUri128: String? = null
+        var albumArtUri32: String? = null
+
+        // Check if full-size cached version exists
         if (cacheFile.exists()) {
-            return Uri.fromFile(cacheFile).toString()
+            albumArtUri = Uri.fromFile(cacheFile).toString()
+            val bitmap = BitmapFactory.decodeFile(cacheFile.path)
+            if (bitmap != null) {
+                albumArtUri128 = getOrExtractAlbumArt128(albumId, bitmap)
+                albumArtUri32 = getOrExtractAlbumArt32(albumId, bitmap)
+            }
+            return Triple(albumArtUri, albumArtUri128, albumArtUri32)
         }
-        
+
         // Check memory cache first
         val cacheKey = "album_$albumId"
         memoryCache.get(cacheKey)?.let { bitmap ->
-            // Save to disk cache if not already there
             if (saveBitmapToCache(bitmap, cacheFile)) {
-                return Uri.fromFile(cacheFile).toString()
+                albumArtUri = Uri.fromFile(cacheFile).toString()
+                albumArtUri128 = getOrExtractAlbumArt128(albumId, bitmap)
+                albumArtUri32 = getOrExtractAlbumArt32(albumId, bitmap)
+                return Triple(albumArtUri, albumArtUri128, albumArtUri32)
             }
         }
-        
+
         // Try Android Q+ ContentResolver.loadThumbnail first
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
             try {
@@ -289,65 +303,74 @@ class MainActivity : AudioServiceFragmentActivity() {
                     albumId
                 )
                 val thumbnail = contentResolver.loadThumbnail(albumUri, Size(512, 512), null)
-                
+
                 if (saveBitmapToCache(thumbnail, cacheFile)) {
-                    // Cache in memory for hot access
                     memoryCache.put(cacheKey, thumbnail)
-                    return Uri.fromFile(cacheFile).toString()
+                    albumArtUri = Uri.fromFile(cacheFile).toString()
+                    albumArtUri128 = getOrExtractAlbumArt128(albumId, thumbnail)
+                    albumArtUri32 = getOrExtractAlbumArt32(albumId, thumbnail)
+                    return Triple(albumArtUri, albumArtUri128, albumArtUri32)
                 }
             } catch (e: Exception) {
                 Log.d("MainActivity", "ContentResolver.loadThumbnail failed for album $albumId, falling back to MediaMetadataRetriever", e)
             }
         }
-        
+
         // Fallback to MediaMetadataRetriever for older versions or when loadThumbnail fails
-        return extractAlbumArtWithRetriever(albumId, cacheFile, cacheKey)
+        val (full, thumb128, thumb32) = extractAlbumArtWithRetriever(albumId, cacheFile, cacheKey)
+        return Triple(full, thumb128, thumb32)
     }
     
     /**
      * Fallback method using MediaMetadataRetriever for album art extraction
      */
-    private suspend fun extractAlbumArtWithRetriever(albumId: Long, cacheFile: File, cacheKey: String): String? {
+    private suspend fun extractAlbumArtWithRetriever(albumId: Long, cacheFile: File, cacheKey: String): Triple<String?, String?, String?> {
         val retriever = retrieverThreadLocal.get()
-        
+
+        var albumArtUri: String? = null
+        var albumArtUri128: String? = null
+        var albumArtUri32: String? = null
+
         try {
             // Find a track from this album to extract art from
-            val trackId = getTrackIdFromAlbum(albumId) ?: return getDefaultAlbumArt()
-            
+            val trackId = getTrackIdFromAlbum(albumId)
+            if (trackId == null) {
+                val defaultArt = getDefaultAlbumArt()
+                return Triple(defaultArt, defaultArt, defaultArt)
+            }
+
             val trackUri = ContentUris.withAppendedId(
                 MediaStore.Audio.Media.EXTERNAL_CONTENT_URI,
                 trackId
             )
-            
+
             retriever.setDataSource(this, trackUri)
             val albumArt = retriever.embeddedPicture
-            
+
             if (albumArt != null) {
                 // Decode the byte array to bitmap
                 val originalBitmap = BitmapFactory.decodeByteArray(albumArt, 0, albumArt.size)
-                
+
                 if (originalBitmap != null) {
-                    // Compress to 2048x2048 thumbnail
-                    val thumbnail = compressBitmapToThumbnail(originalBitmap, 512, 512)
-                    
-                    // Save to cache
-                    if (saveBitmapToCache(thumbnail, cacheFile)) {
-                        // Cache in memory for hot access
-                        memoryCache.put(cacheKey, thumbnail)
-                        // Don't recycle thumbnail as it's now in memory cache
-                        originalBitmap.recycle()
-                        return Uri.fromFile(cacheFile).toString()
+                    // Save full-size image to cache
+                    if (saveBitmapToCache(originalBitmap, cacheFile)) {
+                        memoryCache.put(cacheKey, originalBitmap) // Cache original for hot access
+                        albumArtUri = Uri.fromFile(cacheFile).toString()
                     }
-                    
-                    originalBitmap.recycle()
-                    thumbnail.recycle()
+
+                    // Generate and cache 128x128 and 32x32 thumbnails
+                    albumArtUri128 = getOrExtractAlbumArt128(albumId, originalBitmap)
+                    albumArtUri32 = getOrExtractAlbumArt32(albumId, originalBitmap)
+
+                    // originalBitmap.recycle() // Let GC handle this to avoid issues with concurrent access
                 }
             }
         } catch (e: Exception) {
             Log.e("MainActivity", "Error extracting album art for album $albumId", e)
         }
-        
-        return getDefaultAlbumArt()
+
+        val defaultArt = getDefaultAlbumArt()
+        return Triple(albumArtUri ?: defaultArt, albumArtUri128 ?: defaultArt, albumArtUri32 ?: defaultArt)
     }
     
     /**
@@ -529,6 +552,49 @@ class MainActivity : AudioServiceFragmentActivity() {
             }
         }
         return null
+    }
+/**
+     * Gets or extracts 128x128 album art for the given album.
+     * This function will handle its own caching.
+     */
+    private suspend fun getOrExtractAlbumArt128(albumId: Long, originalBitmap: Bitmap): String? {
+        val cacheFileName = "album_128_${albumId}.jpg"
+        val cacheFile = File(albumArtCacheDir, cacheFileName)
+
+        if (cacheFile.exists()) {
+            return Uri.fromFile(cacheFile).toString()
+        }
+
+        val thumbnail = compressBitmapToThumbnail(originalBitmap, 128, 128)
+        return if (saveBitmapToCache(thumbnail, cacheFile)) {
+            thumbnail.recycle() // Recycle as it's saved to disk
+            Uri.fromFile(cacheFile).toString()
+        } else {
+            thumbnail.recycle()
+            null
+        }
+    }
+
+    /**
+     * Gets or extracts 32x32 album art for the given album.
+     * This function will handle its own caching.
+     */
+    private suspend fun getOrExtractAlbumArt32(albumId: Long, originalBitmap: Bitmap): String? {
+        val cacheFileName = "album_32_${albumId}.jpg"
+        val cacheFile = File(albumArtCacheDir, cacheFileName)
+
+        if (cacheFile.exists()) {
+            return Uri.fromFile(cacheFile).toString()
+        }
+
+        val thumbnail = compressBitmapToThumbnail(originalBitmap, 32, 32)
+        return if (saveBitmapToCache(thumbnail, cacheFile)) {
+            thumbnail.recycle() // Recycle as it's saved to disk
+            Uri.fromFile(cacheFile).toString()
+        } else {
+            thumbnail.recycle()
+            null
+        }
     }
     
     override fun onDestroy() {

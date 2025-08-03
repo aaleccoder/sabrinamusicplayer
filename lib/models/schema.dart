@@ -52,8 +52,9 @@ class Albums extends Table {
   TextColumn get name => text()();
   IntColumn get artistId => integer().nullable().references(Artists, #id)();
   IntColumn get genreId => integer().nullable().references(Genres, #id)();
-  TextColumn get coverImage =>
-      text().nullable()(); // URI for album art thumbnails
+  TextColumn get coverImage => text().nullable()();
+  TextColumn get coverImage128 => text().nullable()();
+  TextColumn get coverImage32 => text().nullable()();
 }
 
 // table for tracks
@@ -61,8 +62,6 @@ class Tracks extends Table {
   IntColumn get id => integer().autoIncrement()();
   TextColumn get title => text()();
   TextColumn get fileuri => text()(); // As requested
-  TextColumn get coverImage =>
-      text().nullable()(); // URI for album art thumbnails
   TextColumn get lyrics => text().nullable()();
   IntColumn get duration => integer().nullable()();
   TextColumn get trackNumber => text().nullable()();
@@ -76,6 +75,8 @@ class Tracks extends Table {
   IntColumn get artistId => integer().nullable().references(Artists, #id)();
   IntColumn get genreId => integer().nullable().references(Genres, #id)();
 }
+
+enum CoverSize { original, s128, s32 }
 
 @DriftDatabase(
   tables: [
@@ -126,7 +127,6 @@ class AppDatabase extends _$AppDatabase {
       id: Value(track.id),
       title: Value(track.title),
       fileuri: Value(track.fileuri),
-      coverImage: Value(track.cover),
       isFavorite: Value(track.liked),
       isUnliked: Value(track.unliked),
       updatedAt: Value(DateTime.now()),
@@ -141,6 +141,7 @@ class AppDatabase extends _$AppDatabase {
     bool? isFavorite,
     bool? isUnliked,
     SortOption sortOption = SortOption.alphabeticalAZ,
+    CoverSize? coverSize = CoverSize.s32,
   }) {
     final query = select(tracks).join([
       leftOuterJoin(artists, artists.id.equalsExp(tracks.artistId)),
@@ -183,13 +184,18 @@ class AppDatabase extends _$AppDatabase {
         final album = row.readTableOrNull(albums);
 
         return TrackItem(
+          fullCover: album?.coverImage ?? '', // always original
           unliked: track.isUnliked,
           liked: track.isFavorite,
           id: track.id,
           title: track.title,
           artist: artist?.name ?? '',
           album: album?.name,
-          cover: track.coverImage ?? '',
+          cover: coverSize == CoverSize.original
+              ? album?.coverImage ?? ''
+              : coverSize == CoverSize.s128
+              ? album?.coverImage128 ?? ''
+              : album?.coverImage32 ?? '',
           fileuri: track.fileuri,
           year: track.year,
           createdAt: track.createdAt,
@@ -213,7 +219,9 @@ class AppDatabase extends _$AppDatabase {
     }).toList();
   }
 
-  Future<List<AlbumItem>> getAllAlbums() async {
+  Future<List<AlbumItem>> getAllAlbums({
+    CoverSize? coverSize = CoverSize.s128,
+  }) async {
     final query = select(
       albums,
     ).join([leftOuterJoin(artists, artists.id.equalsExp(albums.artistId))]);
@@ -224,10 +232,16 @@ class AppDatabase extends _$AppDatabase {
       final album = row.readTable(albums);
       final artist = row.readTableOrNull(artists);
 
+      final cover = coverSize == CoverSize.original
+          ? album.coverImage
+          : coverSize == CoverSize.s128
+          ? album.coverImage128
+          : album.coverImage32;
+
       return AlbumItem(
         id: album.id,
         name: album.name,
-        cover: album.coverImage,
+        cover: cover,
         artistName: artist?.name,
         artistId: artist?.id,
         tracks: null, // Will be loaded lazily
@@ -236,16 +250,25 @@ class AppDatabase extends _$AppDatabase {
   }
 
   // New methods for lazy loading
-  Future<List<AlbumItem>> getAlbumsByArtist(int artistId) async {
+  Future<List<AlbumItem>> getAlbumsByArtist(
+    int artistId, {
+    CoverSize? coverSize = CoverSize.s128,
+  }) async {
     final query = select(albums)..where((a) => a.artistId.equals(artistId));
 
     final rows = await query.get();
 
     return rows.map((album) {
+      final cover = coverSize == CoverSize.original
+          ? album.coverImage
+          : coverSize == CoverSize.s128
+          ? album.coverImage128
+          : album.coverImage32;
+
       return AlbumItem(
         id: album.id,
         name: album.name,
-        cover: album.coverImage,
+        cover: cover,
         artistName: null, // Not needed when fetching by artist
         artistId: artistId,
         tracks: null, // Will be loaded lazily
@@ -253,7 +276,10 @@ class AppDatabase extends _$AppDatabase {
     }).toList();
   }
 
-  Stream<List<TrackItem>> watchTracksByAlbum(int albumId) {
+  Stream<List<TrackItem>> watchTracksByAlbum(
+    int albumId, {
+    CoverSize? coverSize = CoverSize.s32,
+  }) {
     final query = select(tracks).join([
       leftOuterJoin(artists, artists.id.equalsExp(tracks.artistId)),
       leftOuterJoin(albums, albums.id.equalsExp(tracks.albumId)),
@@ -266,12 +292,17 @@ class AppDatabase extends _$AppDatabase {
         final album = row.readTableOrNull(albums);
 
         return TrackItem(
+          fullCover: album?.coverImage ?? '', // always original
           unliked: track.isUnliked,
           id: track.id,
           title: track.title,
           artist: artist?.name ?? '',
           album: album?.name,
-          cover: track.coverImage ?? '',
+          cover: coverSize == CoverSize.original
+              ? album?.coverImage ?? ''
+              : coverSize == CoverSize.s128
+              ? album?.coverImage128 ?? ''
+              : album?.coverImage32 ?? '',
           fileuri: track.fileuri,
           liked: track.isFavorite,
           year: track.year,
@@ -281,7 +312,10 @@ class AppDatabase extends _$AppDatabase {
     });
   }
 
-  Stream<List<TrackItem>> watchTracksByArtist(int artistId) {
+  Stream<List<TrackItem>> watchTracksByArtist(
+    int artistId, {
+    CoverSize? coverSize = CoverSize.s32,
+  }) {
     final query = select(tracks).join([
       leftOuterJoin(artists, artists.id.equalsExp(tracks.artistId)),
       leftOuterJoin(albums, albums.id.equalsExp(tracks.albumId)),
@@ -294,12 +328,17 @@ class AppDatabase extends _$AppDatabase {
         final album = row.readTableOrNull(albums);
 
         return TrackItem(
+          fullCover: album?.coverImage ?? '', // always original
           unliked: track.isUnliked,
           id: track.id,
           title: track.title,
           artist: artist?.name ?? '',
           album: album?.name,
-          cover: track.coverImage ?? '',
+          cover: coverSize == CoverSize.original
+              ? album?.coverImage ?? ''
+              : coverSize == CoverSize.s128
+              ? album?.coverImage128 ?? ''
+              : album?.coverImage32 ?? '',
           fileuri: track.fileuri,
           liked: track.isFavorite,
           year: track.year,
@@ -357,7 +396,10 @@ class AppDatabase extends _$AppDatabase {
   }
 
   // Optimized search methods with indexes
-  Stream<List<TrackItem>> watchSearchTracks(String query) {
+  Stream<List<TrackItem>> watchSearchTracks(
+    String query, {
+    CoverSize? coverSize = CoverSize.s32,
+  }) {
     final searchQuery =
         select(tracks).join([
           leftOuterJoin(artists, artists.id.equalsExp(tracks.artistId)),
@@ -375,12 +417,17 @@ class AppDatabase extends _$AppDatabase {
         final album = row.readTableOrNull(albums);
 
         return TrackItem(
+          fullCover: album?.coverImage ?? '', // always original
           unliked: track.isUnliked,
           id: track.id,
           title: track.title,
           artist: artist?.name ?? '',
           album: album?.name,
-          cover: track.coverImage ?? '',
+          cover: coverSize == CoverSize.original
+              ? album?.coverImage ?? ''
+              : coverSize == CoverSize.s128
+              ? album?.coverImage128 ?? ''
+              : album?.coverImage32 ?? '',
           fileuri: track.fileuri,
           liked: track.isFavorite,
           year: track.year,
@@ -405,7 +452,10 @@ class AppDatabase extends _$AppDatabase {
     }).toList();
   }
 
-  Future<List<AlbumItem>> searchAlbumsByName(String query) async {
+  Future<List<AlbumItem>> searchAlbumsByName(
+    String query, {
+    CoverSize? coverSize = CoverSize.s128,
+  }) async {
     final searchQuery = select(albums).join([
       leftOuterJoin(artists, artists.id.equalsExp(albums.artistId)),
     ])..where(albums.name.like('%$query%') | artists.name.like('%$query%'));
@@ -415,10 +465,16 @@ class AppDatabase extends _$AppDatabase {
       final album = row.readTable(albums);
       final artist = row.readTableOrNull(artists);
 
+      final cover = coverSize == CoverSize.original
+          ? album.coverImage
+          : coverSize == CoverSize.s128
+          ? album.coverImage128
+          : album.coverImage32;
+
       return AlbumItem(
         id: album.id,
         name: album.name,
-        cover: album.coverImage,
+        cover: cover,
         artistName: artist?.name,
         artistId: artist?.id,
         tracks: null,
@@ -436,7 +492,10 @@ class AppDatabase extends _$AppDatabase {
     }).toList();
   }
 
-  Future<List<TrackItem>> getTracksByGenre(int genreId) async {
+  Future<List<TrackItem>> getTracksByGenre(
+    int genreId, {
+    CoverSize? coverSize = CoverSize.s32,
+  }) async {
     final query = select(tracks).join([
       leftOuterJoin(artists, artists.id.equalsExp(tracks.artistId)),
       leftOuterJoin(albums, albums.id.equalsExp(tracks.albumId)),
@@ -450,11 +509,16 @@ class AppDatabase extends _$AppDatabase {
       final album = row.readTableOrNull(albums);
 
       return TrackItem(
+        fullCover: album?.coverImage ?? '', // always original
         id: track.id,
         title: track.title,
         artist: artist?.name ?? '',
         album: album?.name,
-        cover: track.coverImage ?? '',
+        cover: coverSize == CoverSize.original
+            ? album?.coverImage ?? ''
+            : coverSize == CoverSize.s128
+            ? album?.coverImage128 ?? ''
+            : album?.coverImage32 ?? '',
         fileuri: track.fileuri,
         liked: track.isFavorite,
         unliked: track.isUnliked,
@@ -490,7 +554,10 @@ class AppDatabase extends _$AppDatabase {
     }).toList();
   }
 
-  Future<List<TrackItem>> getPlaylistTracks(int playlistId) async {
+  Future<List<TrackItem>> getPlaylistTracks(
+    int playlistId, {
+    CoverSize? coverSize = CoverSize.s32,
+  }) async {
     final query =
         select(tracks).join([
             innerJoin(
@@ -511,12 +578,17 @@ class AppDatabase extends _$AppDatabase {
       final album = row.readTableOrNull(albums);
 
       return TrackItem(
+        fullCover: album?.coverImage ?? '', // always original
         unliked: track.isUnliked,
         id: track.id,
         title: track.title,
         artist: artist?.name ?? '',
         album: album?.name,
-        cover: track.coverImage ?? '',
+        cover: coverSize == CoverSize.original
+            ? album?.coverImage ?? ''
+            : coverSize == CoverSize.s128
+            ? album?.coverImage128 ?? ''
+            : album?.coverImage32 ?? '',
         fileuri: track.fileuri,
         liked: track.isFavorite,
         year: track.year,
@@ -636,7 +708,10 @@ class AppDatabase extends _$AppDatabase {
     }).toList();
   }
 
-  Future<List<AlbumItem>> searchAlbums(String query) async {
+  Future<List<AlbumItem>> searchAlbums(
+    String query, {
+    CoverSize? coverSize = CoverSize.s128,
+  }) async {
     final searchQuery = select(albums).join([
       leftOuterJoin(artists, artists.id.equalsExp(albums.artistId)),
     ])..where(albums.name.like('%$query%') | artists.name.like('%$query%'));
@@ -646,10 +721,16 @@ class AppDatabase extends _$AppDatabase {
       final album = row.readTable(albums);
       final artist = row.readTableOrNull(artists);
 
+      final cover = coverSize == CoverSize.original
+          ? album.coverImage
+          : coverSize == CoverSize.s128
+          ? album.coverImage128
+          : album.coverImage32;
+
       return AlbumItem(
         id: album.id,
         name: album.name,
-        cover: album.coverImage,
+        cover: cover,
         artistName: artist?.name,
         artistId: artist?.id,
         tracks: null,
@@ -657,10 +738,20 @@ class AppDatabase extends _$AppDatabase {
     }).toList();
   }
 
+  Future<String?> getArt32FromSongId(int songId) async {
+    final query = select(tracks).join([
+      leftOuterJoin(albums, albums.id.equalsExp(tracks.albumId)),
+    ])..where(tracks.id.equals(songId));
+
+    final row = await query.getSingleOrNull();
+    return row?.readTableOrNull(albums)?.coverImage32;
+  }
+
   // Pagination support for large datasets
   Future<List<TrackItem>> getTracksPaginated({
     int limit = 50,
     int offset = 0,
+    CoverSize? coverSize = CoverSize.s32,
   }) async {
     final query = select(tracks).join([
       leftOuterJoin(artists, artists.id.equalsExp(tracks.artistId)),
@@ -674,12 +765,17 @@ class AppDatabase extends _$AppDatabase {
       final album = row.readTableOrNull(albums);
 
       return TrackItem(
+        fullCover: album?.coverImage ?? '', // always original
         unliked: track.isUnliked,
         id: track.id,
         title: track.title,
         artist: artist?.name ?? '',
         album: album?.name,
-        cover: track.coverImage ?? '',
+        cover: coverSize == CoverSize.original
+            ? album?.coverImage ?? ''
+            : coverSize == CoverSize.s128
+            ? album?.coverImage128 ?? ''
+            : album?.coverImage32 ?? '',
         fileuri: track.fileuri,
         liked: track.isFavorite,
         year: track.year,

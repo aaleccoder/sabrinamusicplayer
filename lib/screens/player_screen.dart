@@ -1,13 +1,48 @@
 import 'dart:io';
 
 import 'package:flutter/cupertino.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_application_1/main.dart';
+import 'package:flutter_application_1/models/schema.dart';
 import 'package:flutter_application_1/services/metadata_service.dart';
 import 'package:flutter_application_1/theme.dart';
 import 'package:flutter_application_1/services/audio_service.dart';
+import 'package:flutter_application_1/utils/database.dart';
+import 'package:flutter_application_1/widgets/song_list_view.dart';
 import 'package:palette_generator/palette_generator.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+
+Future<List<Color>> _extractColorsFromImage(String? imagePath) async {
+  WidgetsFlutterBinding.ensureInitialized();
+
+  if (imagePath == null || imagePath.isEmpty) {
+    return [AppTheme.primary, AppTheme.background];
+  }
+
+  try {
+    final uri = Uri.parse(imagePath);
+    if (uri.isScheme('file')) {
+      final file = File.fromUri(uri);
+      if (file.existsSync()) {
+        final imageProvider = FileImage(file);
+        final palette = await PaletteGenerator.fromImageProvider(
+          imageProvider,
+          size: const Size(32, 32), // Use smaller size for faster processing
+        );
+
+        final dominantColor = palette.dominantColor?.color ?? AppTheme.primary;
+        final vibrantColor = palette.vibrantColor?.color ?? AppTheme.secondary;
+
+        return [dominantColor, vibrantColor, AppTheme.background];
+      }
+    }
+  } catch (e) {
+    // Fallback to default colors
+  }
+
+  return [AppTheme.primary, AppTheme.background];
+}
 
 class PlayerScreen extends ConsumerStatefulWidget {
   const PlayerScreen({super.key});
@@ -23,6 +58,8 @@ class _PlayerScreenState extends ConsumerState<PlayerScreen>
   late Animation<Offset> _slideAnimation;
   late Animation<double> _scaleAnimation;
   List<Color> _dominantColors = [AppTheme.primary, AppTheme.background];
+  List<Color>? _previousColors;
+  final Map<int, List<Color>> _colorCache = {};
 
   @override
   void initState() {
@@ -50,6 +87,12 @@ class _PlayerScreenState extends ConsumerState<PlayerScreen>
 
     _slideController.forward();
     _scaleController.forward();
+
+    // Set initial colors
+    final currentTrack = ref.read(audioPlayerNotifierProvider).currentTrack;
+    if (currentTrack != null) {
+      _updateColors(currentTrack);
+    }
   }
 
   @override
@@ -59,35 +102,91 @@ class _PlayerScreenState extends ConsumerState<PlayerScreen>
     super.dispose();
   }
 
-  Future<List<Color>> _extractColorsFromImage(String? imagePath) async {
-    if (imagePath == null || imagePath.isEmpty) {
-      return [AppTheme.primary, AppTheme.background];
+  void _updateColors(TrackItem track, {bool prefetchNext = true}) async {
+    print(
+      '[_updateColors] called for track: ${track.title}, fullCover: ${track.fullCover}, mounted: $mounted',
+    );
+    // Store current colors as previous
+    _previousColors = _dominantColors;
+
+    if (_colorCache.containsKey(track.id)) {
+      if (mounted) {
+        setState(() {
+          _dominantColors = _colorCache[track.id]!;
+        });
+      } else {
+        print(
+          '[_updateColors] Widget not mounted, skipping setState for cached colors.',
+        );
+      }
+      if (prefetchNext) {
+        _prefetchNextTrackColors();
+      }
+      return;
     }
 
-    try {
-      final uri = Uri.parse(imagePath);
-      if (uri.isScheme('file')) {
-        final file = File.fromUri(uri);
-        if (file.existsSync()) {
-          final imageProvider = FileImage(file);
-          final palette = await PaletteGenerator.fromImageProvider(
-            imageProvider,
-            size: const Size(100, 100), // Smaller size for faster processing
+    // Fetch the small cover art
+    // Only read ref if mounted
+    if (!mounted) {
+      print('[_updateColors] Widget not mounted, skipping ref.read for db.');
+      return;
+    }
+    // Extract colors in an isolate
+    final newColors = await compute(_extractColorsFromImage, track.fullCover);
+
+    if (mounted) {
+      setState(() {
+        _dominantColors = newColors;
+        _colorCache[track.id] = newColors;
+      });
+    } else {
+      print(
+        '[_updateColors] Widget not mounted, skipping setState for new colors.',
+      );
+    }
+
+    if (prefetchNext) {
+      _prefetchNextTrackColors();
+    }
+  }
+
+  void _prefetchNextTrackColors() async {
+    print('[_prefetchNextTrackColors] called, mounted: $mounted');
+    // Only read ref if mounted
+    if (!mounted) {
+      print(
+        '[_prefetchNextTrackColors] Widget not mounted, skipping ref.read for audioState.',
+      );
+      return;
+    }
+    final audioState = ref.read(audioPlayerNotifierProvider);
+    final queue = audioState.queue;
+    if (queue == null || queue.isEmpty) return;
+
+    final nextIndex = audioState.currentIndex + 1;
+    if (nextIndex < queue.length) {
+      final nextTrack = queue[nextIndex];
+      if (!_colorCache.containsKey(nextTrack.id)) {
+        // Only read ref if mounted
+        if (!mounted) {
+          print(
+            '[_prefetchNextTrackColors] Widget not mounted, skipping ref.read for db (next track).',
           );
-
-          final dominantColor =
-              palette.dominantColor?.color ?? AppTheme.primary;
-          final vibrantColor =
-              palette.vibrantColor?.color ?? AppTheme.secondary;
-
-          return [dominantColor, vibrantColor, AppTheme.background];
+          return;
+        }
+        final colors = await compute(
+          _extractColorsFromImage,
+          nextTrack.fullCover,
+        );
+        if (mounted) {
+          _colorCache[nextTrack.id] = colors;
+        } else {
+          print(
+            '[_prefetchNextTrackColors] Widget not mounted, skipping color cache update.',
+          );
         }
       }
-    } catch (e) {
-      // Fallback to default colors
     }
-
-    return [AppTheme.primary, AppTheme.background];
   }
 
   @override
@@ -100,13 +199,7 @@ class _PlayerScreenState extends ConsumerState<PlayerScreen>
       audioPlayerNotifierProvider.select((value) => value.currentTrack),
       (previous, next) {
         if (previous != next && next != null) {
-          _extractColorsFromImage(next.cover).then((colors) {
-            if (mounted) {
-              setState(() {
-                _dominantColors = colors;
-              });
-            }
-          });
+          _updateColors(next);
         }
       },
     );
@@ -224,11 +317,8 @@ class _PlayerScreenState extends ConsumerState<PlayerScreen>
                 ),
                 child: ClipRRect(
                   borderRadius: AppTheme.radiusXxl,
-                  child: FutureBuilder<String?>(
-                    future: MetadataService().getFullSizeAlbumArt(
-                      currentTrack.id.toString(),
-                    ),
-                    builder: (context, snapshot) {
+                  child: Builder(
+                    builder: (context) {
                       Widget coverArt = Container(
                         width: 320,
                         height: 320,
@@ -249,10 +339,8 @@ class _PlayerScreenState extends ConsumerState<PlayerScreen>
                         ),
                       );
 
-                      String? artUri = snapshot.data;
-                      if (artUri == null || artUri.isEmpty) {
-                        artUri = currentTrack.cover;
-                      }
+                      String? artUri = currentTrack.fullCover;
+                      print('[_buildAlbumArtSection] artUri: $artUri');
 
                       try {
                         if (artUri != null && artUri.isNotEmpty) {
@@ -270,6 +358,9 @@ class _PlayerScreenState extends ConsumerState<PlayerScreen>
                           }
                         }
                       } catch (e) {
+                        print(
+                          '[_buildAlbumArtSection] Error loading image: $e',
+                        );
                         // Fallback to placeholder
                       }
 

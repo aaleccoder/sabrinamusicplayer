@@ -134,6 +134,7 @@ class AudioPlayerNotifier extends StateNotifier<AudioPlayerState> {
       _audioHandler?.mediaItem.listen((mediaItem) {
         if (mediaItem != null) {
           final currentTrack = TrackItem(
+            fullCover: mediaItem.artUri?.toString() ?? '',
             liked: mediaItem.extras?['liked'] ?? false,
             unliked: mediaItem.extras?['unliked'] ?? false,
             id: mediaItem.extras?['trackId'] ?? 0,
@@ -157,6 +158,7 @@ class AudioPlayerNotifier extends StateNotifier<AudioPlayerState> {
         final trackQueue = queue
             .map(
               (mediaItem) => TrackItem(
+                fullCover: mediaItem.artUri?.toString() ?? '',
                 liked: mediaItem.extras?['liked'] ?? false,
                 unliked: mediaItem.extras?['unliked'] ?? false,
                 id: mediaItem.extras?['trackId'] ?? 0,

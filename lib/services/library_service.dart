@@ -21,23 +21,19 @@ class LibraryService {
         currentFile: 'Fetching music from your device...',
       );
 
-      // Fetch all music files from the MediaStore
       final allMusicFiles = await metadataService.getAllMusicFiles();
       final allDeviceFilePaths = allMusicFiles
           .map((f) => f['path'] as String)
           .toSet();
 
-      // Get excluded directories
       final excludedDirs = await database
           .select(database.excludedDirectories)
           .get();
       final excludedPaths = excludedDirs.map((d) => d.path).toSet();
 
-      // Get existing tracks from the database
       final existingTracks = await database.select(database.tracks).get();
       final tracksToDelete = <int>{};
 
-      // Find tracks to delete (orphaned or in excluded folders)
       for (final track in existingTracks) {
         final trackPath = await metadataService.getPathFromUri(track.fileuri);
         bool isInExcluded =
@@ -48,7 +44,6 @@ class LibraryService {
         }
       }
 
-      // Perform deletion if needed
       if (tracksToDelete.isNotEmpty) {
         await (database.delete(
           database.tracks,
@@ -57,7 +52,6 @@ class LibraryService {
           'Deleted ${tracksToDelete.length} orphaned or excluded tracks.',
         );
         await database.cleanupOrphanedMetadata();
-        // Invalidate providers to reflect deletions immediately
         ref.invalidate(tracksProvider);
         ref.invalidate(albumsProvider);
         ref.invalidate(artistsProvider);
@@ -73,11 +67,9 @@ class LibraryService {
       progressNotifier.startScanning(totalFiles: allMusicFiles.length);
       debugPrint('Found ${allMusicFiles.length} music files.');
 
-      // Re-fetch existing tracks to get a clean state for processing new files
       final currentTracks = await database.select(database.tracks).get();
       final currentFilePaths = currentTracks.map((t) => t.fileuri).toSet();
 
-      // Filter out already existing files and files in excluded directories
       final newFilesToProcess = allMusicFiles.where((f) {
         final path = f['path'] as String;
         if (currentFilePaths.contains(path)) {
@@ -97,7 +89,6 @@ class LibraryService {
 
       debugPrint('Processing ${newFilesToProcess.length} new music files.');
 
-      // Process files in batches to avoid overwhelming the database
       const dbCommitSize = 100;
       for (int i = 0; i < newFilesToProcess.length; i += dbCommitSize) {
         final batchEnd = (i + dbCommitSize).clamp(0, newFilesToProcess.length);
@@ -108,11 +99,12 @@ class LibraryService {
           currentFile: 'Processing batch ${i ~/ dbCommitSize + 1}...',
         );
 
-        // Prepare data for batch insertion
         final artistNames = <String>{};
         final genreNames = <String>{};
         final albumArtistMap = <String, String>{};
         final albumArtUriMap = <String, String>{};
+        final albumArtUri128Map = <String, String>{};
+        final albumArtUri32Map = <String, String>{};
 
         for (final metadata in batch) {
           final artist = metadata['artist'] ?? 'Unknown Artist';
@@ -123,7 +115,6 @@ class LibraryService {
           genreNames.add(genre);
           albumArtistMap.putIfAbsent(album, () => artist);
 
-          // Store album art URI for later use
           if (metadata.containsKey('album_art_uri') &&
               metadata['album_art_uri'] != null) {
             final albumKey = '$album|$artist';
@@ -132,23 +123,38 @@ class LibraryService {
               () => metadata['album_art_uri']!,
             );
           }
+          if (metadata.containsKey('album_art_uri_128') &&
+              metadata['album_art_uri_128'] != null) {
+            final albumKey = '$album|$artist';
+            albumArtUri128Map.putIfAbsent(
+              albumKey,
+              () => metadata['album_art_uri_128']!,
+            );
+          }
+          if (metadata.containsKey('album_art_uri_32') &&
+              metadata['album_art_uri_32'] != null) {
+            final albumKey = '$album|$artist';
+            albumArtUri32Map.putIfAbsent(
+              albumKey,
+              () => metadata['album_art_uri_32']!,
+            );
+          }
         }
 
-        // Batch process artists and genres
         final artistIdMap = await _batchProcessArtists(database, artistNames);
         final genreIdMap = await _batchProcessGenres(database, genreNames);
 
-        // Batch process albums with URI-based cover handling
         final albumIdMap = await _batchProcessAlbums(
           database,
           albumArtistMap,
           artistIdMap,
           genreIdMap,
           albumArtUriMap,
+          albumArtUri128Map,
+          albumArtUri32Map,
           {for (var m in batch) m['path']!: m},
         );
 
-        // Prepare tracks for insertion
         final trackCompanions = <TracksCompanion>[];
         for (int j = 0; j < batch.length; j++) {
           final metadata = batch[j];
@@ -160,9 +166,6 @@ class LibraryService {
           final genreName = metadata['genre'] ?? 'Unknown Genre';
           final albumKey = '$albumName|$artistName';
 
-          // Store the album art URI directly in the cover path
-          final albumArtUri = metadata['album_art_uri'];
-
           trackCompanions.add(
             TracksCompanion.insert(
               title: metadata['title'] ?? p.basenameWithoutExtension(filePath),
@@ -173,9 +176,6 @@ class LibraryService {
               createdAt: Value(DateTime.now()),
               artistId: Value(artistIdMap[artistName]),
               genreId: Value(genreIdMap[genreName]),
-              coverImage: albumArtUri != null
-                  ? Value(albumArtUri)
-                  : const Value.absent(),
             ),
           );
           progressNotifier.updateProgress(
@@ -272,6 +272,8 @@ class LibraryService {
     Map<String, int> artistIdMap,
     Map<String, int> genreIdMap,
     Map<String, String> albumArtUriMap,
+    Map<String, String> albumArtUri128Map,
+    Map<String, String> albumArtUri32Map,
     Map<String, Map<String, dynamic>> metadataCache,
   ) async {
     final existingAlbums = await db.select(db.albums).join([
@@ -313,6 +315,12 @@ class LibraryService {
             genreId: Value(genreIdMap[genreName]),
             coverImage: coverArtUri != null
                 ? Value(coverArtUri)
+                : const Value.absent(),
+            coverImage128: albumArtUri128Map[uniqueKey] != null
+                ? Value(albumArtUri128Map[uniqueKey])
+                : const Value.absent(),
+            coverImage32: albumArtUri32Map[uniqueKey] != null
+                ? Value(albumArtUri32Map[uniqueKey])
                 : const Value.absent(),
           ),
         );
