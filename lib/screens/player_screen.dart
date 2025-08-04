@@ -14,6 +14,7 @@ Future<List<Color>> _extractColorsFromImage(String? imagePath) async {
   WidgetsFlutterBinding.ensureInitialized();
 
   if (imagePath == null || imagePath.isEmpty) {
+    debugPrint("Got here nothing working");
     return [AppTheme.primary, AppTheme.background];
   }
 
@@ -308,10 +309,7 @@ class _PlayerScreenState extends ConsumerState<PlayerScreen>
               tag: 'player-artwork',
               child: Container(
                 key: ValueKey(currentTrack.id),
-                decoration: BoxDecoration(
-                  borderRadius: AppTheme.radiusXxl,
-                  // Removed boxShadow and blur, keep only gradient
-                ),
+                decoration: BoxDecoration(borderRadius: AppTheme.radiusXxl),
                 child: ClipRRect(
                   borderRadius: AppTheme.radiusXxl,
                   child: Builder(
@@ -337,7 +335,6 @@ class _PlayerScreenState extends ConsumerState<PlayerScreen>
                       );
 
                       String? artUri = currentTrack.fullCover;
-                      print('[_buildAlbumArtSection] artUri: $artUri');
 
                       try {
                         if (artUri != null && artUri.isNotEmpty) {

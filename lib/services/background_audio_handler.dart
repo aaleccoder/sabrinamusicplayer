@@ -88,8 +88,9 @@ class BackgroundAudioHandler extends BaseAudioHandler
       title: track.title,
       artist: track.artist,
       duration: null, // Will be set when audio loads
-      artUri: track.cover.isNotEmpty ? Uri.parse(track.cover) : null,
+      artUri: track.fullCover.isNotEmpty ? Uri.parse(track.fullCover) : null,
       extras: {
+        'cover128': track.cover,
         'trackId': track.id,
         'liked': track.liked,
         'unliked': track.unliked,

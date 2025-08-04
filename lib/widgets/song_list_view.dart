@@ -1,4 +1,5 @@
 import 'dart:io';
+import 'dart:math' as math;
 
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
@@ -70,11 +71,8 @@ class SongListView extends ConsumerWidget {
               child: const SearchBarWidget(),
             ),
 
-            _buildSongCountHeader(context, tracksAsync),
-            _buildHeaderWithOptions(context, ref, tracksAsync),
-
             // Songs list
-            Expanded(child: _buildSongsList(context, tracksAsync)),
+            Expanded(child: _buildSongsList(context, ref, tracksAsync)),
           ],
         ),
       ),
@@ -176,92 +174,26 @@ class SongListView extends ConsumerWidget {
         border: Border.all(color: AppTheme.primary.withOpacity(0.1), width: 1),
       ),
       child: tracksAsync.when(
-        data: (tracks) => Row(
-          children: [
-            Container(
-              padding: const EdgeInsets.all(8),
-              decoration: BoxDecoration(
-                color: AppTheme.primary.withOpacity(0.1),
-                borderRadius: BorderRadius.circular(8),
-              ),
-              child: Icon(
-                Icons.library_music,
-                size: 28,
-                color: AppTheme.primary,
-              ),
-            ),
-            const SizedBox(width: 12),
-            Expanded(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    'Your Music Library',
-                    style: Theme.of(context).textTheme.bodyMedium,
-                  ),
-                  const SizedBox(height: 2),
-                  Text(
-                    '${tracks.length} song${tracks.length != 1 ? 's' : ''} available',
-                    style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                      fontSize: AppTheme.textTheme.bodySmall?.fontSize,
-                      color: AppTheme.onSurface.withOpacity(0.7),
-                    ),
-                  ),
-                ],
-              ),
-            ),
-          ],
+        data: (tracks) => Text(
+          '${tracks.length} song${tracks.length != 1 ? 's' : ''} available',
+          style: Theme.of(context).textTheme.bodySmall?.copyWith(
+            fontSize: AppTheme.textTheme.bodySmall?.fontSize,
+            color: AppTheme.onSurface.withOpacity(0.7),
+          ),
         ),
-        loading: () => Row(
-          children: [
-            Container(
-              padding: const EdgeInsets.all(8),
-              decoration: BoxDecoration(
-                color: AppTheme.primary.withOpacity(0.1),
-                borderRadius: BorderRadius.circular(8),
-              ),
-              child: SizedBox(
-                width: 16,
-                height: 16,
-                child: CircularProgressIndicator(
-                  strokeWidth: 2,
-                  valueColor: AlwaysStoppedAnimation<Color>(AppTheme.primary),
-                ),
-              ),
-            ),
-            const SizedBox(width: 12),
-            Text(
-              'Loading your music...',
-              style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                fontSize:
-                    (Theme.of(context).textTheme.bodyMedium?.fontSize ?? 14) *
-                    0.6,
-                color: AppTheme.onSurface.withOpacity(0.7),
-              ),
-            ),
-          ],
+        loading: () => Text(
+          'Loading your music...',
+          style: Theme.of(context).textTheme.bodySmall?.copyWith(
+            fontSize: AppTheme.textTheme.bodySmall?.fontSize,
+            color: AppTheme.onSurface.withOpacity(0.7),
+          ),
         ),
-        error: (e, _) => Row(
-          children: [
-            Container(
-              padding: const EdgeInsets.all(8),
-              decoration: BoxDecoration(
-                color: AppTheme.error.withOpacity(0.1),
-                borderRadius: BorderRadius.circular(8),
-              ),
-              child: Icon(Icons.error_outline, size: 16, color: AppTheme.error),
-            ),
-            const SizedBox(width: 12),
-            Text(
-              'Error loading music',
-              style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                fontSize:
-                    (Theme.of(context).textTheme.bodyMedium?.fontSize ?? 14) *
-                    0.6,
-                color: AppTheme.error,
-              ),
-            ),
-          ],
+        error: (e, _) => Text(
+          'Error loading music',
+          style: Theme.of(context).textTheme.bodySmall?.copyWith(
+            fontSize: AppTheme.textTheme.bodySmall?.fontSize,
+            color: AppTheme.error,
+          ),
         ),
       ),
     );
@@ -269,11 +201,41 @@ class SongListView extends ConsumerWidget {
 
   Widget _buildSongsList(
     BuildContext context,
+    WidgetRef ref,
     AsyncValue<List<TrackItem>> tracksAsync,
   ) {
     return tracksAsync.when(
-      data: (tracks) =>
-          tracks.isEmpty ? _buildEmptyState(context) : _buildTracksList(tracks),
+      data: (tracks) {
+        if (tracks.isEmpty) {
+          return _buildEmptyState(context);
+        }
+        return CustomScrollView(
+          slivers: [
+            SliverToBoxAdapter(
+              child: _buildHeaderWithOptions(context, ref, tracksAsync),
+            ),
+            SliverToBoxAdapter(
+              child: _buildSongCountHeader(context, tracksAsync),
+            ),
+            SliverPadding(
+              padding: const EdgeInsets.fromLTRB(10, 5, 10, 10),
+              sliver: SliverList(
+                delegate: SliverChildBuilderDelegate((context, index) {
+                  final itemIndex = index ~/ 2;
+                  if (index.isEven) {
+                    return SongListViewItem(
+                      track: tracks[itemIndex],
+                      tracks: tracks,
+                      index: itemIndex,
+                    );
+                  }
+                  return const SizedBox(height: 8);
+                }, childCount: math.max(0, tracks.length * 2 - 1)),
+              ),
+            ),
+          ],
+        );
+      },
       loading: () => Center(
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
@@ -388,16 +350,6 @@ class SongListView extends ConsumerWidget {
           ],
         ),
       ),
-    );
-  }
-
-  Widget _buildTracksList(List<TrackItem> tracks) {
-    return ListView.separated(
-      padding: const EdgeInsets.fromLTRB(10, 5, 10, 10),
-      itemCount: tracks.length,
-      itemBuilder: (context, index) =>
-          SongListViewItem(track: tracks[index], tracks: tracks, index: index),
-      separatorBuilder: (context, index) => const SizedBox(height: 8),
     );
   }
 }
