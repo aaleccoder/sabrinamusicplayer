@@ -51,7 +51,7 @@ final unlikedTracksProvider = StreamProvider<List<TrackItem>>((ref) {
 
 final albumsProvider = FutureProvider<List<AlbumItem>>((ref) {
   final db = ref.watch(appDatabaseProvider);
-  return db.getAllAlbums(coverSize: CoverSize.s128);
+  return db.getAllAlbums(coverSize: CoverSize.original);
 });
 
 final artistsProvider = FutureProvider<List<ArtistItem>>((ref) {
