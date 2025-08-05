@@ -5,6 +5,7 @@ import 'package:flutter_application_1/widgets/artists.dart';
 import 'package:flutter_application_1/widgets/genres.dart';
 import 'package:flutter_application_1/widgets/playlists.dart';
 import 'package:flutter_application_1/widgets/song_list_view.dart';
+import 'package:flutter_application_1/widgets/stats.dart';
 import 'package:path_provider/path_provider.dart';
 
 part 'schema.g.dart';
@@ -593,6 +594,31 @@ class AppDatabase extends _$AppDatabase {
         updatedAt: playlistRow.updatedAt,
       );
     }).toList();
+  }
+
+  Stream<List<TrackStat>> watchTrackPlays() {
+    final query = select(tracks).join([
+      leftOuterJoin(artists, artists.id.equalsExp(tracks.artistId)),
+      leftOuterJoin(albums, albums.id.equalsExp(tracks.albumId)),
+    ])..where(tracks.playCount.isBiggerThanValue(0));
+
+    return query.watch().map((rows) {
+      return rows.map((row) {
+        final track = row.readTable(tracks);
+        final artist = row.readTableOrNull(artists);
+        final album = row.readTableOrNull(albums);
+
+        return TrackStat(
+          id: track.id,
+          title: track.title,
+          artist: artist?.name ?? '',
+          album: album?.name ?? '',
+          coverImage: album?.coverImage ?? '',
+          fileuri: track.fileuri ?? '',
+          playedAt: track.lastPlayed,
+        );
+      }).toList();
+    });
   }
 
   Future<void> registerStatOnPlay(TrackItem track) async {

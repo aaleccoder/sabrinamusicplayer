@@ -159,6 +159,11 @@ final searchTracksProvider = StreamProvider.family<List<TrackItem>, String>((
   return db.watchSearchTracks(query);
 });
 
+final trackPlaysProvider = StreamProvider<List<TrackStat>>((ref) {
+  final db = ref.watch(appDatabaseProvider); // Your AppDatabase provider
+  return db.watchTrackPlays();
+});
+
 final searchAlbumsProvider = FutureProvider.family<List<AlbumItem>, String>((
   ref,
   query,
