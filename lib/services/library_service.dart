@@ -31,31 +31,29 @@ class LibraryService {
           .get();
       final excludedPaths = excludedDirs.map((d) => d.path).toSet();
 
-      final existingTracks = await database.select(database.tracks).get();
-      final tracksToDelete = <int>{};
+      final allDbTracks = await database.select(database.tracks).get();
+      final tracksToUnlink = <int>{};
 
-      for (final track in existingTracks) {
-        final trackPath = await metadataService.getPathFromUri(track.fileuri);
-        bool isInExcluded =
+      for (final track in allDbTracks) {
+        if (track.fileuri == null) continue; // Already unlinked
+
+        final trackPath = await metadataService.getPathFromUri(track.fileuri!);
+        final isExcluded =
             trackPath != null &&
             excludedPaths.any((p) => trackPath.startsWith(p));
-        if (isInExcluded || !allDeviceFilePaths.contains(track.fileuri)) {
-          tracksToDelete.add(track.id);
+        final isOrphaned = !allDeviceFilePaths.contains(track.fileuri);
+
+        if (isExcluded || isOrphaned) {
+          tracksToUnlink.add(track.id);
         }
       }
 
-      if (tracksToDelete.isNotEmpty) {
-        await (database.delete(
-          database.tracks,
-        )..where((t) => t.id.isIn(tracksToDelete))).go();
-        debugPrint(
-          'Deleted ${tracksToDelete.length} orphaned or excluded tracks.',
-        );
-        await database.cleanupOrphanedMetadata();
+      if (tracksToUnlink.isNotEmpty) {
+        await (database.update(database.tracks)
+              ..where((t) => t.id.isIn(tracksToUnlink)))
+            .write(const TracksCompanion(fileuri: Value.absent()));
+        debugPrint('Unlinked ${tracksToUnlink.length} tracks.');
         ref.invalidate(tracksProvider);
-        ref.invalidate(albumsProvider);
-        ref.invalidate(artistsProvider);
-        ref.invalidate(genresProvider);
       }
 
       if (allMusicFiles.isEmpty) {
@@ -67,32 +65,34 @@ class LibraryService {
       progressNotifier.startScanning(totalFiles: allMusicFiles.length);
       debugPrint('Found ${allMusicFiles.length} music files.');
 
-      final currentTracks = await database.select(database.tracks).get();
-      final currentFilePaths = currentTracks.map((t) => t.fileuri).toSet();
+      // Filter out excluded files first
+      final filesToProcess = allMusicFiles
+          .where((f) => !excludedPaths.any((p) => f['path']!.startsWith(p)))
+          .toList();
 
-      final newFilesToProcess = allMusicFiles.where((f) {
-        final path = f['path'] as String;
-        if (currentFilePaths.contains(path)) {
-          return false;
-        }
-        if (excludedPaths.any((p) => path.startsWith(p))) {
-          return false;
-        }
-        return true;
-      }).toList();
-
-      if (newFilesToProcess.isEmpty) {
-        debugPrint('No new music files to process.');
+      if (filesToProcess.isEmpty) {
+        debugPrint('No new or linkable music files to process.');
         progressNotifier.finishScanning();
         return;
       }
 
-      debugPrint('Processing ${newFilesToProcess.length} new music files.');
+      debugPrint('Processing ${filesToProcess.length} music files.');
+
+      // Fetch all existing track and artist data for efficient lookup
+      final allArtists = await database.select(database.artists).get();
+      final artistIdToName = {for (var a in allArtists) a.id: a.name};
+
+      final allTracks = await database.select(database.tracks).get();
+      final trackLookup = {
+        for (var t in allTracks)
+          '${t.title.toLowerCase()}|${artistIdToName[t.artistId]?.toLowerCase()}':
+              t,
+      };
 
       const dbCommitSize = 100;
-      for (int i = 0; i < newFilesToProcess.length; i += dbCommitSize) {
-        final batchEnd = (i + dbCommitSize).clamp(0, newFilesToProcess.length);
-        final batch = newFilesToProcess.sublist(i, batchEnd);
+      for (int i = 0; i < filesToProcess.length; i += dbCommitSize) {
+        final batchEnd = (i + dbCommitSize).clamp(0, filesToProcess.length);
+        final batch = filesToProcess.sublist(i, batchEnd);
 
         progressNotifier.updateProgress(
           processedFiles: i,
@@ -103,8 +103,6 @@ class LibraryService {
         final genreNames = <String>{};
         final albumArtistMap = <String, String>{};
         final albumArtUriMap = <String, String>{};
-        final albumArtUri128Map = <String, String>{};
-        final albumArtUri32Map = <String, String>{};
 
         for (final metadata in batch) {
           final artist = metadata['artist'] ?? 'Unknown Artist';
@@ -115,78 +113,91 @@ class LibraryService {
           genreNames.add(genre);
           albumArtistMap.putIfAbsent(album, () => artist);
 
-          if (metadata.containsKey('album_art_uri') &&
-              metadata['album_art_uri'] != null) {
+          if (metadata['album_art_uri'] != null) {
             final albumKey = '$album|$artist';
             albumArtUriMap.putIfAbsent(
               albumKey,
               () => metadata['album_art_uri']!,
             );
           }
-          if (metadata.containsKey('album_art_uri_128') &&
-              metadata['album_art_uri_128'] != null) {
-            final albumKey = '$album|$artist';
-            albumArtUri128Map.putIfAbsent(
-              albumKey,
-              () => metadata['album_art_uri_128']!,
-            );
-          }
-          if (metadata.containsKey('album_art_uri_32') &&
-              metadata['album_art_uri_32'] != null) {
-            final albumKey = '$album|$artist';
-            albumArtUri32Map.putIfAbsent(
-              albumKey,
-              () => metadata['album_art_uri_32']!,
-            );
-          }
         }
 
         final artistIdMap = await _batchProcessArtists(database, artistNames);
         final genreIdMap = await _batchProcessGenres(database, genreNames);
-
         final albumIdMap = await _batchProcessAlbums(
           database,
           albumArtistMap,
           artistIdMap,
           genreIdMap,
           albumArtUriMap,
-          albumArtUri128Map,
-          albumArtUri32Map,
+          {}, // albumArtUri128Map - simplified for now
+          {}, // albumArtUri32Map - simplified for now
           {for (var m in batch) m['path']!: m},
         );
 
-        final trackCompanions = <TracksCompanion>[];
+        final tracksToInsert = <TracksCompanion>[];
+        final tracksToUpdate = <TracksCompanion>[];
+
         for (int j = 0; j < batch.length; j++) {
           final metadata = batch[j];
-          final filePath = metadata['path'];
-          if (filePath == null) continue;
-
+          final filePath = metadata['path'] as String;
+          final title =
+              metadata['title'] ?? p.basenameWithoutExtension(filePath);
           final artistName = metadata['artist'] ?? 'Unknown Artist';
           final albumName = metadata['album'] ?? 'Unknown Album';
           final genreName = metadata['genre'] ?? 'Unknown Genre';
           final albumKey = '$albumName|$artistName';
 
-          trackCompanions.add(
-            TracksCompanion.insert(
-              title: metadata['title'] ?? p.basenameWithoutExtension(filePath),
-              fileuri: filePath,
-              trackNumber: Value(metadata['track_number']),
-              year: Value(metadata['year']),
-              albumId: Value(albumIdMap[albumKey]),
-              createdAt: Value(DateTime.now()),
-              artistId: Value(artistIdMap[artistName]),
-              genreId: Value(genreIdMap[genreName]),
-            ),
-          );
+          final lookupKey =
+              '${title.toLowerCase()}|${artistName.toLowerCase()}';
+          final existingTrack = trackLookup[lookupKey];
+
+          if (existingTrack != null) {
+            if (existingTrack.fileuri == null) {
+              // It's an unlinked track, so we update it.
+              tracksToUpdate.add(
+                TracksCompanion(
+                  id: Value(existingTrack.id),
+                  fileuri: Value(filePath),
+                  albumId: Value(albumIdMap[albumKey]),
+                  genreId: Value(genreIdMap[genreName]),
+                  year: Value(metadata['year']),
+                  trackNumber: Value(metadata['track_number']),
+                ),
+              );
+            }
+            // If fileUri is not null, we don't touch it.
+          } else {
+            // It's a new track.
+            tracksToInsert.add(
+              TracksCompanion.insert(
+                title: title,
+                fileuri: filePath,
+                artistId: Value(artistIdMap[artistName]),
+                albumId: Value(albumIdMap[albumKey]),
+                genreId: Value(genreIdMap[genreName]),
+                year: Value(metadata['year']),
+                trackNumber: Value(metadata['track_number']),
+                createdAt: Value(DateTime.now()),
+              ),
+            );
+          }
           progressNotifier.updateProgress(
             processedFiles: i + j + 1,
             currentFile: p.basename(filePath),
           );
         }
-        // Insert tracks in a batch
-        if (trackCompanions.isNotEmpty) {
-          await database.batch((batch) {
-            batch.insertAll(database.tracks, trackCompanions);
+
+        if (tracksToInsert.isNotEmpty) {
+          await database.batch(
+            (b) => b.insertAll(database.tracks, tracksToInsert),
+          );
+        }
+        if (tracksToUpdate.isNotEmpty) {
+          await database.batch((b) {
+            for (final companion in tracksToUpdate) {
+              b.update(database.tracks, companion);
+            }
           });
         }
       }
@@ -276,26 +287,43 @@ class LibraryService {
     Map<String, String> albumArtUri32Map,
     Map<String, Map<String, dynamic>> metadataCache,
   ) async {
-    final existingAlbums = await db.select(db.albums).join([
+    final existingAlbumsResult = await db.select(db.albums).join([
       innerJoin(db.artists, db.artists.id.equalsExp(db.albums.artistId)),
     ]).get();
 
     final idMap = <String, int>{};
-    for (final row in existingAlbums) {
+    final existingAlbumMap = <String, Album>{};
+    for (final row in existingAlbumsResult) {
       final album = row.readTable(db.albums);
       final artist = row.readTable(db.artists);
-      idMap['${album.name}|${artist.name}'] = album.id;
+      final key = '${album.name}|${artist.name}';
+      idMap[key] = album.id;
+      existingAlbumMap[key] = album;
     }
 
-    final newAlbumCompanions = <AlbumsCompanion>[];
+    final albumsToInsert = <AlbumsCompanion>[];
+    final albumsToUpdate = <AlbumsCompanion>[];
     final newAlbumKeys = <String>{};
 
     for (final entry in albumArtistMap.entries) {
       final albumName = entry.key;
       final artistName = entry.value;
       final uniqueKey = '$albumName|$artistName';
+      final coverArtUri = albumArtUriMap[uniqueKey];
 
-      if (!idMap.containsKey(uniqueKey)) {
+      if (idMap.containsKey(uniqueKey)) {
+        // Album exists, check if we should update the cover.
+        final existingAlbum = existingAlbumMap[uniqueKey]!;
+        if (coverArtUri != null && existingAlbum.coverImage != coverArtUri) {
+          albumsToUpdate.add(
+            AlbumsCompanion(
+              id: Value(existingAlbum.id),
+              coverImage: Value(coverArtUri),
+            ),
+          );
+        }
+      } else {
+        // New album, create it.
         final metadata = metadataCache.values.firstWhere(
           (m) =>
               (m['album'] ?? 'Unknown Album') == albumName &&
@@ -306,35 +334,24 @@ class LibraryService {
 
         final genreName = metadata['genre'] ?? 'Unknown Genre';
 
-        final coverArtUri = albumArtUriMap[uniqueKey];
-
-        newAlbumCompanions.add(
+        albumsToInsert.add(
           AlbumsCompanion.insert(
             name: albumName,
             artistId: Value(artistIdMap[artistName]),
             genreId: Value(genreIdMap[genreName]),
-            coverImage: coverArtUri != null
-                ? Value(coverArtUri)
-                : const Value.absent(),
-            coverImage128: albumArtUri128Map[uniqueKey] != null
-                ? Value(albumArtUri128Map[uniqueKey])
-                : const Value.absent(),
-            coverImage32: albumArtUri32Map[uniqueKey] != null
-                ? Value(albumArtUri32Map[uniqueKey])
-                : const Value.absent(),
+            coverImage: Value(coverArtUri),
           ),
         );
         newAlbumKeys.add(uniqueKey);
       }
     }
 
-    if (newAlbumCompanions.isNotEmpty) {
-      await db.batch((batch) => batch.insertAll(db.albums, newAlbumCompanions));
-
+    if (albumsToInsert.isNotEmpty) {
+      await db.batch((batch) => batch.insertAll(db.albums, albumsToInsert));
+      // Re-fetch to get IDs for the new albums
       final inserted = await db.select(db.albums).join([
         innerJoin(db.artists, db.artists.id.equalsExp(db.albums.artistId)),
       ]).get();
-
       for (final row in inserted) {
         final album = row.readTable(db.albums);
         final artist = row.readTable(db.artists);
@@ -344,6 +361,15 @@ class LibraryService {
         }
       }
     }
+
+    if (albumsToUpdate.isNotEmpty) {
+      await db.batch((batch) {
+        for (final companion in albumsToUpdate) {
+          batch.update(db.albums, companion);
+        }
+      });
+    }
+
     return idMap;
   }
 

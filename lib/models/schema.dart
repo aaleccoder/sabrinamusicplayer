@@ -14,10 +14,36 @@ class ExcludedDirectories extends Table {
   TextColumn get path => text().withLength(max: 255)();
 }
 
+class TrackStatPlay extends Table {
+  IntColumn get id => integer().autoIncrement()();
+  IntColumn get trackStatId => integer().references(Tracks, #id)();
+  DateTimeColumn get playedAt => dateTime().withDefault(currentDateAndTime)();
+}
+
+class ALbumStatPlay extends Table {
+  IntColumn get id => integer().autoIncrement()();
+  IntColumn get albumStatId => integer().references(Albums, #id)();
+  DateTimeColumn get playedAt => dateTime().withDefault(currentDateAndTime)();
+}
+
+class ArtistStatPlay extends Table {
+  IntColumn get id => integer().autoIncrement()();
+  IntColumn get artistStatId => integer().references(Artists, #id)();
+  DateTimeColumn get playedAt => dateTime().withDefault(currentDateAndTime)();
+}
+
+class GenreStatPlay extends Table {
+  IntColumn get id => integer().autoIncrement()();
+  IntColumn get genreStatId => integer().references(Genres, #id)();
+  DateTimeColumn get playedAt => dateTime().withDefault(currentDateAndTime)();
+}
+
 // table for genres
 class Genres extends Table {
   IntColumn get id => integer().autoIncrement()();
   TextColumn get name => text().unique()();
+  IntColumn get playCount => integer().withDefault(const Constant(0))();
+  DateTimeColumn get lastPlayed => dateTime().withDefault(currentDateAndTime)();
 }
 
 class Playlist extends Table {
@@ -44,6 +70,8 @@ class PlaylistTracks extends Table {
 class Artists extends Table {
   IntColumn get id => integer().autoIncrement()();
   TextColumn get name => text().unique()();
+  IntColumn get playCount => integer().withDefault(const Constant(0))();
+  DateTimeColumn get lastPlayed => dateTime().withDefault(currentDateAndTime)();
 }
 
 // table for albums
@@ -55,13 +83,15 @@ class Albums extends Table {
   TextColumn get coverImage => text().nullable()();
   TextColumn get coverImage128 => text().nullable()();
   TextColumn get coverImage32 => text().nullable()();
+  IntColumn get playCount => integer().withDefault(const Constant(0))();
+  DateTimeColumn get lastPlayed => dateTime().withDefault(currentDateAndTime)();
 }
 
 // table for tracks
 class Tracks extends Table {
   IntColumn get id => integer().autoIncrement()();
   TextColumn get title => text()();
-  TextColumn get fileuri => text()(); // As requested
+  TextColumn get fileuri => text().nullable()(); // As requested
   TextColumn get lyrics => text().nullable()();
   IntColumn get duration => integer().nullable()();
   TextColumn get trackNumber => text().nullable()();
@@ -74,6 +104,8 @@ class Tracks extends Table {
   IntColumn get albumId => integer().nullable().references(Albums, #id)();
   IntColumn get artistId => integer().nullable().references(Artists, #id)();
   IntColumn get genreId => integer().nullable().references(Genres, #id)();
+  IntColumn get playCount => integer().withDefault(const Constant(0))();
+  DateTimeColumn get lastPlayed => dateTime().withDefault(currentDateAndTime)();
 }
 
 enum CoverSize { original, s128, s32 }
@@ -146,7 +178,7 @@ class AppDatabase extends _$AppDatabase {
     final query = select(tracks).join([
       leftOuterJoin(artists, artists.id.equalsExp(tracks.artistId)),
       leftOuterJoin(albums, albums.id.equalsExp(tracks.albumId)),
-    ]);
+    ])..where(tracks.fileuri.isNotNull());
 
     if (isFavorite != null) {
       query.where(tracks.isFavorite.equals(isFavorite));
@@ -182,6 +214,7 @@ class AppDatabase extends _$AppDatabase {
         final track = row.readTable(tracks);
         final artist = row.readTableOrNull(artists);
         final album = row.readTableOrNull(albums);
+        final genre = row.readTableOrNull(genres);
 
         return TrackItem(
           fullCover: album?.coverImage ?? '', // always original
@@ -190,7 +223,11 @@ class AppDatabase extends _$AppDatabase {
           id: track.id,
           title: track.title,
           artist: artist?.name ?? '',
+          artistID: artist?.id ?? -1,
           album: album?.name,
+          albumID: album?.id ?? -1,
+          genre: genre?.name ?? '',
+          genreID: genre?.id ?? -1,
           cover: coverSize == CoverSize.original
               ? album?.coverImage ?? ''
               : coverSize == CoverSize.s128
@@ -553,6 +590,31 @@ class AppDatabase extends _$AppDatabase {
       );
     }).toList();
   }
+
+  // void registerStatOnPlay(TrackItem track) async {
+  //   final trackStatQuery = select(tracks)..where((s) => s.id.equals(track.id));
+
+  //   final existingStat = await trackStatQuery.getSingleOrNull();
+
+  //   if (existingStat != null) {
+  //     // Update existing stat
+  //     await (update(tracks)..where((s) => s.id.equals(existingStat.id))).write(
+  //       TracksCompanion(
+  //         playCount: Value(existingStat.playCount + 1),
+  //         lastPlayed: Value(DateTime.now()),
+  //       ),
+  //     );
+  //   } else {
+  //     // Insert new stat
+  //     await into(trackStat).insert(
+  //       TrackStatCompanion.insert(
+  //         trackId: track.id,
+  //         playCount: 1,
+  //         lastPlayed: DateTime.now(),
+  //       ),
+  //     );
+  //   }
+  // }
 
   Future<List<TrackItem>> getPlaylistTracks(
     int playlistId, {

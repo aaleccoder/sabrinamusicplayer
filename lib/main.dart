@@ -14,6 +14,7 @@ import 'package:flutter_application_1/widgets/library.dart';
 import 'package:flutter_application_1/widgets/library_scanning_overlay.dart';
 import 'package:flutter_application_1/widgets/mini_player.dart';
 import 'package:flutter_application_1/widgets/song_list_view.dart';
+import 'package:flutter_application_1/widgets/stats.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:permission_handler/permission_handler.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -291,6 +292,7 @@ class _HomeState extends ConsumerState<Home> with TickerProviderStateMixin {
   int _selectedIndex = 0;
   final PageStorageBucket _pageStorageBucket = PageStorageBucket();
   final List<Widget> _pages = [
+    const Stats(),
     SongListView(),
     const AlbumsPage(),
     const ArtistsPage(),
@@ -418,12 +420,13 @@ class _HomeState extends ConsumerState<Home> with TickerProviderStateMixin {
         child: Row(
           mainAxisAlignment: MainAxisAlignment.spaceEvenly,
           children: [
-            _buildNavDestination(Icons.music_note, 'Songs', 0),
-            _buildNavDestination(Icons.album, 'Albums', 1),
-            _buildNavDestination(Icons.person, 'Artists', 2),
-            _buildNavDestination(Icons.category, 'Genres', 3),
-            _buildNavDestination(Icons.library_music, 'Library', 4),
-            _buildNavDestination(Icons.settings, 'Settings', 5),
+            _buildNavDestination(Icons.stacked_bar_chart_rounded, 'Stats', 0),
+            _buildNavDestination(Icons.music_note, 'Songs', 1),
+            _buildNavDestination(Icons.album, 'Albums', 2),
+            _buildNavDestination(Icons.person, 'Artists', 3),
+            _buildNavDestination(Icons.category, 'Genres', 4),
+            _buildNavDestination(Icons.library_music, 'Library', 5),
+            _buildNavDestination(Icons.settings, 'Settings', 6),
           ],
         ),
       ),

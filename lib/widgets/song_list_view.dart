@@ -26,16 +26,25 @@ class TrackItem {
   int id;
   String title;
   String artist;
+  int? artistID;
   String? album;
+  int? albumID;
   String cover;
   String fullCover;
   String fileuri;
+  String? genre;
+  String? lyrics;
+  int? genreID;
   bool liked;
   bool unliked;
   String? year;
   DateTime createdAt;
 
   TrackItem({
+    this.genreID,
+    this.genre,
+    this.albumID,
+    this.artistID,
     required this.fullCover,
     required this.unliked,
     required this.liked,

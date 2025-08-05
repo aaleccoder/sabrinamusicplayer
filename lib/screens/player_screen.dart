@@ -11,8 +11,6 @@ import 'package:palette_generator/palette_generator.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 Future<List<Color>> _extractColorsFromImage(String? imagePath) async {
-  WidgetsFlutterBinding.ensureInitialized();
-
   if (imagePath == null || imagePath.isEmpty) {
     debugPrint("Got here nothing working");
     return [AppTheme.primary, AppTheme.background];
@@ -26,7 +24,7 @@ Future<List<Color>> _extractColorsFromImage(String? imagePath) async {
         final imageProvider = FileImage(file);
         final palette = await PaletteGenerator.fromImageProvider(
           imageProvider,
-          size: const Size(32, 32), // Use smaller size for faster processing
+          size: const Size(16, 16),
         );
 
         final dominantColor = palette.dominantColor?.color ?? AppTheme.primary;
@@ -129,8 +127,7 @@ class _PlayerScreenState extends ConsumerState<PlayerScreen>
       print('[_updateColors] Widget not mounted, skipping ref.read for db.');
       return;
     }
-    // Extract colors in an isolate
-    final newColors = await compute(_extractColorsFromImage, track.fullCover);
+    final newColors = await _extractColorsFromImage(track.cover);
 
     if (mounted) {
       setState(() {
@@ -172,10 +169,7 @@ class _PlayerScreenState extends ConsumerState<PlayerScreen>
           );
           return;
         }
-        final colors = await compute(
-          _extractColorsFromImage,
-          nextTrack.fullCover,
-        );
+        final colors = await _extractColorsFromImage(nextTrack.cover);
         if (mounted) {
           _colorCache[nextTrack.id] = colors;
         } else {
@@ -249,7 +243,7 @@ class _PlayerScreenState extends ConsumerState<PlayerScreen>
               decoration: BoxDecoration(
                 gradient: LinearGradient(
                   begin: Alignment.topCenter,
-                  end: Alignment.bottomCenter,
+                  end: Alignment.center,
                   colors: [
                     _dominantColors[0].withOpacity(0.8),
                     _dominantColors.length > 1
@@ -584,9 +578,9 @@ class _PlayerScreenState extends ConsumerState<PlayerScreen>
               trackHeight: 4.0,
               thumbShape: const RoundSliderThumbShape(enabledThumbRadius: 6.0),
               overlayShape: const RoundSliderOverlayShape(overlayRadius: 18.0),
-              activeTrackColor: AppTheme.primary,
+              activeTrackColor: _dominantColors[0],
               inactiveTrackColor: AppTheme.onSurface.withOpacity(0.2),
-              thumbColor: AppTheme.primary,
+              thumbColor: _dominantColors[1],
               overlayColor: AppTheme.primary.withOpacity(0.2),
             ),
             child: Slider(
@@ -773,7 +767,7 @@ class _PlayerScreenState extends ConsumerState<PlayerScreen>
             ? LinearGradient(
                 begin: Alignment.topLeft,
                 end: Alignment.bottomRight,
-                colors: [AppTheme.primary, AppTheme.primaryDark],
+                colors: [_dominantColors[0], _dominantColors[1]],
               )
             : LinearGradient(
                 begin: Alignment.topLeft,
