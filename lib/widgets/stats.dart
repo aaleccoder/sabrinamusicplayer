@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_application_1/theme.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 class Stats extends ConsumerStatefulWidget {
@@ -22,4 +23,14 @@ class _StatsState extends ConsumerState<Stats> {
       ),
     );
   }
+}
+
+Widget _buildTrackSection() {
+  return Container(
+    padding: const EdgeInsets.all(16.0),
+    child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
+        
+      ],
+    ),
+  );
 }

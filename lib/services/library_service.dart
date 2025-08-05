@@ -35,9 +35,9 @@ class LibraryService {
       final tracksToUnlink = <int>{};
 
       for (final track in allDbTracks) {
-        if (track.fileuri == null) continue; // Already unlinked
-
-        final trackPath = await metadataService.getPathFromUri(track.fileuri!);
+        final trackPath = track.fileuri != null
+            ? await metadataService.getPathFromUri(track.fileuri!)
+            : null;
         final isExcluded =
             trackPath != null &&
             excludedPaths.any((p) => trackPath.startsWith(p));
@@ -130,8 +130,8 @@ class LibraryService {
           artistIdMap,
           genreIdMap,
           albumArtUriMap,
-          {}, // albumArtUri128Map - simplified for now
-          {}, // albumArtUri32Map - simplified for now
+          {},
+          {},
           {for (var m in batch) m['path']!: m},
         );
 
@@ -153,26 +153,13 @@ class LibraryService {
           final existingTrack = trackLookup[lookupKey];
 
           if (existingTrack != null) {
-            if (existingTrack.fileuri == null) {
-              // It's an unlinked track, so we update it.
-              tracksToUpdate.add(
-                TracksCompanion(
-                  id: Value(existingTrack.id),
-                  fileuri: Value(filePath),
-                  albumId: Value(albumIdMap[albumKey]),
-                  genreId: Value(genreIdMap[genreName]),
-                  year: Value(metadata['year']),
-                  trackNumber: Value(metadata['track_number']),
-                ),
-              );
-            }
             // If fileUri is not null, we don't touch it.
           } else {
             // It's a new track.
             tracksToInsert.add(
               TracksCompanion.insert(
                 title: title,
-                fileuri: filePath,
+                fileuri: Value(filePath),
                 artistId: Value(artistIdMap[artistName]),
                 albumId: Value(albumIdMap[albumKey]),
                 genreId: Value(genreIdMap[genreName]),
@@ -381,18 +368,17 @@ class LibraryService {
     final metadataService = MetadataService();
     developer.log('Excluding directory and removing tracks: $path');
 
-    // Add to excluded directories table
     await database
         .into(database.excludedDirectories)
         .insert(ExcludedDirectoriesCompanion.insert(path: path));
 
-    // Get all tracks to find which ones to delete
     final allTracks = await database.select(database.tracks).get();
     final tracksToDelete = <int>[];
 
     for (final track in allTracks) {
-      // We need to resolve the file path from the URI to compare with the excluded path
-      final trackPath = await metadataService.getPathFromUri(track.fileuri);
+      final trackPath = track.fileuri != null
+          ? await metadataService.getPathFromUri(track.fileuri!)
+          : null;
       if (trackPath != null && trackPath.startsWith(path)) {
         tracksToDelete.add(track.id);
       }
@@ -400,15 +386,12 @@ class LibraryService {
 
     if (tracksToDelete.isNotEmpty) {
       developer.log('Deleting ${tracksToDelete.length} tracks from $path');
-      // Delete tracks from that directory
       await (database.delete(
         database.tracks,
       )..where((t) => t.id.isIn(tracksToDelete))).go();
 
-      // Clean up orphaned metadata
       await database.cleanupOrphanedMetadata();
 
-      // Invalidate providers to refresh UI
       ref.invalidate(tracksProvider);
       ref.invalidate(albumsProvider);
       ref.invalidate(artistsProvider);

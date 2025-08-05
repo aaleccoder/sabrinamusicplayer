@@ -1,7 +1,6 @@
 import 'dart:io';
 
 import 'package:flutter/cupertino.dart';
-import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_application_1/main.dart';
 import 'package:flutter_application_1/theme.dart';
@@ -84,7 +83,6 @@ class _PlayerScreenState extends ConsumerState<PlayerScreen>
     _slideController.forward();
     _scaleController.forward();
 
-    // Set initial colors
     final currentTrack = ref.read(audioPlayerNotifierProvider).currentTrack;
     if (currentTrack != null) {
       _updateColors(currentTrack);

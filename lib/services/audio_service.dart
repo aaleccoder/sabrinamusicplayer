@@ -223,9 +223,11 @@ class AudioPlayerNotifier extends StateNotifier<AudioPlayerState> {
 
     if (_audioHandler == null) return;
 
-    // Always call playTrack to ensure the audio source is set for the selected track
     final currentQueue = state.queue ?? [track];
+
     await _audioHandler!.playTrack(track, currentQueue);
+    final db = _ref.read(appDatabaseProvider);
+    await db.registerStatOnPlay(track);
   }
 
   void next() {

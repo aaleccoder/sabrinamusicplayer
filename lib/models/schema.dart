@@ -20,7 +20,7 @@ class TrackStatPlay extends Table {
   DateTimeColumn get playedAt => dateTime().withDefault(currentDateAndTime)();
 }
 
-class ALbumStatPlay extends Table {
+class AlbumStatPlay extends Table {
   IntColumn get id => integer().autoIncrement()();
   IntColumn get albumStatId => integer().references(Albums, #id)();
   DateTimeColumn get playedAt => dateTime().withDefault(currentDateAndTime)();
@@ -119,6 +119,10 @@ enum CoverSize { original, s128, s32 }
     Tracks,
     Playlist,
     PlaylistTracks,
+    TrackStatPlay,
+    AlbumStatPlay,
+    ArtistStatPlay,
+    GenreStatPlay,
   ],
 )
 class AppDatabase extends _$AppDatabase {
@@ -233,7 +237,7 @@ class AppDatabase extends _$AppDatabase {
               : coverSize == CoverSize.s128
               ? album?.coverImage128 ?? ''
               : album?.coverImage32 ?? '',
-          fileuri: track.fileuri,
+          fileuri: track.fileuri ?? '',
           year: track.year,
           createdAt: track.createdAt,
         );
@@ -340,7 +344,7 @@ class AppDatabase extends _$AppDatabase {
               : coverSize == CoverSize.s128
               ? album?.coverImage128 ?? ''
               : album?.coverImage32 ?? '',
-          fileuri: track.fileuri,
+          fileuri: track.fileuri ?? '',
           liked: track.isFavorite,
           year: track.year,
           createdAt: track.createdAt,
@@ -376,7 +380,7 @@ class AppDatabase extends _$AppDatabase {
               : coverSize == CoverSize.s128
               ? album?.coverImage128 ?? ''
               : album?.coverImage32 ?? '',
-          fileuri: track.fileuri,
+          fileuri: track.fileuri ?? '',
           liked: track.isFavorite,
           year: track.year,
           createdAt: track.createdAt,
@@ -465,7 +469,7 @@ class AppDatabase extends _$AppDatabase {
               : coverSize == CoverSize.s128
               ? album?.coverImage128 ?? ''
               : album?.coverImage32 ?? '',
-          fileuri: track.fileuri,
+          fileuri: track.fileuri ?? '',
           liked: track.isFavorite,
           year: track.year,
           createdAt: track.createdAt,
@@ -556,7 +560,7 @@ class AppDatabase extends _$AppDatabase {
             : coverSize == CoverSize.s128
             ? album?.coverImage128 ?? ''
             : album?.coverImage32 ?? '',
-        fileuri: track.fileuri,
+        fileuri: track.fileuri ?? '',
         liked: track.isFavorite,
         unliked: track.isUnliked,
         year: track.year,
@@ -591,30 +595,44 @@ class AppDatabase extends _$AppDatabase {
     }).toList();
   }
 
-  // void registerStatOnPlay(TrackItem track) async {
-  //   final trackStatQuery = select(tracks)..where((s) => s.id.equals(track.id));
+  Future<void> registerStatOnPlay(TrackItem track) async {
+    final trackStatQuery = await (select(
+      tracks,
+    )..where((s) => s.id.equals(track.id))).getSingleOrNull();
 
-  //   final existingStat = await trackStatQuery.getSingleOrNull();
-
-  //   if (existingStat != null) {
-  //     // Update existing stat
-  //     await (update(tracks)..where((s) => s.id.equals(existingStat.id))).write(
-  //       TracksCompanion(
-  //         playCount: Value(existingStat.playCount + 1),
-  //         lastPlayed: Value(DateTime.now()),
-  //       ),
-  //     );
-  //   } else {
-  //     // Insert new stat
-  //     await into(trackStat).insert(
-  //       TrackStatCompanion.insert(
-  //         trackId: track.id,
-  //         playCount: 1,
-  //         lastPlayed: DateTime.now(),
-  //       ),
-  //     );
-  //   }
-  // }
+    if (trackStatQuery != null) {
+      await (update(tracks)..where((s) => s.id.equals(track.id))).write(
+        TracksCompanion(
+          playCount: Value(trackStatQuery.playCount + 1),
+          lastPlayed: Value(DateTime.now()),
+        ),
+      );
+      (into(trackStatPlay)..insert(
+        TrackStatPlayCompanion.insert(
+          trackStatId: trackStatQuery.id,
+          playedAt: Value(DateTime.now()),
+        ),
+      ));
+      (into(albumStatPlay)..insert(
+        AlbumStatPlayCompanion.insert(
+          albumStatId: trackStatQuery.albumId ?? -1,
+          playedAt: Value(DateTime.now()),
+        ),
+      ));
+      (into(artistStatPlay)..insert(
+        ArtistStatPlayCompanion.insert(
+          artistStatId: trackStatQuery.artistId ?? -1,
+          playedAt: Value(DateTime.now()),
+        ),
+      ));
+      (into(genreStatPlay)..insert(
+        GenreStatPlayCompanion.insert(
+          genreStatId: trackStatQuery.genreId ?? -1,
+          playedAt: Value(DateTime.now()),
+        ),
+      ));
+    }
+  }
 
   Future<List<TrackItem>> getPlaylistTracks(
     int playlistId, {
@@ -651,7 +669,7 @@ class AppDatabase extends _$AppDatabase {
             : coverSize == CoverSize.s128
             ? album?.coverImage128 ?? ''
             : album?.coverImage32 ?? '',
-        fileuri: track.fileuri,
+        fileuri: track.fileuri ?? '',
         liked: track.isFavorite,
         year: track.year,
         createdAt: track.createdAt,
@@ -838,7 +856,7 @@ class AppDatabase extends _$AppDatabase {
             : coverSize == CoverSize.s128
             ? album?.coverImage128 ?? ''
             : album?.coverImage32 ?? '',
-        fileuri: track.fileuri,
+        fileuri: track.fileuri ?? '',
         liked: track.isFavorite,
         year: track.year,
         createdAt: track.createdAt,
