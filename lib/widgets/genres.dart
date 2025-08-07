@@ -7,8 +7,9 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 class GenreItem {
   int id;
   String name;
+  int playCount;
 
-  GenreItem({required this.id, required this.name});
+  GenreItem({required this.id, required this.name, this.playCount = 0});
 }
 
 class GenresPage extends ConsumerStatefulWidget {

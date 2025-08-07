@@ -19,6 +19,24 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:permission_handler/permission_handler.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
+class PaginationState {
+  final int page;
+  final int limit;
+
+  PaginationState({required this.page, this.limit = 50});
+
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      other is PaginationState &&
+          runtimeType == other.runtimeType &&
+          page == other.page &&
+          limit == other.limit;
+
+  @override
+  int get hashCode => page.hashCode ^ limit.hashCode;
+}
+
 final appDatabaseProvider = Provider<AppDatabase>((ref) {
   return AppDatabase();
 });
@@ -28,17 +46,25 @@ final audioPlayerNotifierProvider =
       return AudioPlayerNotifier(ref);
     });
 
-final tracksProvider = StreamProvider.family<List<TrackItem>, SortOption>((
-  ref,
-  sortOption,
-) {
+final trackCountProvider = FutureProvider<int>((ref) {
   final db = ref.watch(appDatabaseProvider);
-  return db.watchAllTracks(
-    isUnliked: false,
-    sortOption: sortOption,
-    coverSize: CoverSize.s128,
-  );
+  return db.getTrackCount();
 });
+final tracksProvider =
+    StreamProvider.family<List<TrackItem>, (SortOption, PaginationState)>((
+      ref,
+      params,
+    ) {
+      final (sortOption, pagination) = params;
+      final db = ref.watch(appDatabaseProvider);
+      return db.watchAllTracks(
+        isUnliked: false,
+        sortOption: sortOption,
+        coverSize: CoverSize.s128,
+        limit: pagination.limit,
+        offset: pagination.page * pagination.limit,
+      );
+    });
 
 final likedTracksProvider = StreamProvider<List<TrackItem>>((ref) {
   final db = ref.watch(appDatabaseProvider);
@@ -50,15 +76,24 @@ final unlikedTracksProvider = StreamProvider<List<TrackItem>>((ref) {
   return db.watchAllTracks(isUnliked: true, coverSize: CoverSize.s32);
 });
 
-final albumsProvider = FutureProvider<List<AlbumItem>>((ref) {
-  final db = ref.watch(appDatabaseProvider);
-  return db.getAllAlbums(coverSize: CoverSize.original);
-});
+final albumsProvider = FutureProvider.autoDispose
+    .family<List<AlbumItem>, PaginationState>((ref, pagination) {
+      final db = ref.watch(appDatabaseProvider);
+      return db.getAlbumsPaginated(
+        limit: pagination.limit,
+        offset: pagination.page * pagination.limit,
+        coverSize: CoverSize.original,
+      );
+    });
 
-final artistsProvider = FutureProvider<List<ArtistItem>>((ref) {
-  final db = ref.watch(appDatabaseProvider);
-  return db.getAllArtists();
-});
+final artistsProvider = FutureProvider.autoDispose
+    .family<List<ArtistItem>, PaginationState>((ref, pagination) {
+      final db = ref.watch(appDatabaseProvider);
+      return db.getArtistsPaginated(
+        limit: pagination.limit,
+        offset: pagination.page * pagination.limit,
+      );
+    });
 
 // Providers for lazy loading counts
 final artistAlbumCountProvider = FutureProvider.family<int, int>((
@@ -150,7 +185,6 @@ final playlistTrackCountProvider = FutureProvider.family<int, int>((
   return db.getPlaylistTrackCount(playlistId);
 });
 
-// Search providers
 final searchTracksProvider = StreamProvider.family<List<TrackItem>, String>((
   ref,
   query,
@@ -159,9 +193,24 @@ final searchTracksProvider = StreamProvider.family<List<TrackItem>, String>((
   return db.watchSearchTracks(query);
 });
 
-final trackPlaysProvider = StreamProvider<List<TrackStat>>((ref) {
+final trackPlaysProvider = StreamProvider<List<TrackItem>>((ref) {
   final db = ref.watch(appDatabaseProvider); // Your AppDatabase provider
   return db.watchTrackPlays();
+});
+
+final albumsPlaysProvider = StreamProvider<List<AlbumItem>>((ref) {
+  final db = ref.watch(appDatabaseProvider); // Your AppDatabase provider
+  return db.watchAlbumPlays();
+});
+
+final artistsPlaysProvider = StreamProvider<List<ArtistItem>>((ref) {
+  final db = ref.watch(appDatabaseProvider); // Your AppDatabase provider
+  return db.watchArtistPlays();
+});
+
+final genrePlaysProvider = StreamProvider<List<GenreItem>>((ref) {
+  final db = ref.watch(appDatabaseProvider); // Your AppDatabase provider
+  return db.watchGenrePlays();
 });
 
 final searchAlbumsProvider = FutureProvider.family<List<AlbumItem>, String>((
@@ -183,14 +232,7 @@ final searchArtistsProvider = FutureProvider.family<List<ArtistItem>, String>((
 final searchPlaylistsProvider =
     FutureProvider.family<List<PlaylistItem>, String>((ref, query) {
       final db = ref.watch(appDatabaseProvider);
-      return db.getAllPlaylists().then(
-        (playlists) => playlists
-            .where(
-              (playlist) =>
-                  playlist.name.toLowerCase().contains(query.toLowerCase()),
-            )
-            .toList(),
-      );
+      return db.searchPlaylists(query);
     });
 
 final updateTrackProvider = FutureProvider.family<void, TrackItem>((
@@ -208,18 +250,65 @@ void main() async {
     debugProfileBuildsEnabled = true;
   }
 
-  await Permission.audio.request();
-  await Permission.storage.request();
-  await Permission.notification.request();
-  await Permission.mediaLibrary.request();
-  await Permission.photos.request();
-  await Permission.accessNotificationPolicy.request();
-
   runApp(const ProviderScope(child: MainApp()));
 }
 
 class MainApp extends StatelessWidget {
   const MainApp({super.key});
+
+  static final _themeData = ThemeData(
+    fontFamily: "Sora",
+    colorScheme: ColorScheme.dark(
+      primary: AppTheme.primary,
+      secondary: AppTheme.secondary,
+      surface: AppTheme.surface,
+      error: AppTheme.error,
+      onPrimary: AppTheme.onPrimary,
+      onSecondary: AppTheme.onSecondary,
+      onSurface: AppTheme.onSurface,
+      onError: AppTheme.onError,
+    ),
+    textTheme: AppTheme.textTheme,
+    scaffoldBackgroundColor: AppTheme.background,
+    cardTheme: CardThemeData(
+      elevation: 0,
+      shape: RoundedRectangleBorder(borderRadius: AppTheme.radiusLg),
+      color: Colors.transparent,
+    ),
+    elevatedButtonTheme: ElevatedButtonThemeData(
+      style: ElevatedButton.styleFrom(
+        elevation: 0,
+        shadowColor: Colors.transparent,
+        shape: RoundedRectangleBorder(borderRadius: AppTheme.radiusMd),
+        padding: AppTheme.paddingMd,
+      ),
+    ),
+    navigationBarTheme: NavigationBarThemeData(
+      elevation: 0,
+      backgroundColor: Colors.transparent,
+      indicatorColor: AppTheme.primary.withOpacity(0.2),
+      labelTextStyle: WidgetStateProperty.resolveWith((states) {
+        if (states.contains(WidgetState.selected)) {
+          return AppTheme.textTheme.labelMedium?.copyWith(
+            color: AppTheme.primary,
+            fontWeight: FontWeight.w600,
+          );
+        }
+        return AppTheme.textTheme.labelMedium?.copyWith(
+          color: AppTheme.onSurface.withOpacity(0.6),
+        );
+      }),
+      iconTheme: WidgetStateProperty.resolveWith((states) {
+        if (states.contains(WidgetState.selected)) {
+          return IconThemeData(color: AppTheme.primary, size: 24);
+        }
+        return IconThemeData(
+          color: AppTheme.onSurface.withOpacity(0.6),
+          size: 24,
+        );
+      }),
+    ),
+  );
 
   @override
   Widget build(BuildContext context) {
@@ -227,60 +316,7 @@ class MainApp extends StatelessWidget {
       onGenerateRoute: AppRoutes.generateRoute,
       debugShowCheckedModeBanner: false,
       showPerformanceOverlay: false,
-
-      theme: ThemeData(
-        fontFamily: "Sora",
-        colorScheme: ColorScheme.dark(
-          primary: AppTheme.primary,
-          secondary: AppTheme.secondary,
-          surface: AppTheme.surface,
-          error: AppTheme.error,
-          onPrimary: AppTheme.onPrimary,
-          onSecondary: AppTheme.onSecondary,
-          onSurface: AppTheme.onSurface,
-          onError: AppTheme.onError,
-        ),
-        textTheme: AppTheme.textTheme,
-        scaffoldBackgroundColor: AppTheme.background,
-        cardTheme: CardThemeData(
-          elevation: 0,
-          shape: RoundedRectangleBorder(borderRadius: AppTheme.radiusLg),
-          color: Colors.transparent,
-        ),
-        elevatedButtonTheme: ElevatedButtonThemeData(
-          style: ElevatedButton.styleFrom(
-            elevation: 0,
-            shadowColor: Colors.transparent,
-            shape: RoundedRectangleBorder(borderRadius: AppTheme.radiusMd),
-            padding: AppTheme.paddingMd,
-          ),
-        ),
-        navigationBarTheme: NavigationBarThemeData(
-          elevation: 0,
-          backgroundColor: Colors.transparent,
-          indicatorColor: AppTheme.primary.withOpacity(0.2),
-          labelTextStyle: WidgetStateProperty.resolveWith((states) {
-            if (states.contains(WidgetState.selected)) {
-              return AppTheme.textTheme.labelMedium?.copyWith(
-                color: AppTheme.primary,
-                fontWeight: FontWeight.w600,
-              );
-            }
-            return AppTheme.textTheme.labelMedium?.copyWith(
-              color: AppTheme.onSurface.withOpacity(0.6),
-            );
-          }),
-          iconTheme: WidgetStateProperty.resolveWith((states) {
-            if (states.contains(WidgetState.selected)) {
-              return IconThemeData(color: AppTheme.primary, size: 24);
-            }
-            return IconThemeData(
-              color: AppTheme.onSurface.withOpacity(0.6),
-              size: 24,
-            );
-          }),
-        ),
-      ),
+      theme: _themeData,
       home: Home(),
     );
   }
@@ -346,6 +382,10 @@ class _HomeState extends ConsumerState<Home> with TickerProviderStateMixin {
   }
 
   Future<void> _checkAndScan() async {
+    // Request permissions just before scanning
+    await Permission.audio.request();
+    await Permission.storage.request();
+
     final prefs = await SharedPreferences.getInstance();
     if (prefs.getBool('initial_scan_done') ?? false) return;
 

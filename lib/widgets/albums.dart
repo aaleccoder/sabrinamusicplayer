@@ -14,8 +14,10 @@ class AlbumItem {
   String? artistName;
   int? artistId;
   List<TrackItem>? tracks;
+  int? playCount;
 
   AlbumItem({
+    this.playCount,
     required this.id,
     required this.name,
     required this.cover,
@@ -38,7 +40,9 @@ class _AlbumsState extends ConsumerState<AlbumsPage> {
     return Scaffold(
       body: Consumer(
         builder: (context, ref, _) {
-          final albumsAsync = ref.watch(albumsProvider);
+          final albumsAsync = ref.watch(
+            albumsProvider(PaginationState(page: 0)),
+          );
           return albumsAsync.when(
             data: (albums) {
               if (albums.isEmpty) {
@@ -72,8 +76,9 @@ class _AlbumsState extends ConsumerState<AlbumsPage> {
 
 class AlbumGridItem extends StatelessWidget {
   final AlbumItem album;
+  final int? count;
 
-  const AlbumGridItem({super.key, required this.album});
+  const AlbumGridItem({super.key, required this.album, this.count});
 
   @override
   Widget build(BuildContext context) {
@@ -122,6 +127,15 @@ class AlbumGridItem extends StatelessWidget {
                     maxLines: 1,
                     overflow: TextOverflow.ellipsis,
                   ),
+                  if (count != null) ...[
+                    const SizedBox(height: 4),
+                    Text(
+                      count.toString(),
+                      style: Theme.of(context).textTheme.labelSmall?.copyWith(
+                        color: AppTheme.primary.withOpacity(0.5),
+                      ),
+                    ),
+                  ],
                 ],
               ),
             ),

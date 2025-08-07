@@ -5,7 +5,7 @@ import 'package:flutter_application_1/widgets/artists.dart';
 import 'package:flutter_application_1/widgets/genres.dart';
 import 'package:flutter_application_1/widgets/playlists.dart';
 import 'package:flutter_application_1/widgets/song_list_view.dart';
-import 'package:flutter_application_1/widgets/stats.dart';
+
 import 'package:path_provider/path_provider.dart';
 
 part 'schema.g.dart';
@@ -179,6 +179,8 @@ class AppDatabase extends _$AppDatabase {
     bool? isUnliked,
     SortOption sortOption = SortOption.alphabeticalAZ,
     CoverSize? coverSize = CoverSize.s32,
+    int? limit,
+    int? offset,
   }) {
     final query = select(tracks).join([
       leftOuterJoin(artists, artists.id.equalsExp(tracks.artistId)),
@@ -212,6 +214,10 @@ class AppDatabase extends _$AppDatabase {
       case SortOption.dateAdded:
         query.orderBy([OrderingTerm.desc(tracks.createdAt)]);
         break;
+    }
+
+    if (limit != null) {
+      query.limit(limit, offset: offset ?? 0);
     }
 
     return query.watch().map((rows) {
@@ -418,6 +424,13 @@ class AppDatabase extends _$AppDatabase {
     return result.read(tracks.id.count()) ?? 0;
   }
 
+  Future<int> getTrackCount() async {
+    final countExp = tracks.id.count();
+    final query = selectOnly(tracks)..addColumns([countExp]);
+    final result = await query.getSingle();
+    return result.read(countExp) ?? 0;
+  }
+
   // Batch operations for better performance
   Future<void> insertTracksBatch(List<TracksCompanion> trackList) async {
     await batch((batch) {
@@ -596,11 +609,100 @@ class AppDatabase extends _$AppDatabase {
     }).toList();
   }
 
-  Stream<List<TrackStat>> watchTrackPlays() {
+  Future<List<PlaylistItem>> searchPlaylists(String query) async {
+    final searchQuery = select(playlist)..where((p) => p.name.like('%$query%'));
+
+    final rows = await searchQuery.get();
+
+    return rows.map((playlistRow) {
+      return PlaylistItem(
+        id: playlistRow.id,
+        name: playlistRow.name,
+        description: playlistRow.description,
+        coverImage: playlistRow.coverImage,
+        createdAt: playlistRow.createdAt,
+        updatedAt: playlistRow.updatedAt,
+      );
+    }).toList();
+  }
+
+  Stream<List<GenreItem>> watchGenrePlays() {
+    final query = select(genres)
+      ..orderBy([(g) => OrderingTerm.desc(g.playCount)]);
+
+    return query.watch().map((rows) {
+      return rows.map((genre) {
+        return GenreItem(
+          id: genre.id,
+          name: genre.name,
+          playCount: genre.playCount,
+        );
+      }).toList();
+    });
+  }
+
+  Stream<List<ArtistItem>> watchArtistPlays() {
+    final totalPlaysExp = tracks.playCount.sum();
+
+    final query = select(
+      artists,
+    ).join([innerJoin(tracks, tracks.artistId.equalsExp(artists.id))]);
+
+    query
+      ..addColumns([totalPlaysExp])
+      ..groupBy([artists.id])
+      ..orderBy([OrderingTerm.desc(totalPlaysExp)]);
+
+    query.where(tracks.playCount.isBiggerThanValue(0));
+
+    return query.watch().map((rows) {
+      return rows.map((row) {
+        final artist = row.readTable(artists);
+        final totalPlays = row.read(totalPlaysExp);
+        return ArtistItem(
+          id: artist.id,
+          name: artist.name,
+          cover: '',
+          albums: null,
+          tracks: null,
+          playCount: totalPlays ?? 0,
+        );
+      }).toList();
+    });
+  }
+
+  Stream<List<AlbumItem>> watchAlbumPlays() {
+    final query = select(
+      albums,
+    ).join([leftOuterJoin(artists, artists.id.equalsExp(albums.artistId))]);
+    query.where(albums.playCount.isBiggerThanValue(0));
+    query.orderBy([OrderingTerm.desc(albums.playCount)]);
+
+    return query.watch().map((rows) {
+      return rows.map((row) {
+        final album = row.readTable(albums);
+        final artist = row.readTableOrNull(artists);
+
+        return AlbumItem(
+          id: album.id,
+          name: album.name,
+          cover: album.coverImage128 ?? '',
+          artistName: artist?.name,
+          artistId: artist?.id,
+          tracks: null, // Will be loaded lazily if needed
+          playCount: album.playCount,
+        );
+      }).toList();
+    });
+  }
+
+  Stream<List<TrackItem>> watchTrackPlays() {
     final query = select(tracks).join([
       leftOuterJoin(artists, artists.id.equalsExp(tracks.artistId)),
       leftOuterJoin(albums, albums.id.equalsExp(tracks.albumId)),
-    ])..where(tracks.playCount.isBiggerThanValue(0));
+    ]);
+    query.where(tracks.playCount.isBiggerThanValue(0));
+    query.orderBy([OrderingTerm.desc(tracks.playCount)]);
 
     return query.watch().map((rows) {
       return rows.map((row) {
@@ -608,14 +710,23 @@ class AppDatabase extends _$AppDatabase {
         final artist = row.readTableOrNull(artists);
         final album = row.readTableOrNull(albums);
 
-        return TrackStat(
+        return TrackItem(
+          fullCover: album?.coverImage ?? '',
+          unliked: track.isUnliked,
+          liked: track.isFavorite,
           id: track.id,
           title: track.title,
           artist: artist?.name ?? '',
-          album: album?.name ?? '',
-          coverImage: album?.coverImage ?? '',
+          artistID: artist?.id ?? -1,
+          album: album?.name,
+          albumID: album?.id ?? -1,
+          genre: null,
+          genreID: null,
+          cover: album?.coverImage128 ?? '',
           fileuri: track.fileuri ?? '',
-          playedAt: track.lastPlayed,
+          year: track.year,
+          createdAt: track.lastPlayed,
+          playCount: track.playCount,
         );
       }).toList();
     });
@@ -633,6 +744,58 @@ class AppDatabase extends _$AppDatabase {
           lastPlayed: Value(DateTime.now()),
         ),
       );
+      if (trackStatQuery.albumId != null) {
+        await (update(
+          albums,
+        )..where((a) => a.id.equals(trackStatQuery.albumId!))).write(
+          AlbumsCompanion(
+            playCount: Value(
+              (await (select(
+                            albums,
+                          )..where((a) => a.id.equals(trackStatQuery.albumId!)))
+                          .getSingle())
+                      .playCount +
+                  1,
+            ),
+            lastPlayed: Value(DateTime.now()),
+          ),
+        );
+      }
+      if (trackStatQuery.artistId != null) {
+        await (update(
+          artists,
+        )..where((a) => a.id.equals(trackStatQuery.artistId!))).write(
+          ArtistsCompanion(
+            playCount: Value(
+              (await (select(artists)..where(
+                            (a) => a.id.equals(trackStatQuery.artistId!),
+                          ))
+                          .getSingle())
+                      .playCount +
+                  1,
+            ),
+            lastPlayed: Value(DateTime.now()),
+          ),
+        );
+      }
+      if (trackStatQuery.genreId != null) {
+        await (update(
+          genres,
+        )..where((g) => g.id.equals(trackStatQuery.genreId!))).write(
+          GenresCompanion(
+            playCount: Value(
+              (await (select(
+                            genres,
+                          )..where((g) => g.id.equals(trackStatQuery.genreId!)))
+                          .getSingle())
+                      .playCount +
+                  1,
+            ),
+            lastPlayed: Value(DateTime.now()),
+          ),
+        );
+      }
+
       (into(trackStatPlay)..insert(
         TrackStatPlayCompanion.insert(
           trackStatId: trackStatQuery.id,
@@ -904,6 +1067,37 @@ class AppDatabase extends _$AppDatabase {
         cover: '',
         albums: null,
         tracks: null,
+      );
+    }).toList();
+  }
+
+  Future<List<AlbumItem>> getAlbumsPaginated({
+    int limit = 50,
+    int offset = 0,
+    CoverSize? coverSize = CoverSize.s128,
+  }) async {
+    final query = select(albums).join([
+      leftOuterJoin(artists, artists.id.equalsExp(albums.artistId)),
+    ])..limit(limit, offset: offset);
+
+    final rows = await query.get();
+    return rows.map((row) {
+      final album = row.readTable(albums);
+      final artist = row.readTableOrNull(artists);
+
+      final cover = coverSize == CoverSize.original
+          ? album.coverImage
+          : coverSize == CoverSize.s128
+          ? album.coverImage128
+          : album.coverImage32;
+
+      return AlbumItem(
+        id: album.id,
+        name: album.name,
+        cover: cover,
+        artistName: artist?.name,
+        artistId: artist?.id,
+        tracks: null, // Will be loaded lazily
       );
     }).toList();
   }

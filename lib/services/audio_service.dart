@@ -63,6 +63,9 @@ class AudioPlayerState {
 }
 
 class AudioPlayerNotifier extends StateNotifier<AudioPlayerState> {
+  static BackgroundAudioHandler? _sharedAudioHandler;
+  static bool _isInitializing = false;
+
   BackgroundAudioHandler? _audioHandler;
   List<TrackItem> _originalQueue = [];
   final Completer<void> _initializationCompleter = Completer<void>();
@@ -71,90 +74,181 @@ class AudioPlayerNotifier extends StateNotifier<AudioPlayerState> {
 
   final Ref _ref;
 
+  // Stream subscriptions for cleanup
+  StreamSubscription<Duration>? _positionSubscription;
+  StreamSubscription? _playbackStateSubscription;
+  StreamSubscription? _mediaItemSubscription;
+  StreamSubscription? _queueSubscription;
+  ProviderSubscription? _tracksProviderSubscription;
+
   AudioPlayerNotifier(this._ref) : super(AudioPlayerState()) {
+    debugPrint('[AudioPlayerNotifier] Constructor called');
     _initializeAudioService();
 
     // Listen to track updates and refresh the current track if it's playing
-    _ref.listen(tracksProvider(SortOption.alphabeticalAZ), (previous, next) {
-      final tracks = next.asData?.value;
-      if (tracks != null && state.currentTrack != null) {
-        try {
-          final updatedTrack = tracks.firstWhere(
-            (t) => t.id == state.currentTrack!.id,
+    _tracksProviderSubscription = _ref.listen(
+      tracksProvider((SortOption.alphabeticalAZ, PaginationState(page: 0))),
+      (previous, next) {
+        if (mounted) {
+          debugPrint(
+            '[AudioPlayerNotifier] Tracks provider update, mounted: $mounted',
           );
-          if (state.currentTrack!.liked != updatedTrack.liked ||
-              state.currentTrack!.unliked != updatedTrack.unliked) {
-            state = state.copyWith(currentTrack: updatedTrack);
+          // Fix: Use proper AsyncValue handling - check if it has data
+          if (next.hasValue) {
+            final tracks = next.value;
+            if (tracks != null &&
+                tracks.isNotEmpty &&
+                state.currentTrack != null) {
+              try {
+                final updatedTrack = tracks.firstWhere(
+                  (t) => t.id == state.currentTrack!.id,
+                );
+                if (state.currentTrack!.liked != updatedTrack.liked ||
+                    state.currentTrack!.unliked != updatedTrack.unliked) {
+                  state = state.copyWith(currentTrack: updatedTrack);
+                }
+              } catch (e) {
+                // Track not found, do nothing
+              }
+            }
           }
-        } catch (e) {
-          // Track not found, do nothing
+        } else {
+          debugPrint(
+            '[AudioPlayerNotifier] Tracks provider update called but notifier not mounted',
+          );
         }
-      }
-    });
+      },
+    );
   }
 
-  StreamSubscription<Duration>? _positionSubscription;
+  @override
+  void dispose() {
+    debugPrint('[AudioPlayerNotifier] dispose() called');
+
+    // Cancel all stream subscriptions
+    _positionSubscription?.cancel();
+    _playbackStateSubscription?.cancel();
+    _mediaItemSubscription?.cancel();
+    _queueSubscription?.cancel();
+    _tracksProviderSubscription?.close();
+
+    debugPrint('[AudioPlayerNotifier] All subscriptions cancelled');
+    super.dispose();
+  }
 
   Future<void> _initializeAudioService() async {
     try {
-      _audioHandler = await AudioService.init(
-        builder: () => BackgroundAudioHandler(),
-        config: AudioServiceConfig(
-          androidNotificationChannelId:
-              'com.example.flutter_application_1.channel.audio',
-          androidNotificationChannelName: 'Music Player',
-          androidNotificationChannelDescription: 'Music playback controls',
-          androidNotificationIcon: 'mipmap/ic_launcher',
-          androidShowNotificationBadge: true,
-          androidStopForegroundOnPause: true,
-          fastForwardInterval: const Duration(seconds: 10),
-          rewindInterval: const Duration(seconds: 10),
-          preloadArtwork: true,
-          artDownscaleWidth: 200,
-          artDownscaleHeight: 200,
-        ),
-      );
+      // Use shared audio handler to prevent double initialization
+      if (_sharedAudioHandler == null && !_isInitializing) {
+        _isInitializing = true;
+        debugPrint(
+          '[AudioPlayerNotifier] Initializing AudioService for the first time',
+        );
+        _sharedAudioHandler = await AudioService.init(
+          builder: () => BackgroundAudioHandler(),
+          config: AudioServiceConfig(
+            androidNotificationChannelId:
+                'com.example.flutter_application_1.channel.audio',
+            androidNotificationChannelName: 'Music Player',
+            androidNotificationChannelDescription: 'Music playback controls',
+            androidNotificationIcon: 'mipmap/ic_launcher',
+            androidShowNotificationBadge: true,
+            androidStopForegroundOnPause: true,
+            fastForwardInterval: const Duration(seconds: 10),
+            rewindInterval: const Duration(seconds: 10),
+            preloadArtwork: true,
+            artDownscaleWidth: 200,
+            artDownscaleHeight: 200,
+          ),
+        );
+        _isInitializing = false;
+      } else if (_isInitializing) {
+        // Wait for initialization to complete
+        while (_isInitializing) {
+          await Future.delayed(const Duration(milliseconds: 50));
+        }
+      }
+
+      _audioHandler = _sharedAudioHandler;
+      debugPrint('[AudioPlayerNotifier] Using shared AudioService instance');
 
       // Listen to audio handler events and update state
-      _audioHandler?.playbackState.listen((playbackState) {
-        state = state.copyWith(
-          isPlaying: playbackState.playing,
-          bufferedPosition: playbackState.bufferedPosition,
-        );
+      _playbackStateSubscription = _audioHandler?.playbackState.listen((
+        playbackState,
+      ) {
+        if (mounted) {
+          debugPrint(
+            '[AudioPlayerNotifier] Playback state update, mounted: $mounted',
+          );
+          state = state.copyWith(
+            isPlaying: playbackState.playing,
+            bufferedPosition: playbackState.bufferedPosition,
+          );
+        } else {
+          debugPrint(
+            '[AudioPlayerNotifier] Playback state update called but notifier not mounted',
+          );
+        }
       });
 
       // Listen to positionStream for frequent position updates
       if (_audioHandler != null && _audioHandler is BackgroundAudioHandler) {
         final handler = _audioHandler as BackgroundAudioHandler;
         _positionSubscription = handler.positionStream.listen((pos) {
-          state = state.copyWith(position: pos);
+          if (mounted) {
+            debugPrint(
+              '[AudioPlayerNotifier] Position update: ${pos.inSeconds}s, mounted: $mounted',
+            );
+            state = state.copyWith(position: pos);
+          } else {
+            debugPrint(
+              '[AudioPlayerNotifier] Position update called but notifier not mounted - THIS IS THE ERROR SOURCE',
+            );
+          }
         });
       }
 
-      _audioHandler?.mediaItem.listen((mediaItem) {
-        if (mediaItem != null) {
-          final currentTrack = TrackItem(
-            fullCover: mediaItem.artUri?.toString() ?? '',
-            liked: mediaItem.extras?['liked'] ?? false,
-            unliked: mediaItem.extras?['unliked'] ?? false,
-            id: mediaItem.extras?['trackId'] ?? 0,
-            title: mediaItem.title,
-            artist: mediaItem.artist ?? '',
-            cover: mediaItem.artUri?.toString() ?? '',
-            fileuri: mediaItem.id,
-            album: mediaItem.album,
-            year: mediaItem.extras?['year'],
-            createdAt: DateTime.parse(mediaItem.extras!['createdAt'] as String),
-          );
+      _mediaItemSubscription = _audioHandler?.mediaItem.listen((mediaItem) {
+        if (mediaItem == null) return;
 
+        final newTrackId = mediaItem.extras?['trackId'] as int?;
+        if (newTrackId == null) return;
+
+        final currentTrack = TrackItem(
+          fullCover: mediaItem.artUri?.toString() ?? '',
+          liked: mediaItem.extras?['liked'] ?? false,
+          unliked: mediaItem.extras?['unliked'] ?? false,
+          id: mediaItem.extras?['trackId'] ?? 0,
+          title: mediaItem.title,
+          artist: mediaItem.artist ?? '',
+          cover: mediaItem.artUri?.toString() ?? '',
+          fileuri: mediaItem.id,
+          album: mediaItem.album,
+          year: mediaItem.extras?['year'],
+          createdAt: DateTime.parse(mediaItem.extras!['createdAt'] as String),
+        );
+
+        if (newTrackId != state.currentTrack?.id) {
+          final db = _ref.read(appDatabaseProvider);
+          db.registerStatOnPlay(currentTrack);
+        }
+
+        if (mounted) {
+          debugPrint(
+            '[AudioPlayerNotifier] Media item update, mounted: $mounted',
+          );
           state = state.copyWith(
             currentTrack: currentTrack,
             duration: mediaItem.duration,
           );
+        } else {
+          debugPrint(
+            '[AudioPlayerNotifier] Media item update called but notifier not mounted',
+          );
         }
       });
 
-      _audioHandler?.queue.listen((queue) {
+      _queueSubscription = _audioHandler?.queue.listen((queue) {
         final trackQueue = queue
             .map(
               (mediaItem) => TrackItem(
@@ -175,10 +269,17 @@ class AudioPlayerNotifier extends StateNotifier<AudioPlayerState> {
             )
             .toList();
 
-        state = state.copyWith(
-          queue: trackQueue,
-          currentIndex: _audioHandler?.currentIndex ?? 0,
-        );
+        if (mounted) {
+          debugPrint('[AudioPlayerNotifier] Queue update, mounted: $mounted');
+          state = state.copyWith(
+            queue: trackQueue,
+            currentIndex: _audioHandler?.currentIndex ?? 0,
+          );
+        } else {
+          debugPrint(
+            '[AudioPlayerNotifier] Queue update called but notifier not mounted',
+          );
+        }
       });
       // ... existing listeners setup ...
 
@@ -226,8 +327,6 @@ class AudioPlayerNotifier extends StateNotifier<AudioPlayerState> {
     final currentQueue = state.queue ?? [track];
 
     await _audioHandler!.playTrack(track, currentQueue);
-    final db = _ref.read(appDatabaseProvider);
-    await db.registerStatOnPlay(track);
   }
 
   void next() {

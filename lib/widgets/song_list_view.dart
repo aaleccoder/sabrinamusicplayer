@@ -22,6 +22,10 @@ final sortOptionProvider = StateProvider<SortOption>(
   (ref) => SortOption.alphabeticalAZ,
 );
 
+final songListPaginationProvider = StateProvider<PaginationState>(
+  (ref) => PaginationState(page: 0),
+);
+
 class TrackItem {
   int id;
   String title;
@@ -39,12 +43,15 @@ class TrackItem {
   bool unliked;
   String? year;
   DateTime createdAt;
+  int? playCount;
 
   TrackItem({
+    this.playCount,
     this.genreID,
     this.genre,
     this.albumID,
     this.artistID,
+    this.lyrics,
     required this.fullCover,
     required this.unliked,
     required this.liked,
@@ -59,28 +66,89 @@ class TrackItem {
   });
 }
 
-class SongListView extends ConsumerWidget {
+class SongListView extends ConsumerStatefulWidget {
   const SongListView({super.key});
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
+  ConsumerState<SongListView> createState() => _SongListViewState();
+}
+
+class _SongListViewState extends ConsumerState<SongListView> {
+  final _scrollController = ScrollController();
+  List<TrackItem> _allTracks = [];
+  bool _isLoading = false;
+
+  @override
+  void initState() {
+    super.initState();
+    _scrollController.addListener(_onScroll);
+    _loadInitialTracks();
+  }
+
+  @override
+  void dispose() {
+    _scrollController.removeListener(_onScroll);
+    _scrollController.dispose();
+    super.dispose();
+  }
+
+  void _onScroll() {
+    if (_scrollController.position.pixels ==
+        _scrollController.position.maxScrollExtent) {
+      _loadMoreTracks();
+    }
+  }
+
+  Future<void> _loadInitialTracks() async {
+    final sortOption = ref.read(sortOptionProvider);
+    final pagination = ref.read(songListPaginationProvider);
+    final tracks = await ref.read(
+      tracksProvider((sortOption, pagination)).future,
+    );
+    setState(() {
+      _allTracks = tracks;
+    });
+  }
+
+  Future<void> _loadMoreTracks() async {
+    if (_isLoading) return;
+
+    setState(() {
+      _isLoading = true;
+    });
+
+    final currentPage = ref.read(songListPaginationProvider).page;
+    final newPagination = PaginationState(page: currentPage + 1);
+    final sortOption = ref.read(sortOptionProvider);
+
+    final newTracks = await ref.read(
+      tracksProvider((sortOption, newPagination)).future,
+    );
+
+    setState(() {
+      _allTracks.addAll(newTracks);
+      _isLoading = false;
+    });
+
+    ref.read(songListPaginationProvider.notifier).state = newPagination;
+  }
+
+  @override
+  Widget build(BuildContext context) {
     final sortOption = ref.watch(sortOptionProvider);
-    final tracksAsync = ref.watch(tracksProvider(sortOption));
+    final tracksAsync = ref.watch(
+      tracksProvider((sortOption, PaginationState(page: 0))),
+    );
 
     return Scaffold(
       body: SafeArea(
         child: Column(
           children: [
-            // Top section with scan banner and search
             HomeScanBanner(),
-
-            // Search bar with proper padding
-            Padding(
-              padding: const EdgeInsets.fromLTRB(16, 16, 16, 8),
-              child: const SearchBarWidget(),
+            const Padding(
+              padding: EdgeInsets.fromLTRB(16, 16, 16, 8),
+              child: SearchBarWidget(),
             ),
-
-            // Songs list
             Expanded(child: _buildSongsList(context, ref, tracksAsync)),
           ],
         ),
@@ -173,6 +241,7 @@ class SongListView extends ConsumerWidget {
     BuildContext context,
     AsyncValue<List<TrackItem>> tracksAsync,
   ) {
+    final trackCount = ref.watch(trackCountProvider);
     return Container(
       width: double.infinity,
       margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
@@ -182,9 +251,9 @@ class SongListView extends ConsumerWidget {
         borderRadius: AppTheme.radiusMd,
         border: Border.all(color: AppTheme.primary.withOpacity(0.1), width: 1),
       ),
-      child: tracksAsync.when(
-        data: (tracks) => Text(
-          '${tracks.length} song${tracks.length != 1 ? 's' : ''} available',
+      child: trackCount.when(
+        data: (count) => Text(
+          '$count song${count != 1 ? 's' : ''} available',
           style: Theme.of(context).textTheme.bodySmall?.copyWith(
             fontSize: AppTheme.textTheme.bodySmall?.fontSize,
             color: AppTheme.onSurface.withOpacity(0.7),
@@ -215,10 +284,11 @@ class SongListView extends ConsumerWidget {
   ) {
     return tracksAsync.when(
       data: (tracks) {
-        if (tracks.isEmpty) {
+        if (_allTracks.isEmpty && !_isLoading) {
           return _buildEmptyState(context);
         }
         return CustomScrollView(
+          controller: _scrollController,
           slivers: [
             SliverToBoxAdapter(
               child: _buildHeaderWithOptions(context, ref, tracksAsync),
@@ -229,17 +299,28 @@ class SongListView extends ConsumerWidget {
             SliverPadding(
               padding: const EdgeInsets.fromLTRB(10, 5, 10, 10),
               sliver: SliverList(
-                delegate: SliverChildBuilderDelegate((context, index) {
-                  final itemIndex = index ~/ 2;
-                  if (index.isEven) {
-                    return SongListViewItem(
-                      track: tracks[itemIndex],
-                      tracks: tracks,
-                      index: itemIndex,
-                    );
-                  }
-                  return const SizedBox(height: 8);
-                }, childCount: math.max(0, tracks.length * 2 - 1)),
+                delegate: SliverChildBuilderDelegate(
+                  (context, index) {
+                    if (index < _allTracks.length) {
+                      final itemIndex = index ~/ 2;
+                      if (index.isEven) {
+                        return SongListViewItem(
+                          track: _allTracks[itemIndex],
+                          tracks: _allTracks,
+                          index: itemIndex,
+                        );
+                      }
+                      return const SizedBox(height: 8);
+                    } else {
+                      return _isLoading
+                          ? const Center(child: CircularProgressIndicator())
+                          : const SizedBox.shrink();
+                    }
+                  },
+                  childCount:
+                      math.max(0, _allTracks.length * 2 - 1) +
+                      (_isLoading ? 1 : 0),
+                ),
               ),
             ),
           ],
@@ -340,22 +421,6 @@ class SongListView extends ConsumerWidget {
               ),
               textAlign: TextAlign.center,
             ),
-            const SizedBox(height: 24),
-            ElevatedButton.icon(
-              onPressed: () {
-                // Navigate to settings
-              },
-              icon: const Icon(Icons.settings),
-              label: const Text('Open Settings'),
-              style: ElevatedButton.styleFrom(
-                backgroundColor: AppTheme.primary,
-                foregroundColor: AppTheme.onPrimary,
-                padding: const EdgeInsets.symmetric(
-                  horizontal: 24,
-                  vertical: 12,
-                ),
-              ),
-            ),
           ],
         ),
       ),
@@ -367,12 +432,14 @@ class SongListViewItem extends ConsumerStatefulWidget {
   final TrackItem track;
   final List<TrackItem> tracks;
   final int index;
+  final int? count; // Optional count parameter
 
   const SongListViewItem({
     super.key,
     required this.track,
     required this.tracks,
     required this.index,
+    this.count,
   });
 
   @override
@@ -470,6 +537,20 @@ class _SongListViewItemState extends ConsumerState<SongListViewItem> {
                   ),
                 ),
 
+                // Count (if provided)
+                if (widget.count != null) ...[
+                  Padding(
+                    padding: const EdgeInsets.symmetric(horizontal: 8.0),
+                    child: Text(
+                      widget.count.toString(),
+                      style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                        fontWeight: FontWeight.bold,
+                        color: AppTheme.primary,
+                      ),
+                    ),
+                  ),
+                ],
+
                 // Menu button
                 Container(
                   decoration: BoxDecoration(
@@ -546,7 +627,12 @@ class _SongListViewItemState extends ConsumerState<SongListViewItem> {
                           break;
                       }
                       final currentSortOption = ref.read(sortOptionProvider);
-                      ref.refresh(tracksProvider(currentSortOption));
+                      ref.refresh(
+                        tracksProvider((
+                          currentSortOption,
+                          PaginationState(page: 0),
+                        )),
+                      );
                       ref.refresh(likedTracksProvider);
                       ref.refresh(unlikedTracksProvider);
                     },

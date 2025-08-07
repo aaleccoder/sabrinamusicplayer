@@ -14,6 +14,7 @@ class ArtistItem {
   String cover;
   List<TrackItem>? tracks;
   List<AlbumItem>? albums;
+  int playCount;
 
   ArtistItem({
     required this.id,
@@ -21,6 +22,7 @@ class ArtistItem {
     required this.cover,
     required this.tracks,
     required this.albums,
+    this.playCount = 0,
   });
 }
 
@@ -37,7 +39,9 @@ class _ArtistsState extends ConsumerState<ArtistsPage> {
     return Scaffold(
       body: Consumer(
         builder: (context, ref, _) {
-          final artistsAsync = ref.watch(artistsProvider);
+          final artistsAsync = ref.watch(
+            artistsProvider(PaginationState(page: 0)),
+          );
           return artistsAsync.when(
             data: (artists) {
               if (artists.isEmpty) {

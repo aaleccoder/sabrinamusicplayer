@@ -12,6 +12,7 @@ class BackgroundAudioHandler extends BaseAudioHandler
   int _currentIndex = 0;
   AudioServiceRepeatMode _repeatMode = AudioServiceRepeatMode.none;
   AudioServiceShuffleMode _shuffleMode = AudioServiceShuffleMode.none;
+  StreamSubscription<Duration?>? _durationSubscription;
 
   BackgroundAudioHandler() {
     _init();
@@ -90,6 +91,7 @@ class BackgroundAudioHandler extends BaseAudioHandler
       duration: null, // Will be set when audio loads
       artUri: track.fullCover.isNotEmpty ? Uri.parse(track.fullCover) : null,
       extras: {
+        'lyrics': track.lyrics,
         'cover128': track.cover,
         'trackId': track.id,
         'liked': track.liked,
@@ -214,14 +216,18 @@ class BackgroundAudioHandler extends BaseAudioHandler
       );
 
       // Update media item with duration once loaded
-      _audioPlayer.durationStream.listen((duration) {
+      await _durationSubscription?.cancel();
+      _durationSubscription = _audioPlayer.durationStream.listen((duration) {
         if (duration != null) {
           final updatedItem = mediaItem.copyWith(duration: duration);
           this.mediaItem.add(updatedItem);
 
           // Update in queue as well
-          _queue[_currentIndex] = updatedItem;
-          queue.add(_queue);
+          if (_currentIndex < _queue.length &&
+              _queue[_currentIndex].id == updatedItem.id) {
+            _queue[_currentIndex] = updatedItem;
+            queue.add(_queue);
+          }
         }
       });
 

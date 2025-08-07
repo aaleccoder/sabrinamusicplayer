@@ -135,7 +135,10 @@ class _TrackSearchPageState extends ConsumerState<TrackSearchPage> {
                   tracksAsync = ref.watch(searchTracksProvider(_searchQuery));
                 } else {
                   tracksAsync = ref.watch(
-                    tracksProvider(SortOption.alphabeticalAZ),
+                    tracksProvider((
+                      SortOption.alphabeticalAZ,
+                      PaginationState(page: 0),
+                    )),
                   );
                 }
 

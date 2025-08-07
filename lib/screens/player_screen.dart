@@ -3,11 +3,15 @@ import 'dart:io';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_application_1/main.dart';
+import 'package:flutter_application_1/screens/lyrics_editor_screen.dart';
 import 'package:flutter_application_1/theme.dart';
 import 'package:flutter_application_1/services/audio_service.dart';
 import 'package:flutter_application_1/widgets/song_list_view.dart';
 import 'package:palette_generator/palette_generator.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:flutter_application_1/services/lyrics_service.dart';
+import 'package:flutter_application_1/models/schema.dart';
+import 'package:drift/drift.dart' hide Column;
 
 Future<List<Color>> _extractColorsFromImage(String? imagePath) async {
   if (imagePath == null || imagePath.isEmpty) {
@@ -55,6 +59,7 @@ class _PlayerScreenState extends ConsumerState<PlayerScreen>
   List<Color> _dominantColors = [AppTheme.primary, AppTheme.background];
   List<Color>? _previousColors;
   final Map<int, List<Color>> _colorCache = {};
+  bool _showLyrics = false;
 
   @override
   void initState() {
@@ -256,15 +261,68 @@ class _PlayerScreenState extends ConsumerState<PlayerScreen>
                   padding: const EdgeInsets.fromLTRB(10, 10, 10, 0),
                   child: Column(
                     children: [
-                      const Spacer(),
-                      _buildAlbumArtSection(currentTrack),
-                      const SizedBox(height: 40),
-                      _buildTrackInfoSection(currentTrack),
-                      const Spacer(),
-                      _buildSeekerSection(audioService, audioState),
-                      _buildControlsSection(audioService, audioState),
-                      const SizedBox(height: 80),
-                      // _buildAudioInfoSection(currentTrack),
+                      Expanded(
+                        child: AnimatedSwitcher(
+                          duration: AppTheme.animationSlow,
+                          transitionBuilder:
+                              (Widget child, Animation<double> animation) {
+                                return FadeTransition(
+                                  opacity: animation,
+                                  child: child,
+                                );
+                              },
+                          child: _showLyrics
+                              ? _buildLyricsView(currentTrack)
+                              : _buildPlayerView(
+                                  currentTrack,
+                                  audioService,
+                                  audioState,
+                                ),
+                        ),
+                      ),
+                      Padding(
+                        padding: const EdgeInsets.fromLTRB(24, 16, 24, 16),
+                        child: Row(
+                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                          children: [
+                            IconButton(
+                              icon: Icon(
+                                _showLyrics
+                                    ? CupertinoIcons.music_note_2
+                                    : CupertinoIcons.text_alignleft,
+                                color: AppTheme.onSurface.withOpacity(0.7),
+                              ),
+                              onPressed: () {
+                                setState(() {
+                                  _showLyrics = !_showLyrics;
+                                });
+                              },
+                              tooltip: _showLyrics
+                                  ? 'Show Player'
+                                  : 'Show Lyrics',
+                            ),
+                            IconButton(
+                              icon: Icon(
+                                CupertinoIcons.pencil_ellipsis_rectangle,
+                                color: AppTheme.onSurface.withOpacity(0.7),
+                              ),
+                              onPressed: () {
+                                if (currentTrack != null) {
+                                  Navigator.push(
+                                    context,
+                                    MaterialPageRoute(
+                                      builder: (context) => LyricsEditorScreen(
+                                        track: currentTrack,
+                                      ),
+                                    ),
+                                  );
+                                }
+                              },
+                              tooltip: 'Edit Lyrics',
+                            ),
+                          ],
+                        ),
+                      ),
                     ],
                   ),
                 ),
@@ -793,6 +851,133 @@ class _PlayerScreenState extends ConsumerState<PlayerScreen>
           ),
         ),
       ),
+    );
+  }
+
+  Widget _buildPlayerView(
+    TrackItem? currentTrack,
+    AudioPlayerNotifier audioService,
+    AudioPlayerState audioState,
+  ) {
+    return Column(
+      key: const ValueKey('player_view'),
+      children: [
+        const Spacer(),
+        _buildAlbumArtSection(currentTrack),
+        const SizedBox(height: 40),
+        _buildTrackInfoSection(currentTrack),
+        const Spacer(),
+        _buildSeekerSection(audioService, audioState),
+        _buildControlsSection(audioService, audioState),
+      ],
+    );
+  }
+
+  Widget _buildLyricsView(TrackItem? currentTrack) {
+    final lyrics = currentTrack?.lyrics;
+
+    return Column(
+      key: const ValueKey('lyrics_view'),
+      children: [
+        const Spacer(),
+        Expanded(
+          flex: 8,
+          child: Container(
+            decoration: BoxDecoration(
+              color: Colors.black.withOpacity(0.3),
+              borderRadius: AppTheme.radiusMd,
+            ),
+            child: SingleChildScrollView(
+              padding: AppTheme.paddingLg,
+              child: lyrics != null && lyrics.isNotEmpty
+                  ? Text(
+                      lyrics,
+                      textAlign: TextAlign.center,
+                      style: AppTheme.textTheme.bodyLarge?.copyWith(
+                        color: AppTheme.onSurface,
+                        height: 1.8,
+                      ),
+                    )
+                  : Center(
+                      child: Column(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          const Text(
+                            'No lyrics available for this song.',
+                            style: TextStyle(color: AppTheme.onSurface),
+                          ),
+                          const SizedBox(height: 16),
+                          ElevatedButton.icon(
+                            onPressed: () async {
+                              if (currentTrack != null) {
+                                debugPrint(
+                                  '[PlayerScreen] Starting lyrics fetch for: ${currentTrack.title}',
+                                );
+                                try {
+                                  final lyrics = await LyricsService()
+                                      .fetchLyrics(
+                                        currentTrack.title,
+                                        currentTrack.artist,
+                                      );
+                                  debugPrint(
+                                    '[PlayerScreen] Lyrics fetch completed, mounted: $mounted',
+                                  );
+                                  if (lyrics != null && mounted) {
+                                    final db = ref.read(appDatabaseProvider);
+                                    await db.update(db.tracks)
+                                      ..where(
+                                        (t) => t.id.equals(currentTrack.id),
+                                      )
+                                      ..write(
+                                        TracksCompanion(lyrics: Value(lyrics)),
+                                      );
+
+                                    // Update the current track with the new lyrics
+                                    currentTrack.lyrics = lyrics;
+
+                                    // Update the audio player state with the updated track
+                                    final audioNotifier = ref.read(
+                                      audioPlayerNotifierProvider.notifier,
+                                    );
+                                    final currentState = ref.read(
+                                      audioPlayerNotifierProvider,
+                                    );
+                                    audioNotifier.state = currentState.copyWith(
+                                      currentTrack: currentTrack,
+                                    );
+
+                                    // Also refresh tracks provider for consistency
+                                    ref.invalidate(tracksProvider);
+
+                                    // Force UI rebuild to show the new lyrics
+                                    setState(() {});
+
+                                    debugPrint(
+                                      '[PlayerScreen] Lyrics updated in database, audio player state, and UI refreshed',
+                                    );
+                                  } else if (!mounted) {
+                                    debugPrint(
+                                      '[PlayerScreen] Widget not mounted, skipping lyrics update - POTENTIAL ERROR SOURCE',
+                                    );
+                                  }
+                                } catch (e) {
+                                  debugPrint(
+                                    '[PlayerScreen] Error fetching lyrics: $e',
+                                  );
+                                }
+                              }
+                            },
+                            icon: const Icon(Icons.search),
+                            label: const Text('Fetch Lyrics'),
+                          ),
+                        ],
+                      ),
+                    ),
+            ),
+          ),
+        ),
+        const Spacer(),
+      ],
     );
   }
 }
