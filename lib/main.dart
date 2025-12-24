@@ -469,7 +469,6 @@ class _HomeState extends ConsumerState<Home> with TickerProviderStateMixin {
             _buildNavDestination(Icons.music_note, 'Songs', 1),
             _buildNavDestination(Icons.album, 'Albums', 2),
             _buildNavDestination(Icons.person, 'Artists', 3),
-            _buildNavDestination(Icons.category, 'Genres', 4),
             _buildNavDestination(Icons.library_music, 'Library', 5),
             _buildNavDestination(Icons.settings, 'Settings', 6),
           ],

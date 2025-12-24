@@ -414,7 +414,7 @@ class LyricsService {
           log('Total lines: ${cleanLines.length}');
           log('Lyrics length: ${lyrics.length} characters');
           log(
-            'First 200 characters: ${lyrics.length > 200 ? lyrics.substring(0, 200) + "..." : lyrics}',
+            'First 200 characters: ${lyrics.length > 200 ? "${lyrics.substring(0, 200)}..." : lyrics}',
           );
           return lyrics;
         }
@@ -436,7 +436,7 @@ class LyricsService {
                 '\n',
               );
               var tempDoc = parse('<div>$htmlContent</div>');
-              return tempDoc.body?.text?.trim() ?? '';
+              return tempDoc.body?.text.trim() ?? '';
             })
             .where((text) => text.isNotEmpty)
             .join('\n\n');

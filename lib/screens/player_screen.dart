@@ -62,6 +62,7 @@ class _PlayerScreenState extends ConsumerState<PlayerScreen>
   final Map<int, List<Color>> _colorCache = {};
   bool _showLyrics = false;
   final ScrollController _lyricsScrollController = ScrollController();
+  final Map<int, GlobalKey> _lyricKeys = {};
 
   @override
   void initState() {
@@ -938,7 +939,7 @@ class _PlayerScreenState extends ConsumerState<PlayerScreen>
                                 );
                                 if (lyrics != null && mounted) {
                                   final db = ref.read(appDatabaseProvider);
-                                  await db.update(db.tracks)
+                                  db.update(db.tracks)
                                     ..where((t) => t.id.equals(currentTrack.id))
                                     ..write(
                                       TracksCompanion(lyrics: Value(lyrics)),
@@ -1018,55 +1019,53 @@ class _PlayerScreenState extends ConsumerState<PlayerScreen>
 
     // Auto-scroll to center the current line
     WidgetsBinding.instance.addPostFrameCallback((_) {
-      if (_lyricsScrollController.hasClients && currentLineIndex >= 0) {
-        // Calculate the offset to center the current line
-        const double estimatedLineHeight = 60.0; // Height per line item
-        final double viewportHeight =
-            _lyricsScrollController.position.viewportDimension;
-        final double targetOffset =
-            (currentLineIndex * estimatedLineHeight) -
-            (viewportHeight / 2) +
-            (estimatedLineHeight / 2);
-
-        final double clampedOffset = targetOffset.clamp(
-          0.0,
-          _lyricsScrollController.position.maxScrollExtent,
-        );
-
-        _lyricsScrollController.animateTo(
-          clampedOffset,
-          duration: AppTheme.animationFast,
-          curve: Curves.easeOut,
-        );
+      if (currentLineIndex >= 0) {
+        final key = _lyricKeys[currentLineIndex];
+        if (key != null && key.currentContext != null) {
+          Scrollable.ensureVisible(
+            key.currentContext!,
+            duration: AppTheme.animationFast,
+            curve: Curves.easeOut,
+            alignment: 0.5, // Centers the item in the viewport
+          );
+        }
       }
     });
 
-    return ListView.builder(
-      controller: _lyricsScrollController,
-      padding: AppTheme.paddingLg,
-      itemCount: lrcLines.length,
-      itemBuilder: (context, index) {
-        final line = lrcLines[index];
-        final isActive = index == currentLineIndex;
-        final isPast = index < currentLineIndex;
+    return LayoutBuilder(
+      builder: (context, constraints) {
+        return ListView.builder(
+          controller: _lyricsScrollController,
+          padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 32),
+          itemCount: lrcLines.length,
+          itemBuilder: (context, index) {
+            final line = lrcLines[index];
+            final isActive = index == currentLineIndex;
+            final isPast = index < currentLineIndex;
 
-        return Padding(
-          padding: const EdgeInsets.symmetric(vertical: 12.0),
-          child: AnimatedDefaultTextStyle(
-            duration: AppTheme.animationFast,
-            style: AppTheme.textTheme.bodyLarge!.copyWith(
-              color: isActive
-                  ? _dominantColors[0]
-                  : isPast
-                  ? AppTheme.onSurface.withOpacity(0.4)
-                  : AppTheme.onSurface.withOpacity(0.6),
-              fontWeight: isActive ? FontWeight.w700 : FontWeight.w400,
-              fontSize: isActive ? 26 : 20,
-              height: 1.8,
-            ),
-            textAlign: TextAlign.center,
-            child: Text(line.text.isEmpty ? '♪' : line.text),
-          ),
+            // Ensure we have a GlobalKey for this index
+            _lyricKeys[index] ??= GlobalKey();
+
+            return Padding(
+              key: _lyricKeys[index],
+              padding: const EdgeInsets.symmetric(vertical: 16.0),
+              child: AnimatedDefaultTextStyle(
+                duration: AppTheme.animationFast,
+                style: AppTheme.textTheme.bodyLarge!.copyWith(
+                  color: isActive
+                      ? _dominantColors[0]
+                      : isPast
+                      ? AppTheme.onSurface.withOpacity(0.4)
+                      : AppTheme.onSurface.withOpacity(0.6),
+                  fontWeight: isActive ? FontWeight.w700 : FontWeight.w400,
+                  fontSize: isActive ? 32 : 24,
+                  height: 1.4,
+                ),
+                textAlign: TextAlign.center,
+                child: Text(line.text.isEmpty ? '♪' : line.text),
+              ),
+            );
+          },
         );
       },
     );
