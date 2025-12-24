@@ -7,34 +7,109 @@ import 'package:html/parser.dart';
 class LyricsService {
   static const String _baseUrl = 'https://api.genius.com';
   static const String _geniusUrl = 'https://genius.com';
+  static const String _lrcLibApiUrl = 'https://lrclib.net/api';
 
-  Future<String?> fetchLyrics(String title, String artist) async {
-    final prefs = await SharedPreferences.getInstance();
-    final token = prefs.getString('geniusApiKey');
-
-    if (token == null || token.isEmpty) {
-      log('Genius API key not found.');
-      return null;
-    }
-
-    final response = await http.get(
-      Uri.parse('$_baseUrl/search?q=$title $artist'),
-      headers: {'Authorization': 'Bearer $token'},
+  Future<String?> fetchLyrics(
+    String title,
+    String artist, {
+    String? album,
+    int? durationSeconds,
+  }) async {
+    final lrcLibLyrics = await _fetchFromLrcLib(
+      title: title,
+      artist: artist,
+      album: album,
+      durationSeconds: durationSeconds,
     );
 
-    if (response.statusCode == 200) {
-      final json = jsonDecode(response.body);
-      final hits = json['response']['hits'] as List;
-      if (hits.isNotEmpty) {
-        final path = hits[0]['result']['path'];
-        log('Found song path: $path');
-        return await _scrapeLyrics(path);
-      } else {
-        log('No hits found for $title by $artist');
-      }
-    } else {
-      log('Failed to search for song: ${response.statusCode}');
+    print('LRCLIB lyrics: $lrcLibLyrics');
+
+    if (lrcLibLyrics != null && lrcLibLyrics.isNotEmpty) {
+      return lrcLibLyrics;
     }
+
+    return _fetchFromGenius(title, artist);
+  }
+
+  Future<String?> _fetchFromLrcLib({
+    required String title,
+    required String artist,
+    String? album,
+    int? durationSeconds,
+  }) async {
+    try {
+      final queryParameters = <String, String>{
+        'track_name': title,
+        'artist_name': artist,
+        if (album != null && album.isNotEmpty) 'album_name': album,
+        if (durationSeconds != null && durationSeconds > 0)
+          'duration': durationSeconds.toString(),
+      };
+
+      final uri = Uri.parse(
+        '$_lrcLibApiUrl/get',
+      ).replace(queryParameters: queryParameters);
+
+      final response = await http.get(uri);
+
+      if (response.statusCode == 404) {
+        return null;
+      }
+
+      if (response.statusCode != 200) {
+        log('LRCLIB request failed: ${response.statusCode}');
+        return null;
+      }
+
+      final data = jsonDecode(response.body) as Map<String, dynamic>;
+      final lyrics = (data['syncedLyrics'] ?? data['plainLyrics']) as String?;
+
+      if (lyrics != null && lyrics.trim().isNotEmpty) {
+        return lyrics.trim();
+      }
+    } catch (e) {
+      log('Error fetching lyrics from LRCLIB: $e');
+    }
+
+    return null;
+  }
+
+  Future<String?> _fetchFromGenius(String title, String artist) async {
+    try {
+      final prefs = await SharedPreferences.getInstance();
+      final token = prefs.getString('geniusApiKey');
+
+      if (token == null || token.isEmpty) {
+        log('Genius API key not found.');
+        return null;
+      }
+
+      final uri = Uri.parse(
+        '$_baseUrl/search',
+      ).replace(queryParameters: {'q': '$title $artist'});
+
+      final response = await http.get(
+        uri,
+        headers: {'Authorization': 'Bearer $token'},
+      );
+
+      if (response.statusCode == 200) {
+        final json = jsonDecode(response.body);
+        final hits = json['response']['hits'] as List;
+        if (hits.isNotEmpty) {
+          final path = hits[0]['result']['path'];
+          log('Found song path: $path');
+          return await _scrapeLyrics(path);
+        } else {
+          log('No hits found for $title by $artist');
+        }
+      } else {
+        log('Failed to search for song: ${response.statusCode}');
+      }
+    } catch (e) {
+      log('Error fetching lyrics from Genius: $e');
+    }
+
     return null;
   }
 

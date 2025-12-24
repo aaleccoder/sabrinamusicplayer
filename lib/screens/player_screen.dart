@@ -11,6 +11,7 @@ import 'package:palette_generator/palette_generator.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_application_1/services/lyrics_service.dart';
 import 'package:flutter_application_1/models/schema.dart';
+import 'package:flutter_application_1/utils/lrc_parser.dart';
 import 'package:drift/drift.dart' hide Column;
 
 Future<List<Color>> _extractColorsFromImage(String? imagePath) async {
@@ -60,6 +61,7 @@ class _PlayerScreenState extends ConsumerState<PlayerScreen>
   List<Color>? _previousColors;
   final Map<int, List<Color>> _colorCache = {};
   bool _showLyrics = false;
+  final ScrollController _lyricsScrollController = ScrollController();
 
   @override
   void initState() {
@@ -98,6 +100,7 @@ class _PlayerScreenState extends ConsumerState<PlayerScreen>
   void dispose() {
     _slideController.dispose();
     _scaleController.dispose();
+    _lyricsScrollController.dispose();
     super.dispose();
   }
 
@@ -272,7 +275,7 @@ class _PlayerScreenState extends ConsumerState<PlayerScreen>
                                 );
                               },
                           child: _showLyrics
-                              ? _buildLyricsView(currentTrack)
+                              ? _buildLyricsView(currentTrack, audioState)
                               : _buildPlayerView(
                                   currentTrack,
                                   audioService,
@@ -697,54 +700,68 @@ class _PlayerScreenState extends ConsumerState<PlayerScreen>
     }
 
     return Container(
-      padding: AppTheme.paddingLg,
+      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
       child: Row(
-        mainAxisAlignment: MainAxisAlignment.spaceAround,
+        mainAxisAlignment: MainAxisAlignment.center,
         children: [
-          _buildControlButton(
-            icon: Icons.shuffle_rounded,
-            onPressed: audioService.toggleShuffle,
-            size: 50,
-            isPrimary: false,
-            color: audioState.isShuffleActive ? AppTheme.primary : null,
-          ),
-          _buildControlButton(
-            icon: CupertinoIcons.backward_fill,
-            onPressed: audioService.previous,
-            size: 60,
-            isPrimary: false,
-          ),
-          AnimatedSwitcher(
-            duration: AppTheme.animationNormal,
-            transitionBuilder: (child, animation) {
-              return ScaleTransition(scale: animation, child: child);
-            },
+          Flexible(
             child: _buildControlButton(
-              key: ValueKey(audioState.isPlaying),
-              icon: audioState.isPlaying
-                  ? Icons.pause_rounded
-                  : Icons.play_arrow_rounded,
-              onPressed: audioState.isPlaying
-                  ? audioService.pause
-                  : audioService.unpause,
-              size: 80,
-              isPrimary: true,
+              icon: Icons.shuffle_rounded,
+              onPressed: audioService.toggleShuffle,
+              size: 44,
+              isPrimary: false,
+              color: audioState.isShuffleActive ? AppTheme.primary : null,
             ),
           ),
-          _buildControlButton(
-            icon: CupertinoIcons.forward_fill,
-            onPressed: audioService.next,
-            size: 60,
-            isPrimary: false,
+          const SizedBox(width: 8),
+          Flexible(
+            child: _buildControlButton(
+              icon: CupertinoIcons.backward_fill,
+              onPressed: audioService.previous,
+              size: 52,
+              isPrimary: false,
+            ),
           ),
-          _buildControlButton(
-            icon: repeatIcon,
-            onPressed: audioService.cycleRepeatMode,
-            size: 50,
-            isPrimary: false,
-            color: audioState.repeatMode != RepeatMode.none
-                ? AppTheme.primary
-                : null,
+          const SizedBox(width: 12),
+          Flexible(
+            child: AnimatedSwitcher(
+              duration: AppTheme.animationNormal,
+              transitionBuilder: (child, animation) {
+                return ScaleTransition(scale: animation, child: child);
+              },
+              child: _buildControlButton(
+                key: ValueKey(audioState.isPlaying),
+                icon: audioState.isPlaying
+                    ? Icons.pause_rounded
+                    : Icons.play_arrow_rounded,
+                onPressed: audioState.isPlaying
+                    ? audioService.pause
+                    : audioService.unpause,
+                size: 68,
+                isPrimary: true,
+              ),
+            ),
+          ),
+          const SizedBox(width: 12),
+          Flexible(
+            child: _buildControlButton(
+              icon: CupertinoIcons.forward_fill,
+              onPressed: audioService.next,
+              size: 52,
+              isPrimary: false,
+            ),
+          ),
+          const SizedBox(width: 8),
+          Flexible(
+            child: _buildControlButton(
+              icon: repeatIcon,
+              onPressed: audioService.cycleRepeatMode,
+              size: 44,
+              isPrimary: false,
+              color: audioState.repeatMode != RepeatMode.none
+                  ? AppTheme.primary
+                  : null,
+            ),
           ),
         ],
       ),
@@ -864,7 +881,7 @@ class _PlayerScreenState extends ConsumerState<PlayerScreen>
       children: [
         const Spacer(),
         _buildAlbumArtSection(currentTrack),
-        const SizedBox(height: 40),
+        const SizedBox(height: 24),
         _buildTrackInfoSection(currentTrack),
         const Spacer(),
         _buildSeekerSection(audioService, audioState),
@@ -873,7 +890,10 @@ class _PlayerScreenState extends ConsumerState<PlayerScreen>
     );
   }
 
-  Widget _buildLyricsView(TrackItem? currentTrack) {
+  Widget _buildLyricsView(
+    TrackItem? currentTrack,
+    AudioPlayerState audioState,
+  ) {
     final lyrics = currentTrack?.lyrics;
 
     return Column(
@@ -887,97 +907,168 @@ class _PlayerScreenState extends ConsumerState<PlayerScreen>
               color: Colors.black.withOpacity(0.3),
               borderRadius: AppTheme.radiusMd,
             ),
-            child: SingleChildScrollView(
-              padding: AppTheme.paddingLg,
-              child: lyrics != null && lyrics.isNotEmpty
-                  ? Text(
-                      lyrics,
-                      textAlign: TextAlign.center,
-                      style: AppTheme.textTheme.bodyLarge?.copyWith(
-                        color: AppTheme.onSurface,
-                        height: 1.8,
-                      ),
-                    )
-                  : Center(
-                      child: Column(
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        children: [
-                          const Text(
-                            'No lyrics available for this song.',
-                            style: TextStyle(color: AppTheme.onSurface),
-                          ),
-                          const SizedBox(height: 16),
-                          ElevatedButton.icon(
-                            onPressed: () async {
-                              if (currentTrack != null) {
+            child: lyrics != null && lyrics.isNotEmpty
+                ? _buildSyncedLyrics(lyrics, audioState.position)
+                : Center(
+                    child: Column(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        const Text(
+                          'No lyrics available for this song.',
+                          style: TextStyle(color: AppTheme.onSurface),
+                        ),
+                        const SizedBox(height: 16),
+                        ElevatedButton.icon(
+                          onPressed: () async {
+                            if (currentTrack != null) {
+                              debugPrint(
+                                '[PlayerScreen] Starting lyrics fetch for: ${currentTrack.title}',
+                              );
+                              try {
+                                final lyrics = await LyricsService()
+                                    .fetchLyrics(
+                                      currentTrack.title,
+                                      currentTrack.artist,
+                                      album: currentTrack.album,
+                                      durationSeconds:
+                                          audioState.duration?.inSeconds,
+                                    );
                                 debugPrint(
-                                  '[PlayerScreen] Starting lyrics fetch for: ${currentTrack.title}',
+                                  '[PlayerScreen] Lyrics fetch completed, mounted: $mounted',
                                 );
-                                try {
-                                  final lyrics = await LyricsService()
-                                      .fetchLyrics(
-                                        currentTrack.title,
-                                        currentTrack.artist,
-                                      );
-                                  debugPrint(
-                                    '[PlayerScreen] Lyrics fetch completed, mounted: $mounted',
+                                if (lyrics != null && mounted) {
+                                  final db = ref.read(appDatabaseProvider);
+                                  await db.update(db.tracks)
+                                    ..where((t) => t.id.equals(currentTrack.id))
+                                    ..write(
+                                      TracksCompanion(lyrics: Value(lyrics)),
+                                    );
+
+                                  // Update the current track with the new lyrics
+                                  currentTrack.lyrics = lyrics;
+
+                                  // Update the audio player state with the updated track
+                                  final audioNotifier = ref.read(
+                                    audioPlayerNotifierProvider.notifier,
                                   );
-                                  if (lyrics != null && mounted) {
-                                    final db = ref.read(appDatabaseProvider);
-                                    await db.update(db.tracks)
-                                      ..where(
-                                        (t) => t.id.equals(currentTrack.id),
-                                      )
-                                      ..write(
-                                        TracksCompanion(lyrics: Value(lyrics)),
-                                      );
+                                  final currentState = ref.read(
+                                    audioPlayerNotifierProvider,
+                                  );
+                                  audioNotifier.state = currentState.copyWith(
+                                    currentTrack: currentTrack,
+                                  );
 
-                                    // Update the current track with the new lyrics
-                                    currentTrack.lyrics = lyrics;
+                                  // Also refresh tracks provider for consistency
+                                  ref.invalidate(tracksProvider);
 
-                                    // Update the audio player state with the updated track
-                                    final audioNotifier = ref.read(
-                                      audioPlayerNotifierProvider.notifier,
-                                    );
-                                    final currentState = ref.read(
-                                      audioPlayerNotifierProvider,
-                                    );
-                                    audioNotifier.state = currentState.copyWith(
-                                      currentTrack: currentTrack,
-                                    );
+                                  // Force UI rebuild to show the new lyrics
+                                  setState(() {});
 
-                                    // Also refresh tracks provider for consistency
-                                    ref.invalidate(tracksProvider);
-
-                                    // Force UI rebuild to show the new lyrics
-                                    setState(() {});
-
-                                    debugPrint(
-                                      '[PlayerScreen] Lyrics updated in database, audio player state, and UI refreshed',
-                                    );
-                                  } else if (!mounted) {
-                                    debugPrint(
-                                      '[PlayerScreen] Widget not mounted, skipping lyrics update - POTENTIAL ERROR SOURCE',
-                                    );
-                                  }
-                                } catch (e) {
                                   debugPrint(
-                                    '[PlayerScreen] Error fetching lyrics: $e',
+                                    '[PlayerScreen] Lyrics updated in database, audio player state, and UI refreshed',
+                                  );
+                                } else if (!mounted) {
+                                  debugPrint(
+                                    '[PlayerScreen] Widget not mounted, skipping lyrics update - POTENTIAL ERROR SOURCE',
                                   );
                                 }
+                              } catch (e) {
+                                debugPrint(
+                                  '[PlayerScreen] Error fetching lyrics: $e',
+                                );
                               }
-                            },
-                            icon: const Icon(Icons.search),
-                            label: const Text('Fetch Lyrics'),
-                          ),
-                        ],
-                      ),
+                            }
+                          },
+                          icon: const Icon(Icons.search),
+                          label: const Text('Fetch Lyrics'),
+                        ),
+                      ],
                     ),
-            ),
+                  ),
           ),
         ),
         const Spacer(),
       ],
+    );
+  }
+
+  Widget _buildSyncedLyrics(String lyrics, Duration currentPosition) {
+    final lrcLines = LrcParser.parse(lyrics);
+
+    if (lrcLines.isEmpty) {
+      // Fallback to plain text display if not in LRC format
+      return SingleChildScrollView(
+        padding: AppTheme.paddingLg,
+        child: Text(
+          lyrics,
+          textAlign: TextAlign.center,
+          style: AppTheme.textTheme.bodyLarge?.copyWith(
+            color: AppTheme.onSurface,
+            height: 1.8,
+            fontSize: 18,
+          ),
+        ),
+      );
+    }
+
+    final currentLineIndex = LrcParser.getCurrentLineIndex(
+      lrcLines,
+      currentPosition,
+    );
+
+    // Auto-scroll to center the current line
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (_lyricsScrollController.hasClients && currentLineIndex >= 0) {
+        // Calculate the offset to center the current line
+        const double estimatedLineHeight = 60.0; // Height per line item
+        final double viewportHeight =
+            _lyricsScrollController.position.viewportDimension;
+        final double targetOffset =
+            (currentLineIndex * estimatedLineHeight) -
+            (viewportHeight / 2) +
+            (estimatedLineHeight / 2);
+
+        final double clampedOffset = targetOffset.clamp(
+          0.0,
+          _lyricsScrollController.position.maxScrollExtent,
+        );
+
+        _lyricsScrollController.animateTo(
+          clampedOffset,
+          duration: AppTheme.animationFast,
+          curve: Curves.easeOut,
+        );
+      }
+    });
+
+    return ListView.builder(
+      controller: _lyricsScrollController,
+      padding: AppTheme.paddingLg,
+      itemCount: lrcLines.length,
+      itemBuilder: (context, index) {
+        final line = lrcLines[index];
+        final isActive = index == currentLineIndex;
+        final isPast = index < currentLineIndex;
+
+        return Padding(
+          padding: const EdgeInsets.symmetric(vertical: 12.0),
+          child: AnimatedDefaultTextStyle(
+            duration: AppTheme.animationFast,
+            style: AppTheme.textTheme.bodyLarge!.copyWith(
+              color: isActive
+                  ? _dominantColors[0]
+                  : isPast
+                  ? AppTheme.onSurface.withOpacity(0.4)
+                  : AppTheme.onSurface.withOpacity(0.6),
+              fontWeight: isActive ? FontWeight.w700 : FontWeight.w400,
+              fontSize: isActive ? 26 : 20,
+              height: 1.8,
+            ),
+            textAlign: TextAlign.center,
+            child: Text(line.text.isEmpty ? '♪' : line.text),
+          ),
+        );
+      },
     );
   }
 }

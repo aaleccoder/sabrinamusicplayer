@@ -196,9 +196,6 @@ class AudioPlayerNotifier extends StateNotifier<AudioPlayerState> {
         final handler = _audioHandler as BackgroundAudioHandler;
         _positionSubscription = handler.positionStream.listen((pos) {
           if (mounted) {
-            debugPrint(
-              '[AudioPlayerNotifier] Position update: ${pos.inSeconds}s, mounted: $mounted',
-            );
             state = state.copyWith(position: pos);
           } else {
             debugPrint(
